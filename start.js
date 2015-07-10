@@ -20,7 +20,7 @@ var SALES = [];
 
 
 var PAPERTRADE = true;                  // DEBUG TRADES BY HAND.
-var DEBUG = true;
+var DEBUG = false;
 // var data = {};
 
 function getStats() {
@@ -153,7 +153,7 @@ function checkdoneFetch(data) {
             console.log("Fetching data again in %s seconds", numSeconds);
         }
         
-        console.log("\nAmount Invested: " + Number(calcProfitLoss()).toFixed(2) + " USD || " + 
+        console.log("\nAmount Invested: " + calcProfitLoss() + " USD || " + 
             PURCHASES.length + " purchases, " + SALES.length + " sales");
         
         setTimeout(getStats, numSeconds * 1000);
@@ -185,7 +185,7 @@ function getBuyAdvice(data) {
             }
 
             if(currentlyHedging < MAX_COINS_TO_HEDGE && Number(data.average.price) < Number(MAX_BUY_PRICE)) {                
-                thisAmount = (Math.random() * 12) + 8;
+                thisAmount = ((Math.random()*6)) + 7;
                 
                 if(MAX_COINS_TO_HEDGE < currentlyHedging + thisAmount) {
                     thisAmount = MAX_COINS_TO_HEDGE - currentlyHedging;
@@ -214,7 +214,7 @@ function getBuyAdvice(data) {
                                 getErrorMessage(resp.error_code));
                         }
                     }, 'btc_usd', 'buy', thisAmount, lastTradedPrice );
-                    PURCHASES.push({"amount": thisAmount, "price": lastTradedPrice});
+                    PURCHASES.push({"amount": thisAmount, "price": lastTradedPrice, "sold" : false});
                 }, 'btc_usd');
             }
         }
@@ -235,7 +235,7 @@ function getSellAdvice(data) {
         
         if(PURCHASES) {
             for(var i = 0; i < PURCHASES.length; i++) {
-                if(PURCHASES[i].amount > 0 && lastTradedPrice > PURCHASES[i].price * 1.00125 && (currentlyHedging - PURCHASES[i].amount) > 0 ) {                        
+                if(!PURCHASES[i].sold == false && lastTradedPrice > PURCHASES[i].price * 1.00125 && (currentlyHedging - PURCHASES[i].amount) > 0 ) {                        
                     privateClient.addTrade(function(err, resp) {
                         if(resp.result) {
                             console.log("Your sell order for %s was successfully placed!", PURCHASES[i].amount)
@@ -252,7 +252,7 @@ function getSellAdvice(data) {
                     
                     if(PAPERTRADE) {
                         currentlyHedging -= PURCHASES[i].amount; // DEBUG
-                        PURCHASES[i].amount = 0;
+                        PURCHASES[i].sold = true;
                     }
                 } else {
                     if(DEBUG) {
@@ -268,20 +268,23 @@ function getSellAdvice(data) {
 
 function calcProfitLoss() {
     var profitloss = 0;
+    var totalBTCHolding = 0;
     
     if(PURCHASES) {
         for(var i = 0; i < PURCHASES.length; i++) {
-            profitloss -= (PURCHASES[i].price * PURCHASES[i].amount); 
+            profitloss -= (PURCHASES[i].price * PURCHASES[i].amount);
+            totalBTCHolding += PURCHASES[i].amount;
         }
     }
 
     if(SALES) {
         for(var j = 0; j < SALES.length; j++) {
             profitloss += (SALES[j].price * SALES[j].amount);
+            totalBTCHolding -= SALES[j].amount;
         }
     }
     
-    return profitloss;
+    return "Profit/Loss: " + profitloss + " (holding: " + totalBTCHolding + " BTC) ";
 }
 
 function getErrorMessage(error_code) {
