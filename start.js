@@ -229,6 +229,7 @@ function getSellAdvice(data) {
 
     publicClient.getTicker(function(err, resp) {
         if(err) {
+            // Print Error.
             console.log("Error: " + err);
         }
         var lastTradedPrice = resp.ticker.sell;                    
