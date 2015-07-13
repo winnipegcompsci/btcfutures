@@ -1,5 +1,6 @@
 var btcstats = require('btc-stats');
 var http = require('http');
+var async = require('async');
 
 // OKCOIN 
 var OKCoin = require('okcoin');
@@ -10,20 +11,20 @@ var TTL = 10;               // Number of Seconds to Wait.
 
 // Prompt for These Variables
 var MAX_COINS_TO_HEDGE = process.argv[4] || 100;
-var MAX_BUY_PRICE = process.argv[5] || 300;
+var MAX_BUY_PRICE = process.argv[5] || 350;
 var INSURANCE_COVER_RATE = process.argv[6] || 0.70;
 
 // Other Calculated Vars
 var COINS_PER_TX = 10;
 
-var TOTAL_CURRENT_LONG
-var CURRENT_AMOUNT_INSURED
+var TOTAL_CURRENT_LONG;
+var CURRENT_AMOUNT_INSURED;
 
-var CURRENT_SPREAD
-var AVERAGE_SPREAD
+var CURRENT_SPREAD;
+var AVERAGE_SPREAD;
 
-var OKCOIN_AVERAGE_COST
-var OKCOIN_LTP
+var OKCOIN_AVERAGE_COST;
+var OKCOIN_LTP;
 
 
 function setCurrentValues() {
@@ -32,64 +33,83 @@ function setCurrentValues() {
     publicClient = new OKCoin();
     privateClient = new OKCoin(okcoin_key, okcoin_secret);
     
-    
-    
-    // GET OKCOIN TOTAL_CURRENT_LONG
-    privateClient.getFixedFuturePositions(function(err, resp) {
-        if(resp.result) {
+    publicClient.getFutureTrades(function(err, resp) {
+        if(resp) {
+            var buyAmount;
+            var numBuy = 0;
             
+            var sellAmount;
+            var numSell = 0; 
             
-            for(var i = 0; i < resp.holding.length; i++) {
-                TOTAL_CURRENT_LONG += resp.holding[i].buy_amount;
-                OKCOIN_AVERAGE_COST = resp.holding[i].buy_price_avg;
-            }
-        
-            // GET OKCOIN _LTP
-            publicClient.getFutureTicker(function(err, ticker_resp) {
-                if(err) {
-                   console.log("ERROR: " + err);
-                } else {
-                    OKCOIN_LTP = ticker_resp.ticker.last;
-                    
-                    // GET SPREADS
-                    var buffer = "";
-                    http.get('http://api.796.com/v3/futures/ticker.html?type=weekly', function(res) {
-                        res.on('data', function(d) {
-                            buffer += d;
-                        });
-                        
-                        res.on('end', function() {
-                            var sevenTicker = JSON.parse(buffer);
-                            
-                            AVERAGE_SPREAD = Math.abs(sevenTicker.ticker.sell - ticker_resp.ticker.sell);
-                            
-                            CURRENT_SPREAD = Math.abs(sevenTicker.ticker.last - OKCOIN_LTP);
-
-                            checkForAdvice();
-                        });
-                    });
-                    
-                    // checkForAdvice();
+            resp.forEach(function (item) {
+                if(item.type == "buy") {
+                    buyAmount += item.price;
+                    numBuy++;
+                } else if (item.type == "sell") {
+                    sellAmount += item.price;
+                    numSell++;
                 }
+            });
+            AVERAGE_SPREAD = (buyAmount / numBuy) - (sellAmount / numSell);  
+            
+                    
+            privateClient.getFixedFuturePositions(function(err, resp) {
+                if(resp.result) {
+                    
+                    
+                    for(var i = 0; i < resp.holding.length; i++) {
+                        TOTAL_CURRENT_LONG += resp.holding[i].buy_amount;
+                        TOTAL_CURRENT_SHORT += resp.holding[i].sell_amount;
+                        OKCOIN_AVERAGE_COST = resp.holding[i].buy_price_avg;
+                    }
                 
-                // checkForAdvice();
-                
-            }, 'btc_usd', 'quarter');
-        }
-        // checkForAdvice();
-    }, 'btc_usd', 'quarter', 1); 
+                    // GET OKCOIN _LTP
+                    publicClient.getFutureTicker(function(err, ticker_resp) {
+                        if(err) {
+                           console.log("ERROR: " + err);
+                        } else {
+                            OKCOIN_LTP = ticker_resp.ticker.last;
+                            
+                            // GET SPREADS
+                            var buffer = "";
+                            http.get('http://api.796.com/v3/futures/ticker.html?type=weekly', function(res) {
+                                res.on('data', function(d) {
+                                    buffer += d;
+                                });
+                                
+                                res.on('end', function() {
+                                    var sevenTicker = JSON.parse(buffer);
+                                    
+                                    AVERAGE_SPREAD = Math.abs(sevenTicker.ticker.high - ticker_resp.ticker.high);
+                                    CURRENT_SPREAD = Math.abs(sevenTicker.ticker.last - OKCOIN_LTP);
 
+                                    checkForAdvice();
+                                });
+                            });
+                            
+                            // checkForAdvice();
+                        }
+                        
+                        // checkForAdvice();
+                        
+                    }, 'btc_usd', 'quarter');
+                }
+                // checkForAdvice();
+            }, 'btc_usd', 'quarter', 1);             
+        }
+    }, 'btc_usd', 'quarter');
 }
 
 function checkForAdvice() {
+    console.log();
+    
     console.log("Checking for advice: ");
     console.log("Current OKCoin LTP: " + OKCOIN_LTP);
     console.log("Average Cost of OKCOIN: " + OKCOIN_LTP);
     console.log("Total Current Long: " + TOTAL_CURRENT_LONG);
     console.log("Current Spread: " + CURRENT_SPREAD);
     console.log("Average Spread: " + AVERAGE_SPREAD);
-    console.log();
-    
+
     setTimeout(getBuyAdvice, TTL * 1000);
     setTimeout(getSellAdvice, TTL * 1000);
 }
@@ -228,7 +248,7 @@ function getErrorMessage(error_code) {
     };
         
     if(!errorCodes[error_code]) {
-        return "UNKNOWN ERROR CODE: " + error_code;
+        return "Unknown Error Code: " + error_code;
     } else {
         return errorCodes[error_code];
     }

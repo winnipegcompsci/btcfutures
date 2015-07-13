@@ -17,29 +17,55 @@ I = Insurance coverage rate %
 
 
 /* LONG HEDGE |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-A check is run every (X) seconds if btc is below (Y) and (Q) is < (A)  and (C) is < (S) 
-        it buys (B) out of the pending order  (A) to a max of (A)
-
-It then follows this logic.
-
-if (O) goes up 1.25% above (W),  it sells ‘(R)*(I)’  once the insurance is sold, 
-    it waits for (O) to get to a 2.5%  gain over (W)  
-        it then sells half of (Q), 
-    if (O) keeps going up, at 4% over (W)  
-        it reopens insurance again using ‘(Q) * (I) / 2’ 
-
-If (O) goes down after selling insurance it stops out at ‘(W) + 0.5% to 1.25%’  (full position)  
-
-If (O) goes straight down before insurance is sold, once it is 1.25% below (W) it buys additional insurance at (Q) * (I)  and adds 10% of (Q) to (Q) for every $1 it goes down,  stepping up 10% for the first $3 and then 5% for each additional $
-
-
-Ie:  10%, 20%, 30%, 35%, 40%, 45%, 50%, 55%, 60%, 65%, 70%, 75%, 85%, 90% to the position for each $ it goes down.
-
-It should prompt for: 
-
-A, Y,  I
+Every X Seconds: {
+    if(OKCOIN_LTP < MAX_BUY_PRICE && TOTAL_CURRENT_LONG < MAX_COINS_TO_HEDGE && CURRENT_SPREAD < AVERAGE_SPREAD) {
+        BUY 10 BTC / 100 BTC Limit (MAX_COINS_TO_HEDGE).
+    }
+    
+    if(OKCOIN_LTP > OKC_AVERAGE_PRICE * 1.0125) {
+        Sell INSURANCE_COVERAGE_RATE * AMOUNT_INSURED Insurance (SHORT)
+        
+        if(OKCOIN_LTP > OKC_AVERAGE_PRICE * 1.0250) {
+            SELL HALF OF TOTAL CURRENT LONG
+        }
+        
+        if(OKCOIN_LTP > OKC_AVERAGE_PRICE * 1.04) {
+            BUY INSURANCE USING TOTAL_CURRENT_LONG * INSURANCE_COVERAGE_RATE / 2;
+        }
+    }
+    
+    if(OKCOIN_LTP < OKC_AVERAGE_PRICE*1.005) {
+        Sell Total Current Long (Close Out)
+    }
+    
+    if(OKCOIN_LTP < OKC_AVERAGE_PRICE/1.0125) {
+        BUY ADDITIONAL INSURANCE @ TOTAL_CURRENT_LONG * INSURANCE_COVERAGE_RATE;
+    }
+}
 
 /* SHORT HEDGE ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
-A check is run every (x) seconds if BTC is below (Y) and (Q) is < (A) and (C) is < (S) it buys B out of pending order (A) to a max of (A).
-
-If (o) goes down 1.25% below (W), it sells '(R*I)' insureance, once insurance is sold it waits for (O) to get to a 2.5% gAIN OVER (w) THEN SELLS  HALF OF (Q) if (o)
+Every X Seconds: {
+    if(OKCOIN_LTP > MAX_BUY_PRICE && TOTAL_CURRENT_SHORT < MAX_COINS_TO_HEDGE && CURRENT_SPREAD > AVERAGE_SPREAD) {
+        BUY 10 BTC / 100 BTC Limit (MAX_COINS_TO_HEDGE)
+    }
+    
+    if(OKCOIN_LTP < OKC_AVERAGE_PRICE / 1.0125) {\
+        SELL INSURANCE_COVERAGE_RATE * AMOUNT_INSURED Insurance (LONG)
+    
+        if(OKCOIN_LTP < OKC_AVERAGE_PRICE / 1.0250) {
+            SELL HALF OF TOTAL CURRENT SHORT
+        }
+        
+        if(OKCOIN_LTP < OKC_AVERAGE_PRICE / 1.04) {
+            BUY INSURANCE USING TOTAL_CURRENT_SHORT * INSURANCE_COVERAGE_RATE / 2;
+        }
+    }
+    
+    if(OKCOIN_LTP > OKC_AVERAGE_PRICE*1.005) {
+        Sell Total Current Short (CLOSE OUT)
+    }
+    
+    if(OKCOIN_LTP < OKC_AVERAGE_PRICE*1.0125) {
+        Buy Additional Long @ TOTAL_CURRENT_SHORT * INSURANCE_COVERAGE_RATE;
+    }
+}
