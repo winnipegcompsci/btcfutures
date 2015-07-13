@@ -249,17 +249,16 @@ function getLongFutureSellAdvice() {
             }
             
             if(resp.result) {
-                console.log("Result: " + resp.result);
                 // Then We Have Received Data, 
                 // For all Fixed Positions check to see if we can close thus,
                 
                 for(var i = 0; i < resp.holding.length; i++) {
                     console.log("Holding Position: " + util.inspect(resp.holding[i]));
                     
-                    if(thisLastPrice > (resp.holding[i].buy_price_avg * 1.0125)) {
+                    if(thisLastPrice > (resp.holding[i].sell_flatprice * 1.0125)) {
                         privateClient.addFutureTrade(function(sellError, sellResp) {
                             if(sellResp.result) {
-                                console.log("Placed Sell Order on OKCoin");
+                                console.log("Placed Sell Order on OKCoin for %s", thisLastPrice.toFixed(2));
                             } else {
                                 console.log("Error Placing Sell Order: " + getErrorMessage(sellResp.error_code));
                             }
