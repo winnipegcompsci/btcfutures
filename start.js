@@ -13,27 +13,35 @@ var MAX_COINS_TO_HEDGE = 100;               // Don't Hedge more than 100 BTC
 var MAX_BUY_PRICE = 300;                // Max Buy Price of 300 USD / BTC
 var INSURANCE_COVERAGE_RATE = 0.70;     // Target Insurance Coverage of 70% of Main Exchange
 var PRIMARY_EXCHANGE = "okcoin";
+var BIAS = 1;                           // BUY LONG
+var SELL_BIAS = 3;                      // SELL LONG
 
 var currentlyHedging = 0;                   // Amount Currently Being Hedged.
 var PURCHASES = [];
 var SALES = [];
 
+var numCallBacks = 0;
 
 var PAPERTRADE = true;                  // DEBUG TRADES BY HAND.
-var DEBUG = false;
-// var data = {};
+var DEBUG = true;
+
+
+var data = {};
 
 function getStats() {
+    data = {};
+    
     //var activeExchanges = ["bitfinex", "bitstamp", "okcoin", "btce", "sevenninesix", "bitvc"];
     var activeExchanges = ['okcoin', 'sevenninesix', 'bitfinex', 'bitstamp', 'btce'];
     
     btcstats.exchanges(activeExchanges);
-    var data = {};
+
 
     var MongoClient = require('mongodb').MongoClient;
     
     btcstats.avg(function(error, resp) {
         if(!error) {
+            
             data.average = resp;
             resp.timestamp = Math.floor(Date.now() / 1000);
             MongoClient.connect("mongodb://localhost:27017/btcstats", function(err, db) {
@@ -47,6 +55,7 @@ function getStats() {
 
     btcstats.weightedAvg(function(error, resp) {
         if(!error) {
+            
             data.vwap = resp.price;
             resp.timestamp = Math.floor(Date.now() / 1000);
             MongoClient.connect("mongodb://localhost:27017/btcstats", function(err, db) {
@@ -60,6 +69,7 @@ function getStats() {
     
     btcstats.min(function(error, resp) {
         if(!error) {
+            
             data.minPrice = resp;
             resp.timestamp = Math.floor(Date.now()/1000);
             
@@ -74,6 +84,7 @@ function getStats() {
     
     btcstats.max(function(error, resp) {
         if(!error) {
+            
             data.maxPrice = resp;
             resp.timestamp = Math.floor(Date.now()/1000);
             
@@ -88,6 +99,7 @@ function getStats() {
 
     btcstats.minSpread(function(error, resp) {
         if(!error) {
+            
             data.minSpread = resp;
             resp.timestamp = Math.floor(Date.now() / 1000);
             
@@ -102,6 +114,7 @@ function getStats() {
     
     btcstats.maxSpread(function(error, resp) {
         if(!error) {
+            
             data.maxSpread = resp;
             resp.timestamp = Math.floor(Date.now() / 1000);
             
@@ -116,6 +129,7 @@ function getStats() {
     
     btcstats.minVolume(function(error, resp) {
         if(!error) {
+            
             data.minVolume = resp;
             resp.timestamp = Math.floor(Date.now() / 1000);
             
@@ -130,6 +144,7 @@ function getStats() {
     
     btcstats.maxVolume(function(error, resp) {
         if(!error) {            
+        
             data.maxVolume = resp;
             resp.timestamp = Math.floor(Date.now() / 1000);
             
@@ -145,147 +160,114 @@ function getStats() {
 }
 
 function checkdoneFetch(data) {   
-    if(Object.keys(data).length == 8) {
+    var targetLength = 8;  
+    numCallBacks++;
+    
+    if(numCallBacks == targetLength) {
+        numCallBacks = 0;
+        
         var numSeconds = 10;
         
         if(DEBUG) {
-            console.log("Debug Calculated Data: " + util.inspect(data));
+            // console.log("Debug Calculated Data: " + util.inspect(data));
             console.log("Fetching data again in %s seconds", numSeconds);
+        }       
+
+        setTimeout(getLongFutureBuyAdvice(data), numSeconds * 1000);   
+        setTimeout(getLongFutureSellAdvice(data), numSeconds * 1000);
+        setTimeout(getStats, (numSeconds*2) * 1000);    
+    } else {
+        if(DEBUG) {
+            console.log("Received callback %s / %s", numCallBacks, targetLength);
         }
-        
-        console.log("\nAmount Invested: " + calcProfitLoss() + " USD || " + 
-            PURCHASES.length + " purchases, " + SALES.length + " sales");
-        
-        setTimeout(getStats, numSeconds * 1000);
-        setTimeout(getBuyAdvice(data), numSeconds * 1000);
-        setTimeout(getSellAdvice(data), numSeconds * 1000);
     }
 }
 
 
-function getBuyAdvice(data) {
-
-    var lastTradedPrice = 0;
-    // Checking OKCOin  for Current Orders and Placing a New Order.
+function getLongFutureBuyAdvice() {
+    console.log("Checking Future Buy Advice");
+    
+    var thisLastPrice = MAX_BUY_PRICE;
+    
     publicClient = new OKCoin();
     privateClient = new OKCoin(okcoin_key, okcoin_secret);
     
-    privateClient.getOrderInfo(function(err, resp) {
-        if(err) {
-            console.log("Error: " + err);
+    publicClient.getFutureTicker(function(err, resp) {
+        if(resp) {
+            thisLastPrice = resp.ticker.last;
         }
-    
-        if(resp.result) {
-            if(!PAPERTRADE) {
-                currentlyHedging = 0;
+        
+        console.log("OKCoin Current Price: " + thisLastPrice);
+        
+        privateClient.getFixedFuturePositions(function(err, resp) {
+            if(err) {
+                console.log("Error: " + err);
             }
             
-            for(var i = 0; i < resp.orders.length; i++) {
-                currentlyHedging += resp.orders[i].amount;
-            }
-
-            if(currentlyHedging < MAX_COINS_TO_HEDGE && Number(data.average.price) < Number(MAX_BUY_PRICE)) {                
-                thisAmount = ((Math.random()*6)) + 7;
+            if(resp.result) {
+                var currentlyHedging = 0;
                 
-                if(MAX_COINS_TO_HEDGE < currentlyHedging + thisAmount) {
-                    thisAmount = MAX_COINS_TO_HEDGE - currentlyHedging;
-                } else {
-                    thisAmount = (Math.random() * 12) + 8;
+                for(var i = 0; i < resp.holding.length; i++) {
+                    currentlyHedging += res.holding[i].buy_amount;
                 }
                 
-                if(PAPERTRADE) {
-                    currentlyHedging += thisAmount; // DEBUG
-                }
-                
-                publicClient.getTicker(function(err, resp) {
-                    if(err) {
-                        console.log("Error: " + err);
-                    }
-                    var lastTradedPrice = resp.ticker.buy;                    
-                    console.log("BUY %s BTC from OKCOIN @ $ %s (Hedging %s / %s BTC)", 
-                        thisAmount, resp.ticker.buy, currentlyHedging, MAX_COINS_TO_HEDGE);
-                
-                   
-                    privateClient.addTrade(function(err, resp) {
-                        if(resp.result) {
-                            console.log("Your buy order for %s was successfully placed!", thisAmount)
+                if(currentlyHedging < MAX_COINS_TO_HEDGE && thisLastPrice < MAX_BUY_PRICE ) {
+                    privateClient.addFutureTrade(function(buyError, buyResp) {
+                        if(buyResp.result) {
+                            console.log("Placed Buy Order on OKCoin");
                         } else {
-                            console.log("Failed to place your order on okcoin: %s",
-                                getErrorMessage(resp.error_code));
+                            console.log("Error Placing Purchase Order: " + getErrorMessage(buyResp.error_code));
                         }
-                    }, 'btc_usd', 'buy', thisAmount, lastTradedPrice );
-                    PURCHASES.push({"amount": thisAmount, "price": lastTradedPrice, "sold" : false});
-                }, 'btc_usd');
+                    }, 'btc_usd', 'quarter', 10, thisLastPrice, BIAS);
+                }
+            } else {
+                getErrorMessage(resp.error_code);
             }
-        }
-    }, 'btc_usd', '-1');
-    
+            
+        }, 'btc_usd', 'quarter', 1);
+    }, 'btc_usd', 'quarter');
 }
 
-function getSellAdvice(data) {
-        
+function getLongFutureSellAdvice() {
+    console.log("Checking Future Sell Advice");
+    
+    var thisLastPrice = 0;
+    
     publicClient = new OKCoin();
     privateClient = new OKCoin(okcoin_key, okcoin_secret);
-
-    publicClient.getTicker(function(err, resp) {
-        if(err) {
-            // Print Error.
-            console.log("Error: " + err);
+    
+    publicClient.getFutureTicker(function(err, resp) {
+        if(resp) {
+            thisLastPrice = resp.ticker.last;
         }
-        var lastTradedPrice = resp.ticker.sell;                    
         
-        if(PURCHASES) {
-            for(var i = 0; i < PURCHASES.length; i++) {
-                if(!PURCHASES[i].sold == false && lastTradedPrice > PURCHASES[i].price * 1.00125 && (currentlyHedging - PURCHASES[i].amount) > 0 ) {                        
-                    privateClient.addTrade(function(err, resp) {
-                        if(resp.result) {
-                            console.log("Your sell order for %s was successfully placed!", PURCHASES[i].amount)
-                        } else {
-                            console.log("Failed to place your order on okcoin: %s",
-                                getErrorMessage(resp.error_code));
-                        }
-                    }, 'btc_usd', 'sell', PURCHASES[i].amount, lastTradedPrice );
+        console.log("OKCoin Current Price: " + thisLastPrice);
+        
+        privateClient.getFixedFuturePositions(function (err, resp) {
+            if(err) {
+                console.log("Error: " + err);
+            }
+            
+            if(resp.result) {
+                // Then We Have Received Data, 
+                // For all Fixed Positions check to see if we can close thus,
+                
+                for(var i = 0; i < resp.holding.length; i++) {
+                    console.log("Holding Position: " + util.inspect(resp.holding[i]));
                     
-                    SALES.push({"amount": PURCHASES[i].amount, "price": lastTradedPrice});
-                    
-                    console.log("SELL %s BTC from OKCOIN @ $ %s (Hedging %s / %s BTC)",
-                        PURCHASES[i].amount, lastTradedPrice, currentlyHedging - PURCHASES[i].amount, MAX_COINS_TO_HEDGE);
-                    
-                    if(PAPERTRADE) {
-                        currentlyHedging -= PURCHASES[i].amount; // DEBUG
-                        PURCHASES[i].sold = true;
-                    }
-                } else {
-                    if(DEBUG) {
-                        console.log("Current Price: %s, Not selling %s BTC bought at $ %s until the price gets to %s",
-                            lastTradedPrice, PURCHASES[i].amount, PURCHASES[i].price, PURCHASES[i].price * 1.0125);
+                    if(thisLastPrice > resp.holding[i].buy_price_avg) {
+                        privateClient.addFutureTrade(function(sellError, sellResp) {
+                            if(sellResp.result) {
+                                console.log("Placed Sell Order on OKCoin");
+                            } else {
+                                console.log("Error Placing Sell Order: " + getErrorMessage(sellResp.error_code));
+                            }
+                        }, 'btc_usd', 'quarter', resp.holding[i].buy_amount, thisLastPrice, 3, 1, 10);
                     }
                 }
             }
-        }
-        
-    }, 'btc_usd');   
-}
-
-function calcProfitLoss() {
-    var profitloss = 0;
-    var totalBTCHolding = 0;
-    
-    if(PURCHASES) {
-        for(var i = 0; i < PURCHASES.length; i++) {
-            profitloss -= (PURCHASES[i].price * PURCHASES[i].amount);
-            totalBTCHolding += PURCHASES[i].amount;
-        }
-    }
-
-    if(SALES) {
-        for(var j = 0; j < SALES.length; j++) {
-            profitloss += (SALES[j].price * SALES[j].amount);
-            totalBTCHolding -= SALES[j].amount;
-        }
-    }
-    
-    return "Profit/Loss: " + profitloss + " (holding: " + totalBTCHolding + " BTC) ";
+        }, 'btc_usd', 'quarter', 1);
+    }, 'btc_usd', 'quarter');
 }
 
 function getErrorMessage(error_code) {
@@ -324,6 +306,29 @@ function getErrorMessage(error_code) {
         10042: 'Admin password error',
         10100: 'User account frozen',
         10216: 'Non-available API',
+        20001: 'User does not exist',
+        20002: 'User is frozen',
+        20003: 'Frozen due to mandatory liquidation',
+        20004: 'Future account frozen',
+        20005: 'User future account does not exist',
+        20006: 'Required field is null',
+        20007: 'Illegal parameter',
+        20008: 'Future account fund balance is zero',
+        20009: 'Future contract status error',
+        20010: 'Marginal Rate Illegal',
+        20011: 'Marginal Rate < 90%',
+        20012: 'Marginal Rate < 90%',
+        20013: 'Temporarily No Counter Party Price',
+        20014: 'OKCOIN System Error',
+        20015: 'Order Does Not Exist',
+        20016: 'Liquidation Quantity Bigger Than Current  Holding',
+        20017: 'Not Authorized / Illegal Order ID',
+        20018: 'Order Price Higher Than 105% or Lower Than 95% of last minute',
+        20019: 'This IP cannot use this resource',
+        20020: 'Secret Key Does Not Exist',
+        20021: 'Index Information Does Not Exist',
+        20022: 'API Invoke Error',
+        
         503: 'Too many requests (Http)'
     };
         
@@ -335,3 +340,6 @@ function getErrorMessage(error_code) {
 }
 
 getStats();
+
+// getFutureBuyAdvice();
+// getFutureSellAdvice();
