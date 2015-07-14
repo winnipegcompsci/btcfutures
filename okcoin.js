@@ -3,13 +3,14 @@ var http = require('http');
 var async = require('async');
 var Q = require('q');
 var clc = require('cli-color');
+var fs = require('fs');
 
 // OKCOIN 
 var OKCoin = require('okcoin');
 var okcoin_key = process.argv[2] || 'a3df6a8b-2799-4988-9336-e4ce74b88408';
 var okcoin_secret = process.argv[3] || 'C890A97000A0A5102CF6462F4F7BDCC1';
 
-var TTL = 3;               // Number of Seconds to Wait.
+var TTL = 10;               // Number of Seconds to Wait.
 
 // Prompt for These Variables
 var MAX_COINS_TO_HEDGE = process.argv[4] || 100;
@@ -129,6 +130,14 @@ function doStrategy() {
 function papertrade(amount, price, bias, type) {
     console.log(clc.green("PAPERTRADE:" + type + " - " + bias + " - " + amount + " @ " + price));
     
+    fs.appendFile("papertrade_trades.txt", 
+        "\r\n" + type + ", " + bias + ", " + amount + ", " + price + ";"
+        , function(err) {
+            if(err) {
+                console.log("Error Writing Papertrade Log: " + err);
+            }
+        });
+    
     if(bias == "LONG") {
         if(type == "BUY") {
             PAPERTRADE_LONG += amount;
@@ -165,6 +174,11 @@ function papertrade_getavgprice() {
 function longhedge() {
     // Check if We Should Buy
     COINS_PER_TX = Math.random() * (14 - 6) + 6;
+    
+    if(TOTAL_CURRENT_LONG + COINS_PER_TX > MAX_COINS_TO_HEDGE) {
+        COINS_PER_TX = MAX_COINS_TO_HEDGE - TOTAL_CURRENT_LONG;
+    }
+    
     if(OKCOIN_LTP > OKCOIN_AVERAGE_COST && TOTAL_CURRENT_LONG + COINS_PER_TX < MAX_COINS_TO_HEDGE && CURRENT_SPREAD < AVERAGE_SPREAD) {
         var order_type = 1;     // 1: Open Long Position, 2: Open Short, 3: Close Long, 4: Close Short
         var match_price = 1;    // 0: NO, 1: YES (Ignore Price)
@@ -308,6 +322,9 @@ console.log("Using MAX Buy Price of:   %s", MAX_BUY_PRICE);
 console.log("Using Insurance Coverage Rate of: %s", INSURANCE_COVER_RATE);
 console.log("Using Papertrade: %s\n", PAPERTRADE);
 
+if(fs.existsSync('papertrade_trades.txt')) {
+    fs.unlinkSync('papertrade_trades.txt');
+}
 getCurrentValues();
 
 function getErrorMessage(error_code) {
