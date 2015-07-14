@@ -179,7 +179,7 @@ function longhedge() {
         COINS_PER_TX = MAX_COINS_TO_HEDGE - TOTAL_CURRENT_LONG;
     }
     
-    if(OKCOIN_LTP > OKCOIN_AVERAGE_COST && TOTAL_CURRENT_LONG + COINS_PER_TX < MAX_COINS_TO_HEDGE && CURRENT_SPREAD < AVERAGE_SPREAD) {
+    if((COINS_PER_TX > 0) && (OKCOIN_LTP > OKCOIN_AVERAGE_COST) && (TOTAL_CURRENT_LONG + COINS_PER_TX <= MAX_COINS_TO_HEDGE) && (CURRENT_SPREAD < AVERAGE_SPREAD)) {
         var order_type = 1;     // 1: Open Long Position, 2: Open Short, 3: Close Long, 4: Close Short
         var match_price = 1;    // 0: NO, 1: YES (Ignore Price)
         var lever_rate = 10;    // Leverage Rate, 10 or 20.
@@ -207,10 +207,10 @@ function longhedge() {
     var match_price = 1;
     var lever_rate = 10;
     
-    if(OKCOIN_LTP > OKCOIN_AVERAGE_COST * 1.0125) {
+    if(OKCOIN_LTP > (OKCOIN_AVERAGE_COST * 1.0125)) {
         
         // Sell Insurance
-        if(INSURANCE_COVER_RATE*TOTAL_CURRENT_SHORT > 0) {
+        if((INSURANCE_COVER_RATE*TOTAL_CURRENT_SHORT) > 0) {
             if(PAPERTRADE) {
                 papertrade(INSURANCE_COVER_RATE*TOTAL_CURRENT_SHORT, OKCOIN_LTP, 'SHORT', "SELL");
             } else {
@@ -226,7 +226,7 @@ function longhedge() {
             console.log("No Short Position to Sell");
         }
         
-        if(OKCOIN_LTP > OKCOIN_AVERAGE_COST * 1.0250) {
+        if(OKCOIN_LTP > (OKCOIN_AVERAGE_COST * 1.0250)) {
             var  order_type = 3;
             
             if(TOTAL_CURRENT_LONG / 2 > 0) {
@@ -247,7 +247,7 @@ function longhedge() {
             }
         }
         
-        if(OKCOIN_LTP > OKCOIN_AVERAGE_COST * 1.04) {
+        if(OKCOIN_LTP > (OKCOIN_AVERAGE_COST * 1.04)) {
             var order_type = 2;
             
             if((TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE) / 2 > 0) {
@@ -269,7 +269,7 @@ function longhedge() {
         }
     }
     
-    if(OKCOIN_LTP < OKCOIN_AVERAGE_COST/1.005) {
+    if(OKCOIN_LTP < (OKCOIN_AVERAGE_COST/1.005)) {
         var order_type = 3;
         
         if(TOTAL_CURRENT_LONG > 0) {
@@ -290,7 +290,7 @@ function longhedge() {
         }
     }
     
-    if(OKCOIN_LTP < OKCOIN_AVERAGE_COST/1.0125) {
+    if(OKCOIN_LTP < (OKCOIN_AVERAGE_COST/1.0125)) {
         var order_type = 2;
         
         if(TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE > 0) {
