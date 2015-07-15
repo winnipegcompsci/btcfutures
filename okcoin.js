@@ -1,9 +1,11 @@
+// Requires.
 var btcstats = require('btc-stats');
 var http = require('http');
 var async = require('async');
 var Q = require('q');
 var clc = require('cli-color');
 var fs = require('fs');
+
 
 // OKCOIN 
 var OKCoin = require('okcoin');
@@ -35,6 +37,7 @@ var OKCOIN_LTP;
 var publicClient = new OKCoin();
 var privateClient = new OKCoin(okcoin_key, okcoin_secret);
 
+// Papertrading Variables
 var PAPERTRADE = true;
 var PAPERTRADE_LONG = 0;
 var PAPERTRADE_SHORT = 0;
