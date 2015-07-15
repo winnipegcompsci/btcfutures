@@ -98,25 +98,7 @@ function getCurrentValues() {
         } // end else 
     }, 'btc_usd', 'quarter');
 }
-           
-function getAverageSpread(currentSpread) {
-    if(PAST_SPREADS.length > 1080) {
-        PAST_SPREADS.shift();
-    }
-    
-    console.log("PAST_SPREADS: " + PAST_SPREADS);
-    
-    PAST_SPREADS.push(currentSpread);
-       
-    
-    var sum = 0;
-    for(i = 0; i < PAST_SPREADS.length; i++) {
-        sum += PAST_SPREADS[i];
-    }
-    
-    return sum / PAST_SPREADS.length;
-}
-           
+                      
 function doStrategy() {
     // Print Vars.
     console.log("\nOKCoin Price: %s || Current Spread: %s || 3Hr Avg Spread: %s || LONG HELD: %s BTC || SHORT HELD %s BTC\n",
@@ -131,7 +113,7 @@ function papertrade(amount, price, bias, type) {
     console.log(clc.green("PAPERTRADE:" + type + " - " + bias + " - " + amount + " @ " + price));
     
     fs.appendFile("papertrade_trades.txt", 
-        "\r\n" + type + ", " + bias + ", " + amount + ", " + price + ";"
+        "\r\n" + Math.floor(Date.now()) + "," + type + ", " + bias + ", " + amount + ", " + price + ";"
         , function(err) {
             if(err) {
                 console.log("Error Writing Papertrade Log: " + err);
@@ -323,7 +305,13 @@ console.log("Using Insurance Coverage Rate of: %s", INSURANCE_COVER_RATE);
 console.log("Using Papertrade: %s\n", PAPERTRADE);
 
 if(fs.existsSync('papertrade_trades.txt')) {
-    fs.unlinkSync('papertrade_trades.txt');
+    fs.appendFile("papertrade_trades.txt", 
+    "\r\n--------------------------------------------------------------------------------\r\n"
+    , function(err) {
+        if(err) {
+            console.log("Error Writing Papertrade Log: " + err);
+        }
+    });
 }
 getCurrentValues();
 
