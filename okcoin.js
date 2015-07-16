@@ -285,8 +285,7 @@ function longhedge() {
         }
     }
     
-    // Switch to <?
-    if(OKCOIN_LTP > (OKCOIN_AVERAGE_COST/1.0125) && (TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE) > TOTAL_CURRENT_SHORT) {
+    if(OKCOIN_LTP < (OKCOIN_AVERAGE_COST/1.0125) && (TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE) > TOTAL_CURRENT_SHORT) {
         var order_type = 2;
         var lever_rate = 20;
         var steps = [10,20,30,35,40,45,50,55,60,65,70,75,80,85,90]; // Percentage steps. (/100)
@@ -327,6 +326,10 @@ function longhedge() {
 } // end of longhedge.
 
 function shorthedge() {
+    
+}
+
+function customStrategy() {
     
 }
 
