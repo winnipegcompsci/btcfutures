@@ -104,8 +104,8 @@ function getCurrentValues() {
                       
 function doStrategy() {
     // Print Vars.
-    console.log("\nOKCoin Price: %s || Current Spread: %s || 3Hr Avg Spread: %s || LONG HELD: %s BTC || SHORT HELD %s BTC\n",
-        OKCOIN_LTP.toFixed(2), CURRENT_SPREAD.toFixed(2), AVERAGE_SPREAD.toFixed(2), TOTAL_CURRENT_LONG.toFixed(2), TOTAL_CURRENT_SHORT.toFixed(2));
+    console.log("\nOKCoin Price: %s || Avg. Cost: %s || Current Spread: %s (3Hr) Spread: %s || Long: %s BTC || Short: %s BTC\n",
+        OKCOIN_LTP.toFixed(2), OKCOIN_AVERAGE_COST, CURRENT_SPREAD.toFixed(2), AVERAGE_SPREAD.toFixed(2), TOTAL_CURRENT_LONG.toFixed(2), TOTAL_CURRENT_SHORT.toFixed(2));
     
     longhedge();  
     // shorthedge();
@@ -136,8 +136,7 @@ function papertrade(amount, price, bias, type) {
             PAPERTRADE_SHORT += amount;
         } else if (type == "SELL") {
             PAPERTRADE_SHORT -= amount;
-        }
-        
+        }       
     }
     
     PAPERTRADE_COSTS.push(price);
@@ -275,8 +274,10 @@ function longhedge() {
         }
     }
     
-    if(OKCOIN_LTP < (OKCOIN_AVERAGE_COST/1.0125)) {
+    if(OKCOIN_LTP < (OKCOIN_AVERAGE_COST/1.0125) && (TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE) > TOTAL_CURRENT_SHORT) {
         var order_type = 2;
+        
+        var steps = [10,20,30,35,40,45,50,55,60,65,70,75,80,85,90]; // Percentage steps. (/100)
         
         if(TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE > 0) {
             if(PAPERTRADE) {
@@ -307,14 +308,53 @@ console.log("Using MAX Buy Price of:   %s", MAX_BUY_PRICE);
 console.log("Using Insurance Coverage Rate of: %s", INSURANCE_COVER_RATE);
 console.log("Using Papertrade: %s\n", PAPERTRADE);
 
+// If Papertrade
 if(fs.existsSync('papertrade_trades.txt')) {
-    fs.appendFile("papertrade_trades.txt", 
-    "\r\n--------------------------------------------------------------------------------\r\n"
-    , function(err) {
-        if(err) {
-            console.log("Error Writing Papertrade Log: " + err);
-        }
-    });
+    if(PAPERTRADE) {
+        fs.readFile('papertrade_trades.txt', function read(err, data) {
+            if(err) {
+                throw err;
+            }
+            entries = data.toString().split(";");
+            
+            for(var i = 0; i < entries.length; i++) {
+                entries[i] = entries[i].trim();
+                
+
+                parts = entries[i].split(",");
+                
+                if(parts.length >= 4) {
+                    console.log("Papertrade Loaded: " + entries[i]);
+                    bias = parts[2].trim();
+                    type = parts[1].trim(); 
+                    amount = parts[3].trim();
+                    price = parts[4].trim();
+                    
+                    
+                    if(bias == "LONG") {
+                        if(type == "BUY") {
+                            PAPERTRADE_LONG += Number(amount);
+                        } else if (type == "SELL") {
+                            PAPERTRADE_LONG -= Number(amount);
+                        }
+                        
+                    }
+        
+                    if(bias == "SHORT") {
+                        if(type == "BUY") {
+                            PAPERTRADE_SHORT += Number(amount);
+                        } else if (type == "SELL") {
+                            PAPERTRADE_SHORT -= Number(amount);
+                        }
+                        
+                    }
+                    
+                    PAPERTRADE_COSTS.push(Number(price));
+                }
+                
+            } // end foreach over past papertrades.
+        });  
+    }    
 }
 getCurrentValues();
 
