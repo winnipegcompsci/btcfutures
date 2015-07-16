@@ -72,6 +72,7 @@ function getCurrentValues() {
                                         
                     if(candles.length == 0) {
                         AVERAGE_SPREAD = CURRENT_SPREAD;
+                        console.log("DEBUG: USING CURRENT SPREAD");
                     } else {
                         AVERAGE_SPREAD = (sum / candles.length);
                     }
