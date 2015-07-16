@@ -43,6 +43,8 @@ var PAPERTRADE_LONG = 0;
 var PAPERTRADE_SHORT = 0;
 var PAPERTRADE_COSTS = [];
 
+var CURRENT_PROFITLOSS = 0;
+
 function getCurrentValues() {
     // TOTAL_CURRENT_LONG && TOTAL_CURRENT_SHORT && OKCOIN_AVERAGE_COST
     // OKCOIN_LTP
@@ -110,11 +112,13 @@ function getCurrentValues() {
                       
 function doStrategy() {
     // Print Vars.
-    console.log("\OKCoin LTP: %s || Avg. Cost: %s || Spread: %s (3hr): %s || Long: %s BTC || Short: %s BTC\n",
-        OKCOIN_LTP.toFixed(2), OKCOIN_AVERAGE_COST.toFixed(2), CURRENT_SPREAD.toFixed(2), AVERAGE_SPREAD.toFixed(2), TOTAL_CURRENT_LONG.toFixed(2), TOTAL_CURRENT_SHORT.toFixed(2));
+    console.log("\OKCoin LTP: %s | Avg. $: %s | Spread: %s (3hr): %s | Long: %s BTC | Short: %s BTC| P/L: %s\n",
+        OKCOIN_LTP.toFixed(2), OKCOIN_AVERAGE_COST.toFixed(2), CURRENT_SPREAD.toFixed(2), AVERAGE_SPREAD.toFixed(2), TOTAL_CURRENT_LONG.toFixed(2), TOTAL_CURRENT_SHORT.toFixed(2), CURRENT_PROFITLOSS);
     
     longhedge();  
     // shorthedge();
+    // customStrategy();
+    
     setTimeout(getCurrentValues, TTL * 1000);
 }
 
@@ -132,16 +136,20 @@ function papertrade(amount, price, bias, type) {
     if(bias == "LONG") {
         if(type == "BUY") {
             PAPERTRADE_LONG += amount;
+            CURRENT_PROFITLOSS -= (amount*price);
         } else if (type == "SELL") {
             PAPERTRADE_LONG -= amount;
+            CURRENT_PROFITLOSS += (amount*price);
         }
     }
     
     if(bias == "SHORT") {
         if(type == "BUY") {
             PAPERTRADE_SHORT += amount;
+            CURRENT_PROFITLOSS -= (amount*price);
         } else if (type == "SELL") {
             PAPERTRADE_SHORT -= amount;
+            CURRENT_PROFITLOSS += (amount*price);
         }       
     }
     
@@ -304,24 +312,7 @@ function longhedge() {
             }
         }
     }
-    
-    
-    // My Addition (DAVID)
-    if(TOTAL_CURRENT_LONG == MAX_COINS_TO_HEDGE && OKCOIN_LTP > OKCOIN_AVERAGE_COST) {
-        // Sell Half?
-        if(PAPERTRADE) {
-                    papertrade(TOTAL_CURRENT_LONG / 2, OKCOIN_LTP, "LONG", "SELL");
-        } else {                
-            privateClient.addFutureTrade(function(buyError, buyResp) {               
-                if(buyResp.result) {
-                    console.log("Sold Half of Current Long Position");
-                } else {
-                    console.log(clc.red("Error Selling Half of Current Long Position: " + getErrorMessage(buyResp.error_code)));
-                }   
-            }, 'btc_usd', 'quarter', (TOTAL_CURRENT_LONG / 2), OKCOIN_LTP, order_type, match_price, lever_rate );
-        }
-    }
-    
+        
     console.log("Checking prices again in %s seconds", TTL);
 } // end of longhedge.
 
@@ -330,7 +321,82 @@ function shorthedge() {
 }
 
 function customStrategy() {
+    var NUMCOINS = 10;
+    // Buy Long
+    if(OKCOIN_AVERAGE_COST < OKCOIN_LTP && OKCOIN_LTP < MAX_BUY_PRICE && TOTAL_CURRENT_LONG < MAX_COINS_TO_HEDGE) {
+        if(PAPERTRADE) {
+            papertrade(NUMCOINS, OKCOIN_LTP, "LONG", "BUY");
+        } else {
+            var order_type = 1;
+            var lever_rate = 10;
+            
+            privateClient.addFutureTrade(function(buyError, buyResp) {
+                
+                if(buyResp.result) {
+                    console.log("Placed Long Order on OKCoin for %s BTC @ %s", NUMCOINS, OKCOIN_LTP);
+                } else {
+                    console.log(clc.red("Error Buying Long Order: " + getErrorMessage(buyResp.error_code)));
+                }
+            }, 'btc_usd', 'quarter', NUMCOINS, OKCOIN_LTP, order_type, match_price, lever_rate );
+            
+        }
+    }
     
+    // Sell Long
+    if(TOTAL_CURRENT_LONG == MAX_COINS_TO_HEDGE && OKCOIN_LTP > OKCOIN_AVERAGE_COST) {
+        // Sell Half of Long
+        if(PAPERTRADE) {
+            papertrade(NUMCOINS, OKCOIN_LTP, "LONG", "SELL");
+        } else {
+            var order_type = 3;
+            var lever_rate = 10;
+            
+            privateClient.addFutureTrade(function(buyError, buyResp) {
+                if(buyResp.result) {
+                    console.log("Sold Half of Current Long Position");
+                } else {
+                    console.log(clc.red("Error Selling Half of Current Long Position: " + getErrorMessage(buyResp.error_code)));
+                }   
+            }, 'btc_usd', 'quarter', NUMCOINS, OKCOIN_LTP, order_type, match_price, lever_rate );
+        }
+    }
+    
+    // Buy Short
+    if(OKCOIN_AVERAGE_COST > OKCOIN_LTP && OKCOIN_LTP < MAX_BUY_PRICE && TOTAL_CURRENT_SHORT < TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE) {
+        if(PAPERTRADE) {
+            papertrade(NUMCOINS, OKCOIN_LTP, "SHORT", "BUY");
+        } else {
+            var order_type = 2;
+            var lever_rate = 20;
+            
+            privateClient.addFutureTrade(function(buyError, buyResp) {
+                if(buyResp.result) {
+                    console.log("Sold Insurance");
+                } else {
+                    console.log(clc.red("Error Selling Insurance: " + getErrorMessage(buyResp.error_code)));
+                }
+            }, 'btc_usd', 'quarter', NUMCOINS, OKCOIN_LTP, order_type, match_price, lever_rate );    
+        }
+    }
+    
+    // Sell Short
+    if(OKCOIN_AVERAGE_COST > OKCOIN_LTP && OKCOIN_LTP < MAX_BUY_PRICE || TOTAL_CURRENT_SHORT > TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE) {
+        if(PAPERTRADE) {
+            papertrade(NUMCOINS, OKCOIN_LTP, "SHORT", "SELL");
+        } else {
+            var order_type = 4;
+            var order_type = 20;
+            
+            privateClient.addFutureTrade(function(buyError, buyResp) {
+                if(buyResp.result) {
+                    console.log("Sold Insurance");
+                } else {
+                    console.log(clc.red("Error Selling Insurance: " + getErrorMessage(buyResp.error_code)));
+                }
+            }, 'btc_usd', 'quarter', NUMCOINS, OKCOIN_LTP, order_type, match_price, lever_rate );
+            
+        }
+    }
 }
 
 ///////////// INIT ///////////////////////////////////////////////////////////////
@@ -351,7 +417,6 @@ if(fs.existsSync('papertrade_trades.txt')) {
             
             for(var i = 0; i < entries.length; i++) {
                 entries[i] = entries[i].trim();
-                
 
                 parts = entries[i].split(",");
                 
@@ -366,8 +431,10 @@ if(fs.existsSync('papertrade_trades.txt')) {
                     if(bias == "LONG") {
                         if(type == "BUY") {
                             PAPERTRADE_LONG += Number(amount);
+                            CURRENT_PROFITLOSS -= (amount*price);
                         } else if (type == "SELL") {
                             PAPERTRADE_LONG -= Number(amount);
+                            CURRENT_PROFITLOSS += (amount*price);
                         }
                         
                     }
@@ -375,8 +442,10 @@ if(fs.existsSync('papertrade_trades.txt')) {
                     if(bias == "SHORT") {
                         if(type == "BUY") {
                             PAPERTRADE_SHORT += Number(amount);
+                            CURRENT_PROFITLOSS -= (amount*price);
                         } else if (type == "SELL") {
                             PAPERTRADE_SHORT -= Number(amount);
+                            CURRENT_PROFITLOSS += (amount*price);
                         }
                         
                     }
