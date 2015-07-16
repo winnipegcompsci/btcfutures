@@ -104,8 +104,8 @@ function getCurrentValues() {
                       
 function doStrategy() {
     // Print Vars.
-    console.log("\nOKCoin Price: %s || Avg. Cost: %s || Current Spread: %s (3Hr) Spread: %s || Long: %s BTC || Short: %s BTC\n",
-        OKCOIN_LTP.toFixed(2), OKCOIN_AVERAGE_COST, CURRENT_SPREAD.toFixed(2), AVERAGE_SPREAD.toFixed(2), TOTAL_CURRENT_LONG.toFixed(2), TOTAL_CURRENT_SHORT.toFixed(2));
+    console.log("\nOKCoin Price: %s || Avg. Cost: %s || Spread: %s vs. (3Hr Spread): %s || Long: %s BTC || Short: %s BTC\n",
+        OKCOIN_LTP.toFixed(2), OKCOIN_AVERAGE_COST.toFixed(2), CURRENT_SPREAD.toFixed(2), AVERAGE_SPREAD.toFixed(2), TOTAL_CURRENT_LONG.toFixed(2), TOTAL_CURRENT_SHORT.toFixed(2));
     
     longhedge();  
     // shorthedge();
