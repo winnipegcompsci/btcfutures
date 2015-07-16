@@ -65,12 +65,18 @@ function getCurrentValues() {
                 } else {
                     candles = candles_resp;
                     
+                    console.log("CANDLES: " + candles_resp);
+                    
                     var sum = 0;
                     for(i = 0; i < candles.length; i++) {
                         sum += Math.abs(candles[i][1] - candles[i][2]);
                     }
-                    
-                    AVERAGE_SPREAD = (sum / candles.length) * 1.1;
+                                        
+                    if(candles.length == 0) {
+                        AVERAGE_SPREAD = CURRENT_SPREAD;
+                    } else {
+                        AVERAGE_SPREAD = (sum / candles.length);
+                    }
                     
                     privateClient.getFixedFuturePositions(function(err, resp) {
                         if(err) {
