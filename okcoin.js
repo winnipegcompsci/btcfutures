@@ -70,7 +70,7 @@ function getCurrentValues() {
                         sum += Math.abs(candles[i][1] - candles[i][2]);
                     }
                     
-                    AVERAGE_SPREAD = sum / candles.length;
+                    AVERAGE_SPREAD = (sum / candles.length) * 1.1;
                     
                     privateClient.getFixedFuturePositions(function(err, resp) {
                         if(err) {
@@ -198,6 +198,8 @@ function longhedge() {
             if(PAPERTRADE) {
                 papertrade(INSURANCE_COVER_RATE*TOTAL_CURRENT_SHORT, OKCOIN_LTP, 'SHORT', "SELL");
             } else {
+                lever_rate = 20;
+                
                 privateClient.addFutureTrade(function(buyError, buyResp) {
                     if(buyResp.result) {
                         console.log("Sold Insurance");
@@ -211,7 +213,8 @@ function longhedge() {
         }
         
         if(OKCOIN_LTP > (OKCOIN_AVERAGE_COST * 1.0250)) {
-            var  order_type = 3;
+            var order_type = 3;
+            var lever_rate = 10;
             
             if(TOTAL_CURRENT_LONG / 2 > 0) {
                 // Sell Half of Current Long
@@ -233,6 +236,7 @@ function longhedge() {
         
         if(OKCOIN_LTP > (OKCOIN_AVERAGE_COST * 1.04)) {
             var order_type = 2;
+            var lever_rate = 20;
             
             if((TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE) / 2 > 0) {
                 // Buy Insurance
@@ -255,6 +259,7 @@ function longhedge() {
     
     if(OKCOIN_LTP < (OKCOIN_AVERAGE_COST/1.005)) {
         var order_type = 3;
+        var lever_rate = 10;
         
         if(TOTAL_CURRENT_LONG > 0) {
         // Close Out Position
@@ -276,7 +281,7 @@ function longhedge() {
     
     if(OKCOIN_LTP < (OKCOIN_AVERAGE_COST/1.0125) && (TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE) > TOTAL_CURRENT_SHORT) {
         var order_type = 2;
-        
+        var lever_rate = 20;
         var steps = [10,20,30,35,40,45,50,55,60,65,70,75,80,85,90]; // Percentage steps. (/100)
         
         if(TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE > 0) {
