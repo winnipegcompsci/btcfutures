@@ -43,6 +43,7 @@ var PAPERTRADE_LONG = 0;
 var PAPERTRADE_SHORT = 0;
 var PAPERTRADE_COSTS = [];
 
+var INITIAL_PROFITLOSS = 0;
 var CURRENT_PROFITLOSS = 0;
 
 function getCurrentValues() {
@@ -113,7 +114,7 @@ function getCurrentValues() {
 function doStrategy() {
     // Print Vars.
     console.log("\OKCoin LTP: %s | Avg. $: %s | Spread: %s (3hr): %s | Long: %s BTC | Short: %s BTC | P/L: %s\n",
-        OKCOIN_LTP.toFixed(2), OKCOIN_AVERAGE_COST.toFixed(2), CURRENT_SPREAD.toFixed(2), AVERAGE_SPREAD.toFixed(2), TOTAL_CURRENT_LONG.toFixed(2), TOTAL_CURRENT_SHORT.toFixed(2), CURRENT_PROFITLOSS.toFixed(2));
+        OKCOIN_LTP.toFixed(2), OKCOIN_AVERAGE_COST.toFixed(2), CURRENT_SPREAD.toFixed(2), AVERAGE_SPREAD.toFixed(2), TOTAL_CURRENT_LONG.toFixed(2), TOTAL_CURRENT_SHORT.toFixed(2), (INITIAL_PROFITLOSS - CURRENT_PROFITLOSS.toFixed(2)));
     
     longhedge();  
     // shorthedge();
@@ -454,7 +455,8 @@ if(fs.existsSync('papertrade_trades.txt')) {
                 }
                 
             } // end foreach over past papertrades.
-        });  
+        });
+        INITIAL_PROFITLOSS = CURRENT_PROFITLOSS*-1;
     }    
 }
 getCurrentValues();
