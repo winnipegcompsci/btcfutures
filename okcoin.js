@@ -244,7 +244,7 @@ function longhedge() {
             var order_type = 2;
             var lever_rate = 20;
             
-            if((TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE) / 2 > 0) {
+            if((TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE) / 2 > TOTAL_CURRENT_SHORT) {
                 // Buy Insurance
                 if(PAPERTRADE) {
                     papertrade((TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE) / 2, OKCOIN_LTP, "SHORT", "BUY");
@@ -285,14 +285,15 @@ function longhedge() {
         }
     }
     
-    if(OKCOIN_LTP < (OKCOIN_AVERAGE_COST/1.0125) && (TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE) > TOTAL_CURRENT_SHORT) {
+    // Switch to <?
+    if(OKCOIN_LTP > (OKCOIN_AVERAGE_COST/1.0125) && (TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE) > TOTAL_CURRENT_SHORT) {
         var order_type = 2;
         var lever_rate = 20;
         var steps = [10,20,30,35,40,45,50,55,60,65,70,75,80,85,90]; // Percentage steps. (/100)
         
-        if(TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE > 0) {
+        if((TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE) - TOTAL_CURRENT_SHORT > 0) {
             if(PAPERTRADE) {
-                papertrade(TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE, OKCOIN_LTP, "SHORT", "BUY");
+                papertrade((TOTAL_CURRENT_LONG*INSURANCE_COVER_RATE)-TOTAL_CURRENT_SHORT, OKCOIN_LTP, "SHORT", "BUY");
             } else {
                 privateClient.addFutureTrade(function(buyError, buyResp) {           
                     if(buyResp.result) {
@@ -300,8 +301,25 @@ function longhedge() {
                     } else {
                         console.log(clc.red("Error Buying Insurance: " + getErrorMessage(buyResp.error_code)));
                     }   
-                }, 'btc_usd', 'quarter', (TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE), OKCOIN_LTP, order_type, match_price, lever_rate );
+                }, 'btc_usd', 'quarter', (TOTAL_CURRENT_LONG * INSURANCE_COVER_RATE) - TOTAL_CURRENT_SHORT, OKCOIN_LTP, order_type, match_price, lever_rate );
             }
+        }
+    }
+    
+    
+    // My Addition (DAVID)
+    if(TOTAL_CURRENT_LONG == MAX_COINS_TO_HEDGE && OKCOIN_LTP > OKCOIN_AVERAGE_COST) {
+        // Sell Half?
+        if(PAPERTRADE) {
+                    papertrade(TOTAL_CURRENT_LONG / 2, OKCOIN_LTP, "LONG", "SELL");
+        } else {                
+            privateClient.addFutureTrade(function(buyError, buyResp) {               
+                if(buyResp.result) {
+                    console.log("Sold Half of Current Long Position");
+                } else {
+                    console.log(clc.red("Error Selling Half of Current Long Position: " + getErrorMessage(buyResp.error_code)));
+                }   
+            }, 'btc_usd', 'quarter', (TOTAL_CURRENT_LONG / 2), OKCOIN_LTP, order_type, match_price, lever_rate );
         }
     }
     
