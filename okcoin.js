@@ -163,7 +163,7 @@ function longhedge() {
         COINS_PER_TX = MAX_COINS_TO_HEDGE - TOTAL_CURRENT_LONG;
     }
     
-    if((COINS_PER_TX > 0) && (OKCOIN_LTP > OKCOIN_AVERAGE_COST) && (TOTAL_CURRENT_LONG + COINS_PER_TX <= MAX_COINS_TO_HEDGE) && (CURRENT_SPREAD < AVERAGE_SPREAD)) {
+    if((COINS_PER_TX > 0) && (OKCOIN_LTP < MAX_BUY_PRICE) && (TOTAL_CURRENT_LONG + COINS_PER_TX <= MAX_COINS_TO_HEDGE) && (CURRENT_SPREAD < AVERAGE_SPREAD)) {
         var order_type = 1;     // 1: Open Long Position, 2: Open Short, 3: Close Long, 4: Close Short
         var match_price = 1;    // 0: NO, 1: YES (Ignore Price)
         var lever_rate = 10;    // Leverage Rate, 10 or 20.
