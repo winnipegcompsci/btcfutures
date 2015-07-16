@@ -71,7 +71,9 @@ function getCurrentValues() {
                     }
                                         
                     if(candles.length == 0) {
-                        AVERAGE_SPREAD = CURRENT_SPREAD * 1.1;
+                        if(AVERAGE_SPREAD == 0) {
+                            AVERAGE_SPREAD = CURRENT_SPREAD * 1.1;
+                        }
                     } else {
                         AVERAGE_SPREAD = (sum / candles.length);
                     }
