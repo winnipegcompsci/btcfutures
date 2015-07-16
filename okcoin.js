@@ -64,9 +64,7 @@ function getCurrentValues() {
                     console.log("ERROR: " + err);
                 } else {
                     candles = candles_resp;
-                    
-                    console.log("CANDLES: " + candles_resp);
-                    
+                                        
                     var sum = 0;
                     for(i = 0; i < candles.length; i++) {
                         sum += Math.abs(candles[i][1] - candles[i][2]);
