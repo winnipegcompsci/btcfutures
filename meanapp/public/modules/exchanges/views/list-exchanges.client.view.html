@@ -1,0 +1,18 @@
+<section data-ng-controller="ExchangesController" data-ng-init="find()">
+    <div class="page-header">
+        <h1>Exchanges</h1>
+    </div>
+    <div class="list-group">
+        <a data-ng-repeat="exchange in exchanges" data-ng-href="#!/exchanges/{{exchange._id}}" class="list-group-item">
+            <span style="padding-right: 15px" class="pull-left"><img src="http://placehold.it/100x50"></span>
+            <h4 class="list-group-item-heading" data-ng-bind="exchange.name"></h4>
+            <h4 class="pull-right list-group-item-heading">$XXX.XX</h4>
+            <small class="list-group-item-text">
+                Currently Holding <span data-ng-bind="exchange.getNumberOpenPositions()"></span>X Positions.
+			</small>            
+        </a>
+    </div>
+    <div class="alert alert-warning text-center" data-ng-hide="!exchanges.$resolved || exchanges.length">
+    	No Exchanges yet, why don't you <a href="/#!/exchanges/create">create one</a>?
+    </div>
+</section>

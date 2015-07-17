@@ -17,7 +17,7 @@ module.exports = function sendOK (data, options) {
   var req = this.req;
   var res = this.res;
   var sails = req._sails;
-
+  
   sails.log.silly('res.ok() :: Sending 200 ("OK") response');
 
   // Set status code
