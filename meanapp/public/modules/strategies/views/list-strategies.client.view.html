@@ -1,0 +1,18 @@
+<section data-ng-controller="StrategiesController" data-ng-init="find()">
+    <div class="page-header">
+        <h1>Strategies</h1>
+    </div>
+    <div class="list-group">
+        <a data-ng-repeat="strategy in strategies" data-ng-href="#!/strategies/{{strategy._id}}" class="list-group-item">
+			<h4 class="list-group-item-heading" data-ng-bind="strategy.name"></h4>
+            <small class="list-group-item-text">
+				Implemented on
+				<span data-ng-bind="strategy.exchange.name"></span>
+			</small>
+			<h4 class="pull-right list-group-item-heading" data-ng-bind="strategy.getProfitLoss()"></h4>
+        </a>
+    </div>
+    <div class="alert alert-warning text-center" data-ng-hide="!strategies.$resolved || strategies.length">
+    	No Strategies yet, why don't you <a href="/#!/strategies/create">create one</a>?
+    </div>
+</section>

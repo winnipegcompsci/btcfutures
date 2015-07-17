@@ -4,17 +4,16 @@
  * Module dependencies.
  */
 var mongoose = require('mongoose'),
-	Schema = mongoose.Schema,
-    okcoin = require('okcoin'),
-    futures796 = require('futures796');
+	Schema = mongoose.Schema;
+
 /**
- * Exchange Schema
+ * Strategy Schema
  */
-var ExchangeSchema = new Schema({
+var StrategySchema = new Schema({
 	name: {
 		type: String,
 		default: '',
-		required: 'Please fill Exchange name',
+		required: 'Please fill Strategy name',
 		trim: true
 	},
 	created: {
@@ -27,4 +26,4 @@ var ExchangeSchema = new Schema({
 	}
 });
 
-mongoose.model('Exchange', ExchangeSchema);
+mongoose.model('Strategy', StrategySchema);

@@ -1,0 +1,19 @@
+<section data-ng-controller="TickersController" data-ng-init="find()">
+    <div class="page-header">
+        <h1>Tickers</h1>
+    </div>
+    <div class="list-group">
+        <a data-ng-repeat="ticker in tickers" data-ng-href="#!/tickers/{{ticker._id}}" class="list-group-item">
+			<small class="list-group-item-text">
+				Posted on
+				<span data-ng-bind="ticker.created | date:'medium'"></span>
+				by
+				<span data-ng-bind="ticker.user.displayName"></span>
+			</small>
+			<h4 class="list-group-item-heading" data-ng-bind="ticker.name"></h4>
+        </a>
+    </div>
+    <div class="alert alert-warning text-center" data-ng-hide="!tickers.$resolved || tickers.length">
+    	No Tickers yet, why don't you <a href="/#!/tickers/create">create one</a>?
+    </div>
+</section>
