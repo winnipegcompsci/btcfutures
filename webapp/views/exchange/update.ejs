@@ -1,0 +1,8 @@
+<a href="/exchange/index">List</a>
+<h2> Exchange: <%= model.name %> </h2>
+
+<form action="/users/update/<%= model.id %>" method="POST"
+<table>
+<tr><td>Name:<td><input type="text" name="Exchange[name]" value="<%= model.name %>"><br />
+<tr><td>API Key: <td><input type="text" name="Exchange[apikey]" value="<%= model.apikey %>"><br />
+<tr><td>Secret Key: <td><input type="text" name="Exchange[secretkey]" value="<%= model.secretkey %>"><br />

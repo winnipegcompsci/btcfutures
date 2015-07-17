@@ -37,8 +37,50 @@
     <!--STYLES END-->
   </head>
 
-  <body>
-    <%- body %>
+    <body>
+        <div id="wrap">
+
+        <!-- Fixed navbar -->
+        <div class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Back to the Futures</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                      <li class="active"><a href="#">Home</a></li>
+                      <li><a href="/Exchange">Exchange</a></li>
+                      <li><a href="pages/about">About</a></li>
+                      
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
+
+        <!-- Begin page content -->
+        <div class="container">
+            <h1>-------------</h1>
+            <p>
+            <%- body %>
+            </p>        
+        </div>
+    </div>
+
+    <div id="footer">
+        <div class="container">
+            <p class="text-muted credit">Created 2015 by <a href="#">Enigma Networks</a></p>
+        </div>
+    </div>
+    
+    
+    
+    
+    
 
 
 

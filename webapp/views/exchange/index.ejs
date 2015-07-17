@@ -1,0 +1,11 @@
+<a href="/exchange/create">+Create</a>
+<ol>
+<% exchanges.forEach(function(model) { %>
+    <li>
+        <%= model.name %> 
+        (<a href="/exchange/delete/<%= model.id %>">Delete</a> 
+        |<a href="/exchange/update/<%= model.id %>">Update</a>
+        |<a href="/exchange/show/<%= model.id %>">View</a>
+    </li>
+<% }); %>
+</ol>

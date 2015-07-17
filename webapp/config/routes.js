@@ -46,8 +46,5 @@ module.exports.routes = {
   * for configuration options and examples.                                  *
   *                                                                          *
   ***************************************************************************/
-
-  'post /User': 'UserController.create',
-  'post /Exchange': 'ExchangeController.create'
   
 };
