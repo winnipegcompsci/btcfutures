@@ -16,6 +16,14 @@ var StrategySchema = new Schema({
 		required: 'Please fill Strategy name',
 		trim: true
 	},
+	primaryExchange: {
+		type: Schema.ObjectId,
+		ref: 'Exchange'
+	},
+	insuranceExchange: {
+		type: Schema.ObjectId,
+		ref: 'Exchange'
+	},
 	created: {
 		type: Date,
 		default: Date.now

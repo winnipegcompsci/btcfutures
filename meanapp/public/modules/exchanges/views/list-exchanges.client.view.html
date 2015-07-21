@@ -6,7 +6,7 @@
         <a data-ng-repeat="exchange in exchanges" data-ng-href="#!/exchanges/{{exchange._id}}" class="list-group-item">
             <span style="padding-right: 15px" class="pull-left"><img src="http://placehold.it/100x50"></span>
             <h4 class="list-group-item-heading" data-ng-bind="exchange.name"></h4>
-            <h4 class="pull-right list-group-item-heading">$XXX.XX</h4>
+            <h4 class="pull-right list-group-item-heading" data-ng-bind="getCurrentPrice(exchange)">$XXX.XX</h4>
             <small class="list-group-item-text">
                 Currently Holding <span data-ng-bind="exchange.getNumberOpenPositions()"></span>X Positions.
 			</small>            

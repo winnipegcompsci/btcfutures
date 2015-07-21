@@ -6,8 +6,16 @@
 var mongoose = require('mongoose'),
 	errorHandler = require('./errors.server.controller'),
 	Exchange = mongoose.model('Exchange'),
+	okcoin  = require('okcoin'),
+	futures796 = require('futures796'),
 	_ = require('lodash');
 
+	
+var okcoin_public = new OKCoin();
+var okcoin_private = new OKCoin();
+
+var futures796_public = new Futures796();
+var futures796_private = new Futures796();
 /**
  * Create a Exchange
  */
@@ -104,4 +112,31 @@ exports.hasAuthorization = function(req, res, next) {
 		return res.status(403).send('User is not authorized');
 	}
 	next();
+};
+
+exports.getCurrentPrice = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+	
+	var currentPrice = 'Price from: ' + thisName;
+	res.send({'current_price': currentPrice});
+};
+
+exports.getCurrentTrades = function(req, res) {
+
+};
+
+exports.buyLong = function (req, res) {
+	
+};
+
+exports.buyShort = function (req, res) {
+
+};
+
+exports.sellLong = function (req, res) {
+
+};
+
+exports.sellShort = function (req, res) {
+
 };

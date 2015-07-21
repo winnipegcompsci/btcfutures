@@ -17,6 +17,18 @@ var ExchangeSchema = new Schema({
 		required: 'Please fill Exchange name',
 		trim: true
 	},
+	apikey: {
+		type: String,
+		default: '',
+		required: 'Please fill API Key',
+		trim: true
+	},
+	secretkey: {
+		type: String,
+		default: '',
+		required: 'Please enter secret key',
+		trim: true
+	},
 	created: {
 		type: Date,
 		default: Date.now

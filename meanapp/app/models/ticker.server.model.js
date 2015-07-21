@@ -10,19 +10,36 @@ var mongoose = require('mongoose'),
  * Ticker Schema
  */
 var TickerSchema = new Schema({
-	name: {
+	exchange: {
+		type: Schema.ObjectId,
+		ref: 'Exchange'
+	},
+	date: {
+		type: Date,
+		default: Date.now,
+	},
+	last: {
+		type: Number
+	},
+	buy: {
+		type: Number
+	},
+	sell: {
+		type: Number
+	},
+	high: {
+		type: Number
+	},
+	low: {
+		type: Number
+	}, 
+	volume: {
+		type: Number
+	},
+	contract_id: {
 		type: String,
 		default: '',
-		required: 'Please fill Ticker name',
 		trim: true
-	},
-	created: {
-		type: Date,
-		default: Date.now
-	},
-	user: {
-		type: Schema.ObjectId,
-		ref: 'User'
 	}
 });
 

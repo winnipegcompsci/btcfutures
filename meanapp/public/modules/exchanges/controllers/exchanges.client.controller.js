@@ -1,8 +1,8 @@
 'use strict';
 
 // Exchanges controller
-angular.module('exchanges').controller('ExchangesController', ['$scope', '$stateParams', '$location', 'Authentication', 'Exchanges',
-	function($scope, $stateParams, $location, Authentication, Exchanges) {
+angular.module('exchanges').controller('ExchangesController', ['$scope', '$stateParams', '$location', '$http', 'Authentication', 'Exchanges',
+	function($scope, $stateParams, $location, $http, Authentication, Exchanges) {
 		$scope.authentication = Authentication;
 
 		// Create new Exchange
@@ -22,7 +22,7 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$state
 				$scope.error = errorResponse.data.message;
 			});
 		};
-
+		
 		// Remove existing Exchange
 		$scope.remove = function(exchange) {
 			if ( exchange ) { 
@@ -62,5 +62,12 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$state
 				exchangeId: $stateParams.exchangeId
 			});
 		};
+		
+		$scope.getCurrentPrice = function(exchange) {
+			console.log("Getting current price for: " + exchange.name);
+			
+			return exchange.getCurrentPrice();
+		}
+		
 	}
 ]);
