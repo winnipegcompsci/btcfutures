@@ -6,8 +6,8 @@
 var mongoose = require('mongoose'),
 	errorHandler = require('./errors.server.controller'),
 	Exchange = mongoose.model('Exchange'),
-	okcoin  = require('okcoin'),
-	futures796 = require('futures796'),
+	OKCoin  = require('okcoin'),
+	Futures796 = require('futures796'),
 	_ = require('lodash');
 
 	
@@ -117,26 +117,58 @@ exports.hasAuthorization = function(req, res, next) {
 exports.getCurrentPrice = function(req, res) {
 	var thisName = req.exchange.name.toLowerCase().replace(' ', '');
 	
-	var currentPrice = 'Price from: ' + thisName;
-	res.send({'current_price': currentPrice});
-};
-
-exports.getCurrentTrades = function(req, res) {
-
-};
-
-exports.buyLong = function (req, res) {
+    if(thisName === 'okcoin') {
+        okcoin_public.getFutureTicker(function(err, ticker_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+            
+            return res.send(ticker_resp.ticker);
+        }, 'btc_usd', 'quarter');
+        
+    } else if (thisName === '796' || thisName === 'futures796') {
+        futures796_public.getTicker(function(err, ticker_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+            
+            return res.send(ticker_resp.ticker);
+        });
+    } else {
+        res.status(500).send('ERROR: ' + thisName + ' Function GetCurrentPrice() -- Not Found');
+    }
+    
 	
 };
 
-exports.buyShort = function (req, res) {
-
+exports.getCurrentTrades = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        okcoin_public.getFutureTrades(function(err, trades_resp) {
+            
+        });
+    } else if(thisName === '796' || thisName === 'futures796') {
+        
+    } else {
+        res.status(500).send('ERROR: ' + thisName + ' Function GetCurrentTrades() -- Not Found');
+    }
 };
 
-exports.sellLong = function (req, res) {
-
+exports.addTrade = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        okcoin_private.addFutureTrade(function (err, newTrade_resp) {
+            res.send(newTrade_resp);
+        }, 'btc_usd', 'quarter', amount, price, type, match_price, lever_rate);
+        
+    } else if (thisName === '796' || thisName === 'futures796') {
+        
+    } else {
+        res.status(500).send('ERROR: ' + thisName + ' Function AddTrade() -- Not Found');
+    }
+    
+    var trade = req.trade;
 };
 
-exports.sellShort = function (req, res) {
-
-};

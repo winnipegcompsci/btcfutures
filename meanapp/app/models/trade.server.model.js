@@ -10,9 +10,6 @@ var mongoose = require('mongoose'),
  * Trade Schema
  */
  
- //OKCOIN: date, price, amount, tid, type
- 
- //796: num, price, ptype, 
 var TradeSchema = new Schema({
 	exchange: {
 		type: Schema.ObjectId,
@@ -26,14 +23,26 @@ var TradeSchema = new Schema({
 		type: Number,
 		default: ''
 	},
+    type: {
+        type: String,
+        default: ''
+    },
+    lever_rate: {
+        type: String,
+        default: ''
+    },
 	tid: {
 		type: String,
-		default: '',
+		default: ''
 	},
 	created: {
 		type: Date,
 		default: Date.now
 	},
+    status: {
+        type: Number, 
+        default: 0,
+    },
 	user: {
 		type: Schema.ObjectId,
 		ref: 'User'

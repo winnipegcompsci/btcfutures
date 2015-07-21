@@ -1,22 +1,63 @@
-<section data-ng-controller="TradesController">
+<section data-ng-controller="TradesController as TradesCtrl">
     <div class="page-header">
         <h1>New Trade</h1>
     </div>
     <div class="col-md-12">
         <form class="form-horizontal" data-ng-submit="create()" novalidate>
-            <fieldset>
-                <div class="form-group">
-                    <label class="control-label" for="name">Name</label>
-                    <div class="controls">
-                        <input type="text" data-ng-model="name" id="name" class="form-control" placeholder="Name" required>
+            <fieldset>               
+                <div class="panel panel-primary">
+                    <div class="panel-heading">New {{exchange.name}} Trade</div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="columns col-md-6">
+                                <label for="newTrade.price">Price:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" data-ng-model="price" placeholder="price" aria-describedby="basic-addon2" required>
+                                    <span class="input-group-addon" id="basic-addon2">$ (USD)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="columns col-md-6">
+                                <label for="newTrade.amount">Amount:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" data-ng-model="amount" placeholder="amount" aria-describedby="basic-addon2" required>
+                                    <span class="input-group-addon" id="basic-addon2"> BTC</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="columns col-md-6">
+                                <label class="control-label" for="type">Position Bias:</label>
+                                <select data-ng-model="type" class="form-control" id="type" required>
+                                    <option value="long">LONG</option>
+                                    <option value="short">SHORT</option>
+                                </select>
+                            </div>
+
+                            <div class="columns col-md-6">
+                                <label class="control-label" for="lever_rate">Leverage Rate:</label>
+                                <select data-ng-model="lever_rate" class="form-control" id="lever_rate" required>
+                                    <option value="10">10X</option>
+                                    <option value="20">20X</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">                                   
+                            <div class="columns col-md-6">
+                                <label class="control-label" for="exchange">Exchange</label>
+                                <select class="form-control" data-ng-model="$root.exchange" data-ng-controller="ExchangesController" data-ng-init="find()" required>
+                                    <option data-ng-repeat="exchange in exchanges" value="{{exchange._id}}"> {{exchange.name}} </option>
+                                </select>
+                            </div>
+                            <div class="columns col-md-4">
+                                <br />
+                                <input type="submit" id="{{exchange.name}}_submit_order" value="Place {{exchange.name}} Order" class="btn btn-success pull-right">
+                            </div>
+                        </div>
                     </div>
+                
                 </div>
-                <div class="form-group">
-                    <input type="submit" class="btn btn-default">
-                </div>
-				<div data-ng-show="error" class="text-danger">
-					<strong data-ng-bind="error"></strong>
-				</div>
             </fieldset>
         </form>
     </div>

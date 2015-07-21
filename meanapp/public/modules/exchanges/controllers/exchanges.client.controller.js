@@ -1,8 +1,8 @@
 'use strict';
 
 // Exchanges controller
-angular.module('exchanges').controller('ExchangesController', ['$scope', '$stateParams', '$location', '$http', 'Authentication', 'Exchanges',
-	function($scope, $stateParams, $location, $http, Authentication, Exchanges) {
+angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootScope', '$stateParams', '$location', '$http', 'Authentication', 'Exchanges',
+	function($scope, $rootScope, $stateParams, $location, $http, Authentication, Exchanges) {
 		$scope.authentication = Authentication;
 
 		// Create new Exchange
@@ -64,9 +64,18 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$state
 		};
 		
 		$scope.getCurrentPrice = function(exchange) {
-			console.log("Getting current price for: " + exchange.name);
-			
-			return exchange.getCurrentPrice();
+			$http.get('exchanges/' + exchange._id + '/getTicker')
+                .success(function (data) {
+                    exchange.current_price = '$' + Number(data.last).toFixed(2) + ' USD';
+                    
+                    data.last = Number(data.last).toFixed(2);
+                    data.high = Number(data.high).toFixed(2);
+                    data.low = Number(data.low).toFixed(2);
+                    data.buy = Number(data.buy).toFixed(2);
+                    data.sell = Number(data.sell).toFixed(2);
+                    
+                    exchange.tickerRes = data;
+                });
 		}
 		
 	}

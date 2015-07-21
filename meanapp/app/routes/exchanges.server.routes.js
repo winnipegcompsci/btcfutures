@@ -16,6 +16,12 @@ module.exports = function(app) {
 
 	app.route('/exchanges/:exchangeId/getTicker')
 		.get(exchanges.getCurrentPrice);
+        
+    // app.route('/exchanges/:exchangeId/getTrades')
+        // .get(exchanges.getCurrentTrades);
+        
+    // app.route('/exchanges/:exchangeId/getDepth')
+        // .get(exchanges.getCurrentDepth);
 		
 		
 	// Finish by binding the Exchange middleware

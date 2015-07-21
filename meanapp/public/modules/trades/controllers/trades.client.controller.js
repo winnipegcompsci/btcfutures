@@ -1,23 +1,29 @@
 'use strict';
 
 // Trades controller
-angular.module('trades').controller('TradesController', ['$scope', '$stateParams', '$location', 'Authentication', 'Trades',
-	function($scope, $stateParams, $location, Authentication, Trades) {
+angular.module('trades').controller('TradesController', ['$scope', '$rootScope', '$stateParams', '$location', 'Authentication', 'Trades',
+	function($scope, $rootScope, $stateParams, $location, Authentication, Trades) {
 		$scope.authentication = Authentication;
-
+        
 		// Create new Trade
-		$scope.create = function() {
-			// Create new Trade object
+		$scope.create = function() {            
+			// Create new Trade object            
 			var trade = new Trades ({
-				name: this.name
-			});
-
+                // name: this.name,
+                price: this.price,
+                amount: this.amount,
+                exchange: $rootScope.exchange,
+                type: this.type,
+                lever_rate: this.lever_rate
+            });
+            
 			// Redirect after save
 			trade.$save(function(response) {
 				$location.path('trades/' + response._id);
 
 				// Clear form fields
 				$scope.name = '';
+                // $scope.newTrade = {};
 			}, function(errorResponse) {
 				$scope.error = errorResponse.data.message;
 			});

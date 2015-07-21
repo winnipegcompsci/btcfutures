@@ -7,7 +7,9 @@
 			<h4 class="list-group-item-heading" data-ng-bind="strategy.name"></h4>
             <small class="list-group-item-text">
 				Implemented on
-				<span data-ng-bind="strategy.exchange.name"></span>
+				<span data-ng-bind="strategy.primaryExchange.name"></span>
+                Currently Buying Insurance on
+                <span data-ng-bind="strategy.insuranceExchange.name"></span>
 			</small>
 			<h4 class="pull-right list-group-item-heading" data-ng-bind="strategy.getProfitLoss()"></h4>
         </a>

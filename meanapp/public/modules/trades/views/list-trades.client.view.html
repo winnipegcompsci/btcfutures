@@ -1,17 +1,45 @@
 <section data-ng-controller="TradesController" data-ng-init="find()">
     <div class="page-header">
-        <h1>Trades</h1>
+        <h1>Trades / Open Positions</h1>
     </div>
     <div class="list-group">
-        <a data-ng-repeat="trade in trades" data-ng-href="#!/trades/{{trade._id}}" class="list-group-item">
-			<small class="list-group-item-text">
-				Posted on
-				<span data-ng-bind="trade.created | date:'medium'"></span>
-				by
-				<span data-ng-bind="trade.user.displayName"></span>
-			</small>
-			<h4 class="list-group-item-heading" data-ng-bind="trade.name"></h4>
-        </a>
+        <table width="100%" border="1px solid black" cellpadding="10">
+            <thead>
+            <tr>
+                <th>Opened </th>
+                <th>Trade ID</th>
+                <th>Amount </th>
+                <th>Exchange </th>
+                <th>Type </th>
+                <th>Price </th>
+                <th> Current Exchange Price </th>
+                <th> Difference </th>
+                <th> Profit / Loss </th>
+                <th> Status / Close </th>
+            </tr>
+            </thead>
+            
+            <tbody>
+            <tr data-ng-repeat="trade in trades">
+                <td> <span data-ng-bind="trade.created | date:'short'"></span> </td>
+                <td> <a data-ng-href="#!/trades/{{trade._id}}"> {{ trade._id }} </a></td>
+                <td> <span data-ng-bind="trade.amount"> </span> BTC </td>
+                <td> <span data-ng-bind="trade.exchange.name"> </span> </td>
+                <td> <span data-ng-bind="trade.type | uppercase"> </span> </td>
+                <td> <span data-ng-bind="trade.price"> </span> USD </td>
+                <td> <span data-ng-bind="trade.exchange.current_price"> </span> USD </td>
+                <td> {{trade.exchange.getCurrentPrice() - trade.price}} </td>
+                <td> {{trade.amount * ( trade.price - trade.exchange.getCurrentPrice() ) }} </td>
+                <td>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox"> Close Position
+                        </label>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
     <div class="alert alert-warning text-center" data-ng-hide="!trades.$resolved || trades.length">
     	No Trades yet, why don't you <a href="/#!/trades/create">create one</a>?
