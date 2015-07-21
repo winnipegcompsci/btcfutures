@@ -82,7 +82,26 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                     
                     exchange.tickerRes = data;
                 });
-		}
+		};
+        
+        $scope.getLastPrice = function(exchange) {
+            if(!exchange) {
+                var exchange = Exchanges.get({
+                    exchangeId: $stateParams.exchangeId
+                });
+            }
+
+            $http.get('exchanges/' + exchange._id + '/getTicker')
+                .success(function(data) {
+                    return Number(data.last).toFixed(2); 
+                });
+        };
+        
+        $scope.sendTrade = function() {
+            
+        };
+        
+        
 		
 	}
 ]);

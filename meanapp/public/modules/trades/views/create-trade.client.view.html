@@ -13,7 +13,7 @@
                                 <label for="newTrade.price">Price:</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" data-ng-model="price" placeholder="price" aria-describedby="basic-addon2" required>
-                                    <span class="input-group-addon" id="basic-addon2">$ (USD)</span>
+                                    <span class="input-group-addon" id="basic-addon2"><span class="glyphicon glyphicon-usd"></span></span>
                                 </div>
                             </div>
                             
@@ -21,7 +21,7 @@
                                 <label for="newTrade.amount">Amount:</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" data-ng-model="amount" placeholder="amount" aria-describedby="basic-addon2" required>
-                                    <span class="input-group-addon" id="basic-addon2"> BTC</span>
+                                    <span class="input-group-addon" id="basic-addon2"><span class="glyphicon glyphicon-bitcoin"></span></span>
                                 </div>
                             </div>
                         </div>
@@ -29,7 +29,7 @@
                         <div class="row">
                             <div class="columns col-md-6">
                                 <label class="control-label" for="type">Position Bias:</label>
-                                <select data-ng-model="type" class="form-control" id="type" required>
+                                <select data-ng-model="type" class="form-control btn-info" id="type" data-style="btn-warning" required>
                                     <option value="long">LONG</option>
                                     <option value="short">SHORT</option>
                                 </select>
@@ -37,7 +37,7 @@
 
                             <div class="columns col-md-6">
                                 <label class="control-label" for="lever_rate">Leverage Rate:</label>
-                                <select data-ng-model="lever_rate" class="form-control" id="lever_rate" required>
+                                <select data-ng-model="lever_rate" class="form-control btn-warning" id="lever_rate" data-style="btn-info" required>
                                     <option value="10">10X</option>
                                     <option value="20">20X</option>
                                 </select>
@@ -46,7 +46,7 @@
                         <div class="row">                                   
                             <div class="columns col-md-6">
                                 <label class="control-label" for="exchange">Exchange</label>
-                                <select class="form-control" data-ng-model="$root.exchange" data-ng-controller="ExchangesController" data-ng-init="find()" required>
+                                <select class="form-control btn-primary" data-ng-model="$root.exchange" data-ng-controller="ExchangesController" data-ng-init="find()" required>
                                     <option data-ng-repeat="exchange in exchanges" value="{{exchange._id}}"> {{exchange.name}} </option>
                                 </select>
                             </div>

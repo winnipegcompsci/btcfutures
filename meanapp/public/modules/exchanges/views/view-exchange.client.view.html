@@ -7,15 +7,11 @@
             Graph {{exchange.name}} Exchange Data Here
         </div>
     </div>
-	<small data-ng-init="getCurrentPrice()">
+	<small data-ng-init="">
 		<em class="text-muted">
-            <h4 class="pull-right list-group-item-heading">Last Price: {{exchange.current_price}}</h4>
+            <h4 class="pull-right list-group-item-heading">Last Price: </h4>
             <div class="row">
-                Last: $<span data-ng-bind="exchange.tickerRes.last"></span> 
-                Low: $<span data-ng-bind="exchange.tickerRes.low"></span>
-                High: $<span data-ng-bind="exchange.tickerRes.high"></span>
-                Buy: $<span data-ng-bind="exchange.tickerRes.buy"></span>
-                Sell: $<span data-ng-bind="exchange.tickerRes.sell"></span>
+                Last, High, Low, Buy, Sell
 			</div>            
 		</em>
 	</small>

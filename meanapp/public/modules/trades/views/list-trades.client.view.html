@@ -1,6 +1,9 @@
 <section data-ng-controller="TradesController" data-ng-init="find()">
     <div class="page-header">
         <h1>Trades / Open Positions</h1>
+        <a class="pull-right btn btn-info" href="#!/trades/all">View All Trade History</a>
+        <br />
+        <div> Total Profit / Losses, Total Positions Open, Using Strategy, etc.</div>
     </div>
     <div class="list-group">
         <table width="100%" border="1px solid black" cellpadding="10">
@@ -12,15 +15,15 @@
                 <th>Exchange </th>
                 <th>Type </th>
                 <th>Price </th>
-                <th> Current Exchange Price </th>
-                <th> Difference </th>
-                <th> Profit / Loss </th>
-                <th> Status / Close </th>
+                <th>Current Exchange Price </th>
+                <th>Difference </th>
+                <th>Profit / Loss </th>
+                <th>Status / Close </th>
             </tr>
             </thead>
             
             <tbody>
-            <tr data-ng-repeat="trade in trades">
+            <tr data-ng-repeat="trade in trades | orderBy:'-created' ">
                 <td> <span data-ng-bind="trade.created | date:'short'"></span> </td>
                 <td> <a data-ng-href="#!/trades/{{trade._id}}"> {{ trade._id }} </a></td>
                 <td> <span data-ng-bind="trade.amount"> </span> BTC </td>
