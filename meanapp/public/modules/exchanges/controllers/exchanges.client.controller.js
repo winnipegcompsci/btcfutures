@@ -97,10 +97,25 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                 });
         };
         
-        $scope.sendTrade = function() {
+        $scope.sendTrade = function(exchange, trade) {
+            if(!exchange) {
+                var exchange = Exchanges.get({
+                    exchangeId: $stateParams.exchangeId
+                });
+            }
             
+            $http.post('exchanges/' + exchange._id + '/makeTrade')
+                .success(function(data) {
+                    
+                });
         };
         
+        $scope.getTrades = function() {                        
+            $http.get('exchanges/' + $stateParams.exchangeId + '/getTrades')
+                .success(function(data) {
+                    $scope.trades = data;
+                });
+        }
         
 		
 	}

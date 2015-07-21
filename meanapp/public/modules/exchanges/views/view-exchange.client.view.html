@@ -5,6 +5,28 @@
     <div class="row">
         <div class="well">
             Graph {{exchange.name}} Exchange Data Here
+            
+        </div>
+        
+        <div class="well" data-ng-init="getTrades()">
+            <h3> Recent Trades on {{exchange.name}} </h3>
+            <table width="100%">
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Price</th>
+                    <th>TID</th>
+                    <th>Type</th>
+                </tr>
+                                
+                <tr data-ng-repeat="trade in trades" ng-if="$index < 25">
+                    <td> {{trade.date_ms | date:'medium'}} </td>
+                    <td> {{trade.amount}} <span class="pull-left glyphicon glyphicon-bitcoin"></span></td>
+                    <td> {{trade.price}} <span class="pull-left glyphicon glyphicon-usd"></span></td>
+                    <td> {{trade.tid}} </td>
+                    <td> {{trade.type}} </td>
+                </tr>
+            </table>      
         </div>
     </div>
 	<small data-ng-init="">

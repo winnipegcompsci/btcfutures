@@ -146,8 +146,8 @@ exports.getCurrentTrades = function(req, res) {
     
     if(thisName === 'okcoin') {
         okcoin_public.getFutureTrades(function(err, trades_resp) {
-            
-        });
+            res.send(trades_resp);
+        }, 'btc_usd', 'quarter');
     } else if(thisName === '796' || thisName === 'futures796') {
         
     } else {
