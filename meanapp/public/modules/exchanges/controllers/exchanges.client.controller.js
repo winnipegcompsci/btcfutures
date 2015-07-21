@@ -61,9 +61,15 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
 			$scope.exchange = Exchanges.get({ 
 				exchangeId: $stateParams.exchangeId
 			});
-		};
+        };
 		
 		$scope.getCurrentPrice = function(exchange) {
+            if(!exchange) {
+                var exchange = Exchanges.get({
+                    exchangeId: $stateParams.exchangeId
+                });
+            }
+            
 			$http.get('exchanges/' + exchange._id + '/getTicker')
                 .success(function (data) {
                     exchange.current_price = '$' + Number(data.last).toFixed(2) + ' USD';

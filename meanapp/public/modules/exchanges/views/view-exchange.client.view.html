@@ -2,7 +2,24 @@
 	<div class="page-header">
 		<h1 data-ng-bind="exchange.name"></h1>
 	</div>
-	<div class="pull-right" data-ng-show="((authentication.user) && (authentication.user._id == exchange.user._id))">
+    <div class="row">
+        <div class="well">
+            Graph {{exchange.name}} Exchange Data Here
+        </div>
+    </div>
+	<small data-ng-init="getCurrentPrice()">
+		<em class="text-muted">
+            <h4 class="pull-right list-group-item-heading">Last Price: {{exchange.current_price}}</h4>
+            <div class="row">
+                Last: $<span data-ng-bind="exchange.tickerRes.last"></span> 
+                Low: $<span data-ng-bind="exchange.tickerRes.low"></span>
+                High: $<span data-ng-bind="exchange.tickerRes.high"></span>
+                Buy: $<span data-ng-bind="exchange.tickerRes.buy"></span>
+                Sell: $<span data-ng-bind="exchange.tickerRes.sell"></span>
+			</div>            
+		</em>
+	</small>
+    <div class="pull-right" data-ng-show="((authentication.user) && (authentication.user._id == exchange.user._id))">
 		<a class="btn btn-primary" href="/#!/exchanges/{{exchange._id}}/edit">
 			<i class="glyphicon glyphicon-edit"></i>
 		</a>
@@ -10,12 +27,4 @@
 			<i class="glyphicon glyphicon-trash"></i>
 		</a>
 	</div>
-	<small>
-		<em class="text-muted">
-			Posted on
-			<span data-ng-bind="exchange.created | date:'mediumDate'"></span>
-			by
-			<span data-ng-bind="exchange.user.displayName"></span>
-		</em>
-	</small>
 </section>

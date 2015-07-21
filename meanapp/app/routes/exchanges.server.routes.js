@@ -22,7 +22,7 @@ module.exports = function(app) {
         
     // app.route('/exchanges/:exchangeId/getDepth')
         // .get(exchanges.getCurrentDepth);
-		
+    
 		
 	// Finish by binding the Exchange middleware
 	app.param('exchangeId', exchanges.exchangeByID);
