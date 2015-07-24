@@ -1,8 +1,8 @@
 'use strict';
 
 // Trades controller
-angular.module('trades').controller('TradesController', ['$scope', '$rootScope', '$stateParams', '$location', 'Authentication', 'Trades',
-	function($scope, $rootScope, $stateParams, $location, Authentication, Trades) {
+angular.module('trades').controller('TradesController', ['$scope', '$http', '$rootScope', '$stateParams', '$location', 'Authentication', 'Trades',
+	function($scope, $http, $rootScope, $stateParams, $location, Authentication, Trades) {
 		$scope.authentication = Authentication;
         
 		// Create new Trade
@@ -68,5 +68,12 @@ angular.module('trades').controller('TradesController', ['$scope', '$rootScope',
 				tradeId: $stateParams.tradeId
 			});
 		};
+        
+        $scope.getCurrentPriceById = function(exchange_id) {
+            $http.get('exchanges/' + exchange_id + '/getTicker')
+                .success(function (data) {
+                    return Number(data.last).toFixed(2);
+                });
+        };
 	}
 ]);

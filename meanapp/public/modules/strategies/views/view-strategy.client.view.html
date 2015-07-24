@@ -1,7 +1,46 @@
 <section data-ng-controller="StrategiesController" data-ng-init="findOne()">
 	<div class="page-header">
 		<h1 data-ng-bind="strategy.name"></h1>
+        <span class="pull-right">
+            Enabled: <span class="text-success" data-ng-bind="strategy.enabled"></span>
+        </span>
+        <br />
 	</div>
+    
+    <div class="row">
+        <div class="columns col-lg-6">
+            Currently Trading on: <span data-ng-bind="strategy.primaryExchange.name"></span>
+        </div>
+        
+        <div class="columns col-lg-6">
+            Currently Buying Insurance on: <span data-ng-bind="strategy.insuranceExchange.name"></span>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="columns col-lg-4">
+            Total Coins to Hedge: 
+            <span data-ng-bind="strategy.totalCoins"></span> <span class="glyphicon glyphicon-bitcoin"></span>
+        </div>
+        
+        <div class="columns col-lg-4">
+            Max. Buy Price: 
+            <span data-ng-bind="strategy.maxBuyPrice"></span> <span class="glyphicon glyphicon-usd"></span>
+        </div>
+        
+        <div class="columns col-lg-4">
+            Insurance Coverage Rate:
+            <span data-ng-bind="strategy.insuranceCoverage*100"></span>%
+        </div>
+    </div>
+    
+    <div class="row">
+        <h3>Details:</h3>
+    </div>
+    
+    
+    
+    
 	<div class="pull-right" data-ng-show="((authentication.user) && (authentication.user._id == strategy.user._id))">
 		<a class="btn btn-primary" href="/#!/strategies/{{strategy._id}}/edit">
 			<i class="glyphicon glyphicon-edit"></i>
@@ -12,7 +51,7 @@
 	</div>
 	<small>
 		<em class="text-muted">
-			Posted on
+			Implemented on
 			<span data-ng-bind="strategy.created | date:'mediumDate'"></span>
 			by
 			<span data-ng-bind="strategy.user.displayName"></span>

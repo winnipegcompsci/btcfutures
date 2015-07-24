@@ -25,6 +25,16 @@ module.exports = function(app) {
     app.route('/exchanges/:exchangeId/getTrades')
         .get(exchanges.getCurrentTrades);
         
+    app.route('/exchanges/:exchangeId/getFutureCandles')
+        .get(exchanges.getFutureCandles);
+        
+    app.route('/exchanges/:exchangeId/getPositions')
+        .get(exchanges.getFuturePositions);
+        
+    app.route('/exchanges/:exchangeId/getUserInfo')
+        .get(exchanges.getUserInfo);
+
+    
     // app.route('/exchanges/:exchangeId/getDepth')
         // .get(exchanges.getCurrentDepth);
     

@@ -19,6 +19,10 @@ var TradeSchema = new Schema({
 		type: Number,
 		default: ''
 	},
+    close_price: {
+        type: Number,
+        default: 0
+    },
 	amount: {
 		type: Number,
 		default: ''
@@ -48,5 +52,9 @@ var TradeSchema = new Schema({
 		ref: 'User'
 	}
 });
+
+function getClosingPrice() {
+    return "GET CLOSING PRICE()";
+}
 
 mongoose.model('Trade', TradeSchema);

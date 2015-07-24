@@ -1,31 +1,68 @@
 <section data-ng-controller="ExchangesController" data-ng-init="findOne()">
 	<div class="page-header">
 		<h1 data-ng-bind="exchange.name"></h1>
+        <span class="pull-right" data-ng-init="getUserInfo(exchange)">
+            <span>Balance</span>
+            {{userinfo.info.btc.balance.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> 
+            <span>Account Equity:</span>
+            {{userinfo.info.btc.rights.toFixed(2)}}  <span class="glyphicon glyphicon-usd"></span> 
+        </span>
+        <br />
 	</div>
     <div class="row">
-        <div class="well">
-            Graph {{exchange.name}} Exchange Data Here
+        <div class="panel panel-info">
+            <div class="panel-heading">Current Contracts</div>
+            <div class="panel-body">
+            <ul>
+                <p data-ng-if="userinfo.info.btc.contracts.length == 0">
+                    <strong class="text-center">Not Holding Any Contracts</strong>
+                </p>
+                
+                <li data-ng-repeat="contract in userinfo.info.btc.contracts">
+                    Available: {{contract.available}}
+                    Balance: {{contract.balance}}
+                    Bond: {{contract.bond}}
+                    Contract ID: {{contract.contract_id}}
+                    Contract Type: {{contract.contract_type}}
+                    Frozen: {{contract.freeze}}
+                    Profit: {{contract.profit}}
+                    Unrealized Profit: {{contract.unprofit}}
+                </li>
+            </ul>
+            </div>
             
-        </div>
+        </div>           
+        <br />
         
-        <div class="well" data-ng-init="getTrades()">
+        <!--
+        <div class="well">
+            <div id="chart" style="width:100%; height:300px;"></div>
+            {{chartData}}
+        </div>
+        -->
+        
+        <div data-ng-init="getTrades()">
             <h3> Recent Trades on {{exchange.name}} </h3>
-            <table width="100%">
-                <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Price</th>
-                    <th>TID</th>
-                    <th>Type</th>
-                </tr>
-                                
-                <tr data-ng-repeat="trade in trades" ng-if="$index < 25">
-                    <td> {{trade.date_ms | date:'medium'}} </td>
-                    <td> {{trade.amount}} <span class="pull-left glyphicon glyphicon-bitcoin"></span></td>
-                    <td> {{trade.price}} <span class="pull-left glyphicon glyphicon-usd"></span></td>
-                    <td> {{trade.tid}} </td>
-                    <td> {{trade.type}} </td>
-                </tr>
+            <table id="trades_table" class="table" border="1px solid" width="100%">
+                <thead>
+                    <tr class="info">
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Price</th>
+                        <th>TID</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr data-ng-class="{'table success': trade.type === 'buy', 'table danger': trade.type === 'sell'}" data-ng-repeat="trade in trades track by trade.tid | orderBy:'-trade.date_ms'" post-repeat-directive>
+                        <td> {{trade.date_ms | date:'medium'}} </td> 
+                        <td> {{trade.amount.toFixed(5)}} <span class="pull-left glyphicon glyphicon-bitcoin"></span></td>
+                        <td> {{trade.price.toFixed(2)}} <span class="pull-left glyphicon glyphicon-usd"></span></td>
+                        <td> {{trade.tid}} </td>
+                        <td> {{trade.type | uppercase}} </td>
+                    </tr>
+                </tbody>
             </table>      
         </div>
     </div>
@@ -39,10 +76,37 @@
 	</small>
     <div class="pull-right" data-ng-show="((authentication.user) && (authentication.user._id == exchange.user._id))">
 		<a class="btn btn-primary" href="/#!/exchanges/{{exchange._id}}/edit">
-			<i class="glyphicon glyphicon-edit"></i>
+			<i class="glyphicon glyphicon-edit"> Edit</i>
 		</a>
 		<a class="btn btn-primary" data-ng-click="remove();">
-			<i class="glyphicon glyphicon-trash"></i>
+			<i class="glyphicon glyphicon-trash"> Delete</i>
 		</a>
 	</div>
 </section>
+
+<script type="text/javascript-lazy">
+$(document).ready(function(){
+    $(function () {
+        $('#chart').highcharts({
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: 'Trades by Price'
+            },
+            xAxis: {
+                categories: '{{chartData.timestamps}}'         
+            },
+            yAxis: {
+                title: {
+                    text: 'Price'
+                }
+            },
+            series: [{
+                name: 'Price',
+                data: '{{chartData.prices}}'
+            }]
+        });
+    });
+});
+</script>

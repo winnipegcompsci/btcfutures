@@ -137,8 +137,33 @@ exports.getCurrentPrice = function(req, res) {
     } else {
         res.status(500).send('ERROR: ' + thisName + ' Function GetCurrentPrice() -- Not Found');
     }
+};
+
+
+exports.addTrade = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+
+    var amount = req.amount;
+    var price = req.price;
+    var type = req.type;
+    var match_price = req.match_price;
+    var lever_rate = req.lever_rate;
     
-	
+    if(thisName === 'okcoin') {
+        okcoin_private.addFutureTrade(function (err, newTrade_resp) {
+            
+            res.send(newTrade_resp);
+        }, 'btc_usd', 'quarter', amount, price, type, match_price, lever_rate);
+        
+    } else if (thisName === '796' || thisName === 'futures796') {        
+        futures796_private.openBuy(function (err, newTrade_resp) {
+            res.send(newTrade_resp);
+        }, '0.10', '10', price, 'A');
+    } else {
+        res.status(500).send('ERROR: ' + thisName + ' Function AddTrade() -- Not Found');
+    }
+    
+    var trade = req.trade;
 };
 
 exports.getCurrentTrades = function(req, res) {
@@ -149,26 +174,53 @@ exports.getCurrentTrades = function(req, res) {
             res.send(trades_resp);
         }, 'btc_usd', 'quarter');
     } else if(thisName === '796' || thisName === 'futures796') {
-        
+        futures796_public.getTrades(function(err, trades_resp) {
+            res.send(trades_resp);
+        });
     } else {
         res.status(500).send('ERROR: ' + thisName + ' Function GetCurrentTrades() -- Not Found');
     }
 };
 
-exports.addTrade = function(req, res) {
+
+
+exports.getFutureCandles = function(req, res) {
     var thisName = req.exchange.name.toLowerCase().replace(' ', '');
     
     if(thisName === 'okcoin') {
-        okcoin_private.addFutureTrade(function (err, newTrade_resp) {
-            res.send(newTrade_resp);
-        }, 'btc_usd', 'quarter', amount, price, type, match_price, lever_rate);
+        okcoin_public.getFutureKline(function(err, candles_resp) {
+           res.send(candles_resp); 
+        }, 'btc_usd', '1hour', 'weekly');
+    } else if (thisName === '796' || thisName === 'futures796') {
+        res.status(500).send('ERROR: 796s API does not provide Candlestick data');
+    } else {
         
+    }
+};
+
+exports.getFuturePositions = function(req, res) {
+    
+};
+
+exports.getUserInfo = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        okcoin_private = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        okcoin_private.getFixedUserInfo(function(err, user_resp) {
+            if(err) {
+                res.send(err);
+            } else {
+                res.send(user_resp);
+            }
+        });
+           
     } else if (thisName === '796' || thisName === 'futures796') {
         
     } else {
-        res.status(500).send('ERROR: ' + thisName + ' Function AddTrade() -- Not Found');
+        res.status(500).send('ERROR: ' + thisName + ' Function GetUserInfo() -- Not Found');
     }
-    
-    var trade = req.trade;
 };
+
+
 

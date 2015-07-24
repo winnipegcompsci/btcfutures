@@ -53,7 +53,26 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
 
 		// Find a list of Exchanges
 		$scope.find = function() {
-			$scope.exchanges = Exchanges.query();
+			// $scope.exchanges = Exchanges.query();
+            
+            Exchanges.query().$promise.then(function(result) {
+                $scope.exchanges = result;
+                
+                for(var i = 0; i < result.length; i++) {
+                    var thisName = result[i].name.toLowerCase().replace(" ", "");
+                                       
+                    if(thisName === 'okcoin') {
+                        $scope.exchanges[i].logo_url = "/img/okcoin.png"
+                    } else if (thisName === '796' || thisName === 'futures796') {
+                        $scope.exchanges[i].logo_url = "/img/796.jpg"
+                    } else {
+                        console.log("Exchange: " + thisName + " -- has no logo on record");
+                    }
+                }
+                
+                $scope.exchanges = result;
+            });
+            
 		};
 
 		// Find existing Exchange
@@ -63,9 +82,10 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
 			});
         };
 		
+                
 		$scope.getCurrentPrice = function(exchange) {
             if(!exchange) {
-                var exchange = Exchanges.get({
+                exchange = Exchanges.get({
                     exchangeId: $stateParams.exchangeId
                 });
             }
@@ -86,7 +106,7 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
         
         $scope.getLastPrice = function(exchange) {
             if(!exchange) {
-                var exchange = Exchanges.get({
+                exchange = Exchanges.get({
                     exchangeId: $stateParams.exchangeId
                 });
             }
@@ -99,7 +119,7 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
         
         $scope.sendTrade = function(exchange, trade) {
             if(!exchange) {
-                var exchange = Exchanges.get({
+                exchange = Exchanges.get({
                     exchangeId: $stateParams.exchangeId
                 });
             }
@@ -110,13 +130,51 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                 });
         };
         
-        $scope.getTrades = function() {                        
+        $scope.getTrades = function() {
             $http.get('exchanges/' + $stateParams.exchangeId + '/getTrades')
                 .success(function(data) {
                     $scope.trades = data;
+                    
+                    $scope.chartData = {
+                        timestamps: [],
+                        prices: []
+                    };
+                    for(var i = 0; i < data.length; i++) {
+                        $scope.chartData.timestamps.push(data[i].date_ms);
+                        $scope.chartData.prices.push(data[i].price);
+                    }
                 });
-        }
+        };
         
-		
+        $scope.getUserInfo = function() {
+            $http.get('exchanges/' + $stateParams.exchangeId + '/getUserInfo')
+                .success(function(data) {
+                    $scope.userinfo = data;
+                });
+        };	
 	}
 ]);
+
+angular.module('exchanges').directive('script', function() {
+    return {
+        restrict: 'E',
+        scope: true,
+        link: function(scope, elem, attr) 
+        {
+            if (attr.type==='text/javascript-lazy') 
+            {
+                var s = document.createElement("script");
+                s.type = "text/javascript";                
+                var src = elem.attr('src');
+                if(src!==undefined) {
+                    s.src = src;
+                } else {
+                    var code = elem.text();
+                    s.text = code;                    
+                }
+                document.head.appendChild(s);
+                elem.remove();
+            }
+        }
+    }  
+});

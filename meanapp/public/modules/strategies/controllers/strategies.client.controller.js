@@ -1,8 +1,8 @@
 'use strict';
 
 // Strategies controller
-angular.module('strategies').controller('StrategiesController', ['$scope', '$stateParams', '$location', 'Authentication', 'Strategies',
-	function($scope, $stateParams, $location, Authentication, Strategies) {
+angular.module('strategies').controller('StrategiesController', ['$scope', '$http', '$stateParams', '$location', 'Authentication', 'Strategies',
+	function($scope, $http, $stateParams, $location, Authentication, Strategies) {
 		$scope.authentication = Authentication;
 
 		// Create new Strategy
@@ -62,5 +62,12 @@ angular.module('strategies').controller('StrategiesController', ['$scope', '$sta
 				strategyId: $stateParams.strategyId
 			});
 		};
+        
+        $scope.getExchangesList = function() {
+            $http.get('exchanges')
+                .success(function (exchanges) {
+                    $scope.exchanges = exchanges;
+                });
+        };
 	}
 ]);
