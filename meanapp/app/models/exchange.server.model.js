@@ -20,13 +20,11 @@ var ExchangeSchema = new Schema({
 	apikey: {
 		type: String,
 		default: '',
-		required: 'Please fill API Key',
 		trim: true
 	},
 	secretkey: {
 		type: String,
 		default: '',
-		required: 'Please enter secret key',
 		trim: true
 	},
 	created: {

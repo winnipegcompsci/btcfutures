@@ -1,13 +1,13 @@
 <section data-ng-controller="StrategiesController" data-ng-init="findOne()">
     <div class="page-header">
-        <h1>Edit Strategy</h1>
+        <h1>Edit Strategy <small class="pull-right">{{strategy.name}}</small></h1>
     </div>
     <div class="col-md-12">
         <form class="form-horizontal" data-ng-submit="update()" novalidate>
             <fieldset>
                 <div class="columns col-md-6">
                     <div class="panel panel-info">
-                        <div class="panel-heading"> Configuration </div>
+                        <div class="panel-heading"> General Strategy Configuration </div>
                         <div class="panel-body">
                             <div class="form-group">
                                 <label class="control-label" for="name">Name</label>
@@ -18,19 +18,28 @@
                                 
                                 <label class="control-label" for="totalCoins">Total Coins to Hedge:</label>
                                 <div class="controls">
-                                    <input type="text" data-ng-model="strategy.totalCoins" id="totalCoins" class="form-control" placeholder="Total Coins to Hedge" required>
+                                    <div class="input-group">
+                                        <input type="text" data-ng-model="strategy.totalCoins" id="totalCoins" class="form-control" placeholder="Total Coins to Hedge" required>
+                                        <span class="input-group-addon" id="basic-addon2"><span class="glyphicon glyphicon-bitcoin"></span></span>
+                                    </div>
                                 </div>
                                 
                                 <label class="control-label" for="maxBuyPrice">Max Buy Price:</label>
                                 <div class="controls">
-                                    <input type="text" data-ng-model="strategy.maxBuyPrice" id="maxBuyPrice" class="form-control" placeholder="Max Buy Price" required>
+                                    <div class="input-group">
+                                        <input type="text" data-ng-model="strategy.maxBuyPrice" id="maxBuyPrice" class="form-control" placeholder="Max Buy Price" required>
+                                        <span class="input-group-addon" id="basic-addon3"><span class="glyphicon glyphicon-usd"></span></span>
+                                    </div>
                                 </div>
                                 
                                 <label class="control-label" for="insuranceCoverage">Insurance Coverage Rate:</label>
                                 <div class="controls">
-                                    <input type="text" data-ng-model="strategy.insuranceCoverage" id="insuranceCoverage" class="form-control" placeholder="Insurance Coverage Rate" required>
+                                    <div class="input-group">
+                                        <input type="text" data-ng-model="strategy.insuranceCoverage" id="insuranceCoverage" class="form-control" placeholder="Insurance Coverage Rate" required>
+                                        <span class="input-group-addon" id="basic-addon4">{{strategy.insuranceCoverage}} = {{strategy.insuranceCoverage*100}}% </span>
+                                    </div>
                                 </div>
-                                
+                                <br />
                                 <label class="control-label" for="enabled">Enabled</label>
                                 <div class="controls">
                                     <input type="checkbox" data-ng-model="strategy.enabled" id="enabled" class="form-control">
@@ -42,35 +51,74 @@
                 
                 <div class="columns col-md-6" data-ng-init="getExchangesList()">
                     <div class="panel panel-success">
-                        <div class="panel-heading">Primary Exchanges</div>
+                        <div class="panel-heading" ng-if="strategy.name == 'Long Biased Hedge'">Primary Exchanges (Long)</div>
+                        <div class="panel-heading" ng-if="strategy.name == 'Short Biased Hedge'">Primary Exchanges (Short)</div>
                         <div class="panel-body">
-                            <table width="100%">
-                            <tr data-ng-repeat="exchange in exchanges">
-                                <td>
-                                    {{exchange.name}}
-                                </td>
-                                <td>
-                                    <input type="textbox" data-ng-model="primaryExchange.percent" class="form-control" placeholder="eg: 0.5 = 50%">
-                                </td>
-                            </tr>
-                            </table>
+                            <div class="form-group">
+                                <table width="100%">
+                                <tr data-ng-repeat="exchange in exchanges">
+                                    <td width="25%">
+                                        {{exchange.name}}
+                                    </td>
+                                    <td data-ng-init="strategy.primaryExchanges[$index].exchange = exchange._id">
+                                        <div class="input-group">
+                                            <input type="textbox" data-ng-model="strategy.primaryExchanges[$index].ratio"  class="form-control" placeholder="eg: 0.5 = 50%" />     
+                                            <span class="input-group-addon" id="basic-addon5">
+                                                Goal: {{(strategy.totalCoins * strategy.primaryExchanges[$index].ratio).toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span>
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td></td>
+                                    <td class="text-right">
+                                        <br />
+                                        Total: {{strategy.totalCoins.toFixed(4)}}
+                                        <span class="glyphicon glyphicon-bitcoin"></span>
+                                        &nbsp;&nbsp;
+                                    </td>
+                                </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                    <br />
                     <div class="panel panel-warning">
-                        <div class="panel-heading">Insurance Exchanges</div>
+                        <div class="panel-heading" ng-if="strategy.name == 'Long Biased Hedge'">Insurance Exchanges (Short)</div>
+                        <div class="panel-heading" ng-if="strategy.name == 'Short Biased Hedge'">Insurance Exchanges (Long)</div>
                         <div class="panel-body">
-                            <table width="100%">
-                            <tr data-ng-repeat="exchange in exchanges">
-                                <td>
-                                    {{exchange.name}}
-                                </td>
-                                <td>
-                                    <input type="textbox" data-ng-model="insuranceExchange.percent" class="form-control" placeholder="0.7 for 70%">
-                                </td>
-                            </tr>
-                            </table>
+                            <div class="form-group">
+                                <table width="100%">
+                                <tr data-ng-repeat="insuranceExchange in exchanges">
+                                    <td width="25%">
+                                        {{insuranceExchange.name}}
+                                    </td>
+                                    <td data-ng-init="strategy.insuranceExchanges[$index].exchange = insuranceExchange._id">
+                                        <div class="input-group">
+                                            <input type="textbox" data-ng-model="strategy.insuranceExchanges[$index].ratio" class="form-control" placeholder="0.5 for 50%" />                   
+                                            <span class="input-group-addon" id="basic-addon6">
+                                               Goal: {{((strategy.totalCoins * strategy.insuranceCoverage) * strategy.insuranceExchanges[$index].ratio).toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span> 
+                                            </span>
+                                        </div>
+                                    </td>
+                                    
+                                </tr>
+                                
+                                <tr>
+                                    <td></td>
+                                    <td class="text-right">
+                                        <br />
+                                        Total: {{(strategy.totalCoins * strategy.insuranceCoverage).toFixed(4)}}
+                                        <span class="glyphicon glyphicon-bitcoin"></span>
+                                        &nbsp;&nbsp;
+                                    </td>
+                                </tr>
+                                </table>
+                            </div>
                         </div>
+                    </div>
+                    <div class="note">
+                    <p class="text-right"><em>Please Note, These values should add up to 1.0 (100%).</em> </p>
                     </div>
                 </div> <!-- end right column -->
                 <div class="columns col-md-12">

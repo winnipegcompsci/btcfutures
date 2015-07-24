@@ -27,9 +27,15 @@ var StrategySchema = new Schema({
         }
     }],
 	insuranceExchanges: [{
-		type: Schema.ObjectId,
-		ref: 'Exchange'
-	}],
+        exchange: {
+            type: Schema.ObjectId,
+            ref: 'Exchange'
+        }, 
+        ratio: {
+            type: Number,
+            default: 0,
+        }
+    }],
     totalCoins: {
         type: Number,
         default: 100,
