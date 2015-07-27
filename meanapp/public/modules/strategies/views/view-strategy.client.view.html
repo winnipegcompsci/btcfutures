@@ -43,8 +43,9 @@
                         <th>Position</th>
                         <th>Currently Holding</th>
                         <th>Goal</th>
+                        <th>Completion</th>
                     </tr>
-                    <tr data-ng-repeat="exchange in exchanges">
+                    <tr ng-if="strategy.primaryExchanges[$index].ratio !== 0" data-ng-repeat="exchange in exchanges">
                         <td>
                             {{exchange.name}} 
                         </td>
@@ -58,6 +59,14 @@
                         </td>
                         <td data-ng-init="strategy.primaryExchanges[$index].exchange = exchange._id">
                             {{(strategy.totalCoins * strategy.primaryExchanges[$index].ratio).toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span>
+                        </td>
+                        <td>
+                            <div data-ng-if="strategy.name == 'Long Biased Hedge'">
+                                {{ ((strategy.primaryExchanges[$index].holding_long) / (strategy.totalCoins * strategy.primaryExchanges[$index].ratio)) }} %
+                            </div>
+                            <div data-ng-if="strategy.name == 'Short Biased Hedge'">
+                                {{ ((strategy.primaryExchanges[$index].holding_short) / (strategy.totalCoins * strategy.primaryExchanges[$index].ratio)) }} %
+                            </div>
                         </td>
                     </tr>
                     </table>
@@ -80,8 +89,9 @@
                             <th>Position</th>
                             <th>Currently Holding</th>
                             <th>Goal</th>
+                            <th>Completion</th>
                         </tr>
-                        <tr data-ng-repeat="exchange in exchanges">
+                        <tr ng-if="strategy.insuranceExchanges[$index].ratio !== 0" data-ng-repeat="exchange in exchanges">
                             <td> {{exchange.name}} </td>
                             <td> {{(strategy.totalCoins * strategy.insuranceCoverage).toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span> </td>
                             <td> {{strategy.insuranceExchanges[$index].ratio * 100}} %</td>
@@ -93,6 +103,15 @@
                             </td>
                             <td data-ng-init="strategy.insuranceExchanges[$index].exchange = exchange._id">
                                 {{(strategy.totalCoins * strategy.insuranceCoverage *  strategy.insuranceExchanges[$index].ratio).toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span>
+                            </td>
+                            
+                            <td>
+                                <div data-ng-if="strategy.name == 'Long Biased Hedge'">
+                                    {{ ((strategy.primaryExchanges[$index].holding_short) / (strategy.totalCoins * strategy.insuranceExchanges[$index].ratio))  }} %
+                                </div>
+                                <div data-ng-if="strategy.name == 'Short Biased Hedge'">
+                                    {{ ((strategy.primaryExchanges[$index].holding_long) / (strategy.totalCoins * strategy.insuranceExchanges[$index].ratio)) }} %
+                                </div>                            
                             </td>
                         </tr>
                     </table>

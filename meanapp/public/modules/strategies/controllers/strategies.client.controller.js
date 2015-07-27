@@ -80,6 +80,11 @@ angular.module('strategies').controller('StrategiesController', ['$scope', '$htt
             $http.get('exchanges/' + exchange.exchange + '/getCurrentHolding')
                 .success(function (holding)  {
                    
+                    if(!$scope.strategy.primaryExchanges[$index]) {
+                        $scope.strategy.primaryExchanges[$index] = $scope.strategy.insuranceExchanges[$index];
+                    }
+                   
+                   
                     if (position === 'long') {
                         $scope.strategy.primaryExchanges[$index].holding_long = holding.long;
                     } else if (position === 'short') {

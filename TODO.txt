@@ -1,13 +1,13 @@
 TODO LIST.
 
-#. Cron Scripts 
+1. Cron Scripts 
         -> Price Fetcher.
         -> Update Formula for Calculating Spreads
 
-#. BitVC Module
+2. BitVC Module
         -> Finish Function mapping
         
-#. 796 Module
+3. 796 Module
         -> POST encryption
         
         

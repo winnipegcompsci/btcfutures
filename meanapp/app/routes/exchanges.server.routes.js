@@ -36,7 +36,6 @@ module.exports = function(app) {
 
     app.route('/exchanges/:exchangeId/getCurrentHolding')
         .get(exchanges.getCurrentHolding);
-                
 
 	// Finish by binding the Exchange middleware
 	app.param('exchangeId', exchanges.exchangeByID);
