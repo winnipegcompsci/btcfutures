@@ -222,5 +222,23 @@ exports.getUserInfo = function(req, res) {
     }
 };
 
+exports.getCurrentHolding = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        return {
+            'long': 10,
+            'short': 5
+        };
+    } else if (thisName === '796' || thisName === 'futures796') {
+        return {
+            'long': 8,
+            'short': 15
+        }
+    } else {
+       res.status(500).send('ERROR: ' + thisName + ' Function getCurrentHolding() -- Not Found');
+    }
+};
+
 
 

@@ -8,34 +8,104 @@
 	</div>
     
     <div class="row">
-        <div class="columns col-lg-6">
-            Currently Trading on: <span data-ng-bind="strategy.primaryExchange.name"></span>
+        <div class="panel panel-primary"> 
+            <div class="panel-heading">Settings </div>
+            <div class="panel-body">
+                <div class="columns col-lg-4">
+                    Total Coins to Hedge: 
+                    <span data-ng-bind="strategy.totalCoins"></span> <span class="glyphicon glyphicon-bitcoin"></span>
+                </div>
+                
+                <div class="columns col-lg-4">
+                    Max. Buy Price: 
+                    <span data-ng-bind="strategy.maxBuyPrice"></span> <span class="glyphicon glyphicon-usd"></span>
+                </div>
+                
+                <div class="columns col-lg-4">
+                    Insurance Coverage Rate:
+                    <span data-ng-bind="strategy.insuranceCoverage*100"></span>%
+                </div>
+            </div>
         </div>
-        
-        <div class="columns col-lg-6">
-            Currently Buying Insurance on: <span data-ng-bind="strategy.insuranceExchange.name"></span>
+    </div>
+    
+    <div class="row" data-ng-init="getExchangesList()">
+        <div class="panel panel-success">
+            <div class="panel-heading" ng-if="strategy.name == 'Long Biased Hedge'">Primary Exchanges (Long)</div>
+            <div class="panel-heading" ng-if="strategy.name == 'Short Biased Hedge'">Primary Exchanges (Short)</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <table width="100%">
+                    <tr>
+                        <th>Exchange</th>
+                        <th>Strategy Total Coins</th>
+                        <th>Exchange Weight</th>
+                        <th>Goal</th>
+                        <th>Position</th>
+                        <th>Currently Holding</th>
+                    </tr>
+                    <tr data-ng-repeat="exchange in exchanges">
+                        <td>
+                            {{exchange.name}} 
+                        </td>
+                        <td>{{strategy.totalCoins.toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span> </td>
+                        <td>{{strategy.primaryExchanges[$index].ratio * 100}} % </td>
+                        <td data-ng-init="strategy.primaryExchanges[$index].exchange = exchange._id">
+                            {{(strategy.totalCoins * strategy.primaryExchanges[$index].ratio).toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span>
+                        </td>
+                        <td> <div data-ng-if="strategy.name == 'Long Biased Hedge'">LONG</div> <div data-ng-if="strategy.name == 'Short Biased Hedge'">SHORT</div> </td>
+
+                        <td> 
+                            <div data-ng-if="strategy.name == 'Long Biased Hedge'" data-ng-init="getCurrentHolding(strategy.primaryExchanges[$index], 'long')"> {{ holding }} <span class="glyphicon glyphicon-bitcoin"></div> 
+                            <div data-ng-if="strategy.name == 'Short Biased Hedge'" data-ng-init="getCurrentHolding(strategy.primaryExchanges[$index], 'short')"> {{ holding }} <span class="glyphicon glyphicon-bitcoin"></div> 
+                        </td>
+                    </tr>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
     
     <div class="row">
-        <div class="columns col-lg-4">
-            Total Coins to Hedge: 
-            <span data-ng-bind="strategy.totalCoins"></span> <span class="glyphicon glyphicon-bitcoin"></span>
-        </div>
-        
-        <div class="columns col-lg-4">
-            Max. Buy Price: 
-            <span data-ng-bind="strategy.maxBuyPrice"></span> <span class="glyphicon glyphicon-usd"></span>
-        </div>
-        
-        <div class="columns col-lg-4">
-            Insurance Coverage Rate:
-            <span data-ng-bind="strategy.insuranceCoverage*100"></span>%
+        <div class="panel panel-warning">
+            <div class="panel-heading" ng-if="strategy.name == 'Long Biased Hedge'">Insurance Exchanges (Short)</div>
+            <div class="panel-heading" ng-if="strategy.name == 'Short Biased Hedge'">Insurance Exchanges (Long)</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <table width="100%">
+                        <tr>
+                            <th>Exchange</th>
+                            <th>Insurance Total Coins</th>
+                            <th>Exchange Weight</th>
+                            <th>Goal</th>
+                            <th>Position</th>
+                            <th>Currently Holding</th>
+                        </tr>
+                        <tr data-ng-repeat="exchange in exchanges">
+                            <td> {{exchange.name}} </td>
+                            <td> {{(strategy.totalCoins * strategy.insuranceCoverage).toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span> </td>
+                            <td> {{strategy.insuranceExchanges[$index].ratio * 100}} %</td>
+                            <td data-ng-init="strategy.insuranceExchanges[$index].exchange = exchange._id">
+                                {{(strategy.totalCoins * strategy.insuranceCoverage *  strategy.insuranceExchanges[$index].ratio).toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span>
+                            </td>
+                            <td> <div data-ng-if="strategy.name == 'Long Biased Hedge'">SHORT</div> <div data-ng-if="strategy.name == 'Short Biased Hedge'">LONG</div> </td>
+                    
+                            <td> 
+                                <div data-ng-if="strategy.name == 'Long Biased Hedge'" data-ng-init="getCurrentHolding(strategy.primaryExchanges[$index], 'short')"> {{ holding }} <span class="glyphicon glyphicon-bitcoin"></div> 
+                                <div data-ng-if="strategy.name == 'Short Biased Hedge'" data-ng-init="getCurrentHolding(strategy.primaryExchanges[$index], 'long')"> {{ holding }} <span class="glyphicon glyphicon-bitcoin"></div> 
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
     
     <div class="row">
         <h3>Details:</h3>
+        <div class="well">
+            Load Trades based on Strategy Here.
+        </div>
     </div>
     
     

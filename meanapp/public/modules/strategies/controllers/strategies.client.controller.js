@@ -75,6 +75,26 @@ angular.module('strategies').controller('StrategiesController', ['$scope', '$htt
                     $scope.exchanges = exchanges;
                 });
         };
+        
+        $scope.getCurrentHolding = function(exchange, position) {
+            console.log("Checking %s for %s", position, exchange.exchange);
+            
+            
+            $http.get('exchanges/' + exchange.exchange + '/getCurrentHolding')
+                .success(function (holding)  {
+                    console.log("SUCCESS");
+                    if (position === 'long') {
+                        $scope.holding = holding.long;
+                    } else if (position === 'short') {
+                        $scope.holding = holding.short;
+                    }
+                })
+                .error(function (err) {
+                    console.log("ERROR: " + err);
+                });
+            
+            $scope.holding = "ERROR";
+        };
 	}
 ]);
 
