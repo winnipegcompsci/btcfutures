@@ -62,9 +62,11 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                     var thisName = result[i].name.toLowerCase().replace(" ", "");
                                        
                     if(thisName === 'okcoin') {
-                        $scope.exchanges[i].logo_url = "/img/okcoin.png"
+                        $scope.exchanges[i].logo_url = "/img/okcoin.png";
                     } else if (thisName === '796' || thisName === 'futures796') {
-                        $scope.exchanges[i].logo_url = "/img/796.jpg"
+                        $scope.exchanges[i].logo_url = "/img/796.jpg";
+                    } else if (thisName === 'bitvc') {
+                        $scope.exchanges[i].logo_url = '/img/bitvc.png';                        
                     } else {
                         console.log("Exchange: " + thisName + " -- has no logo on record");
                     }

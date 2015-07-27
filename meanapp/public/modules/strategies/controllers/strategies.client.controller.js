@@ -76,24 +76,23 @@ angular.module('strategies').controller('StrategiesController', ['$scope', '$htt
                 });
         };
         
-        $scope.getCurrentHolding = function(exchange, position) {
-            console.log("Checking %s for %s", position, exchange.exchange);
-            
-            
+        $scope.getCurrentHolding = function(exchange, position, $index) {
             $http.get('exchanges/' + exchange.exchange + '/getCurrentHolding')
                 .success(function (holding)  {
-                    console.log("SUCCESS");
+                   
                     if (position === 'long') {
-                        $scope.holding = holding.long;
+                        $scope.strategy.primaryExchanges[$index].holding_long = holding.long;
                     } else if (position === 'short') {
-                        $scope.holding = holding.short;
+                        $scope.strategy.primaryExchanges[$index].holding_short = holding.short;
+                    } else {
+                        console.log("Position: " + position + " can not be found");
                     }
                 })
                 .error(function (err) {
                     console.log("ERROR: " + err);
                 });
             
-            $scope.holding = "ERROR";
+            // $scope.holding = "ERROR";
         };
 	}
 ]);

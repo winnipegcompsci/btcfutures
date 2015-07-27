@@ -8,6 +8,7 @@ var mongoose = require('mongoose'),
 	Exchange = mongoose.model('Exchange'),
 	OKCoin  = require('okcoin'),
 	Futures796 = require('futures796'),
+    BitVC = require('bitvc'),
 	_ = require('lodash');
 
 	
@@ -16,6 +17,8 @@ var okcoin_private = new OKCoin();
 
 var futures796_public = new Futures796();
 var futures796_private = new Futures796();
+
+var bitvc_public = new BitVC();
 /**
  * Create a Exchange
  */
@@ -134,6 +137,25 @@ exports.getCurrentPrice = function(req, res) {
             
             return res.send(ticker_resp.ticker);
         });
+    } else if (thisName === 'bitvc') {
+        bitvc_public.getTicker(function(err, ticker_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            } 
+
+            bitvc_public.getExchangeRate(function(err, exchange_rate) {
+                ticker_resp.last = ticker_resp.last / exchange_rate.rate;
+                ticker_resp.high = ticker_resp.high / exchange_rate.rate;
+                ticker_resp.low = ticker_resp.low / exchange_rate.rate;
+                ticker_resp.buy = ticker_resp.buy / exchange_rate.rate;
+                ticker_resp.sell = ticker_resp.sell / exchange_rate.rate;
+                
+                return res.send(ticker_resp);
+            });
+            
+            
+            
+        });
     } else {
         res.status(500).send('ERROR: ' + thisName + ' Function GetCurrentPrice() -- Not Found');
     }
@@ -226,15 +248,58 @@ exports.getCurrentHolding = function(req, res) {
     var thisName = req.exchange.name.toLowerCase().replace(' ', '');
     
     if(thisName === 'okcoin') {
-        return {
-            'long': 10,
-            'short': 5
-        };
-    } else if (thisName === '796' || thisName === 'futures796') {
-        return {
-            'long': 8,
-            'short': 15
-        }
+        okcoin_private = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        okcoin_private.getFixedFuturePositions(function(err, pos_resp) {
+            if(err) {
+                res.send(err);
+            } else {
+                var thisLongAmount = 0;
+                var thisShortAmount = 0;
+                
+                for(var i = 0; i < pos_resp.holding.length; i++) {
+                    thisLongAmount += pos_resp.holding[i]['buy_amount'];
+                    thisShortAmount += pos_resp.holding[i]['sell_amount'];
+                }
+                
+                res.send({
+                   'long': thisLongAmount,
+                   'short': thisShortAmount
+                });
+            }
+        }, 'btc_usd', 'quarter', 1);
+        
+    } else if (thisName === '796' || thisName === 'futures796') {      
+            
+        futures796_private = new Futures796(req.exchange.apikey, req.exchange.secretkey);
+        futures796_private.getPositions(function(err, pos_resp) {
+            
+            var thisLongAmount = 0;
+            var thisShortAmount = 0;
+            
+            var $STRING = '10';
+            
+            if(pos_resp.data.A) {
+                thisLongAmount = pos_resp.data.A.buy.$STRING.total;
+            }
+            
+            if(pos_resp.data.B) {
+                thisShortAmount = pos_resp.data.B.buy.$STRING.total;
+            }
+            
+            res.send({
+                'long': thisLongAmount,
+                'short': thisShortAmount
+            });
+
+        });
+        
+    } else if (thisName === 'bitvc') {
+        res.send({
+            'long': 0,
+            'short': 0
+        });
+        
+        
     } else {
        res.status(500).send('ERROR: ' + thisName + ' Function getCurrentHolding() -- Not Found');
     }
