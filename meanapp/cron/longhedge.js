@@ -62,9 +62,6 @@ var INITIAL_PROFITLOSS = 0;
 var CURRENT_PROFITLOSS = 0;
 
 function getCurrentValues() {
-    // TOTAL_CURRENT_LONG && TOTAL_CURRENT_SHORT && OKCOIN_AVERAGE_COST
-    // OKCOIN_LTP
-    
     publicClient.getFutureTicker(function(err, ticker_resp) {
         TOTAL_CURRENT_LONG = 0;
         TOTAL_CURRENT_SHORT = 0;

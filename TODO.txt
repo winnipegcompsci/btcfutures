@@ -1,0 +1,13 @@
+TODO LIST.
+
+#. Cron Scripts 
+        -> Price Fetcher.
+        -> Update Formula for Calculating Spreads
+
+#. BitVC Module
+        -> Finish Function mapping
+        
+#. 796 Module
+        -> POST encryption
+        
+        
