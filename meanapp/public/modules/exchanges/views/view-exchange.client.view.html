@@ -9,6 +9,7 @@
         </span>
         <br />
 	</div>
+        
     <div class="row">
         <div class="panel panel-info">
             <div class="panel-heading">Current Contracts</div>
@@ -34,12 +35,12 @@
         </div>           
         <br />
         
-        <!--
-        <div class="well">
+       
+        <div class="well" data-ng-init="getPricesFromDB()">
             <div id="chart" style="width:100%; height:300px;"></div>
             {{chartData}}
         </div>
-        -->
+        
         
         <div data-ng-init="getTrades()">
             <h3> Recent Trades on {{exchange.name}} </h3>
@@ -85,28 +86,37 @@
 </section>
 
 <script type="text/javascript-lazy">
+function updateChart() {
+    alert("Updating Chart");
+};
+
 $(document).ready(function(){
-    $(function () {
-        $('#chart').highcharts({
-            chart: {
-                type: 'line'
-            },
-            title: {
-                text: 'Trades by Price'
-            },
-            xAxis: {
-                categories: '{{chartData.timestamps}}'         
-            },
-            yAxis: {
+    $(function drawChart() {
+        if(typeof chartData !== 'undefined') {
+            $('#chart').highcharts({
+                chart: {
+                    type: 'line'
+                },
                 title: {
-                    text: 'Price'
-                }
-            },
-            series: [{
-                name: 'Price',
-                data: '{{chartData.prices}}'
-            }]
-        });
+                    text: 'Exchange Price over Time'
+                },
+                xAxis: {
+                    categories: chartData.timestamps         
+                },
+                yAxis: {
+                    title: {
+                        text: 'Price'
+                    }
+                },
+                series: [{
+                    name: 'Price',
+                    data: chartData.prices
+                }]
+            });
+        } else {
+            console.log("Trying to draw chart again in 10 seconds");
+            setTimeout(drawChart, 3 * 1000);
+        }
     });
 });
 </script>

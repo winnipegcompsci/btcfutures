@@ -136,15 +136,6 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
             $http.get('exchanges/' + $stateParams.exchangeId + '/getTrades')
                 .success(function(data) {
                     $scope.trades = data;
-                    
-                    $scope.chartData = {
-                        timestamps: [],
-                        prices: []
-                    };
-                    for(var i = 0; i < data.length; i++) {
-                        $scope.chartData.timestamps.push(data[i].date_ms);
-                        $scope.chartData.prices.push(data[i].price);
-                    }
                 });
         };
         
@@ -153,7 +144,28 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                 .success(function(data) {
                     $scope.userinfo = data;
                 });
-        };	
+        };
+
+        $scope.getPricesFromDB = function(exchange_id) {
+            var thisID; 
+            
+            if(!$scope.chartData) {
+                $scope.chartData = [];
+            }
+            
+            if(exchange_id) {
+                thisID = exchange_id;
+            } else {
+                thisID = $stateParams.exchangeId;
+            }
+            
+            $stateParams.exchangeId;
+            $http.get('exchanges/' + thisID + '/getPricesFromDB')
+                .success(function(data) {
+                    $scope.chartData = data; 
+                });
+        };
+        
 	}
 ]);
 

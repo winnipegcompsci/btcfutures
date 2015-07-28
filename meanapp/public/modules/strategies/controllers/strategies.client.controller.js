@@ -102,7 +102,7 @@ angular.module('strategies').controller('StrategiesController', ['$scope', '$htt
 	}
 ]);
 
-angular.module('exchanges').directive('script', function() {
+angular.module('strategies').directive('script', function() {
     return {
         restrict: 'E',
         scope: true,

@@ -1,19 +1,47 @@
-<section data-ng-controller="PricesController" data-ng-init="find()">
-    <div class="page-header">
-        <h1>Prices</h1>
-    </div>
+<section data-ng-controller="ExchangesController" data-ng-init="find()">   
+    <h1>Exchanges </h1>
+    <div id="chart_container" style="height:400px"> </div>
+    
     <div class="list-group">
-        <a data-ng-repeat="price in prices" data-ng-href="#!/prices/{{price._id}}" class="list-group-item">
-			<small class="list-group-item-text">
-				Posted on
-				<span data-ng-bind="price.created | date:'medium'"></span>
-				by
-				<span data-ng-bind="price.user.displayName"></span>
-			</small>
-			<h4 class="list-group-item-heading" data-ng-bind="price.name"></h4>
-        </a>
+        <div data-ng-repeat="exchange in exchanges" data-ng-init="getPricesFromDB(exchange._id)">             
+            <div class="columns col-lg-4" data-ng-controller="PricesController" data-ng-init="find()">
+                <h4> {{ exchange.name }} - {{exchange._id}}</h4>
+                <div class="list-group">
+                    <div data-ng-repeat="price in prices" data-ng-if="price.exchange == exchange._id">
+                        {{price.price.toFixed(2)}}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="alert alert-warning text-center" data-ng-hide="!prices.$resolved || prices.length">
-    	No Prices yet, why don't you <a href="/#!/prices/create">create one</a>?
-    </div>
-</section>
+</div>
+
+
+<script type="text/javascript-lazy">
+$(function () {
+    $('#chart_container').highcharts({
+        title: {
+            text: 'Exchange Prices over Time'
+        },
+        xAxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        },
+        series: [{
+            data: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            step: 'okcoin',
+            name: 'OKCoin'
+        }, {
+            data: [5, 6, 7, 8, 7, 10, 11, 12, 13],
+            step: '796',
+            name: '796'
+        }, {
+            data: [9, 10, 11, 12, 9, 14, 15, 14, 17],
+            step: 'bitvc',
+            name: 'BitVC'
+        }]
+
+    });
+    
+    alert(chartData);
+});
+</script>

@@ -6,6 +6,7 @@
 var mongoose = require('mongoose'),
 	errorHandler = require('./errors.server.controller'),
 	Exchange = mongoose.model('Exchange'),
+    Price = mongoose.model('Price'),
 	OKCoin  = require('okcoin'),
 	Futures796 = require('futures796'),
     BitVC = require('bitvc'),
@@ -243,6 +244,23 @@ exports.getUserInfo = function(req, res) {
         res.status(500).send('ERROR: ' + thisName + ' Function GetUserInfo() -- Not Found');
     }
 };
+
+exports.getPricesFromDB = function(req, res) {
+    var exchange = req.exchange;
+    
+    Price.find({'exchange':exchange._id}, function(err, prices) {
+        var prices_arr = [];
+        var times_arr = [];
+        
+        for(var i = 0; i < prices.length; i++) {
+            prices_arr.push(prices[i].price)
+            times_arr.push(prices[i].timestamp);
+        }
+        res.send({'prices': prices_arr, 'timestamps': times_arr});
+    });
+    
+}
+
 
 exports.getCurrentHolding = function(req, res) {
     var thisName = req.exchange.name.toLowerCase().replace(' ', '');

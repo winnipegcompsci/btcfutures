@@ -46,8 +46,6 @@ function getPrices() {
     setTimeout(getPrices, TTL * 1000)
 }
 
-
-
 function getCurrentPrice(exchange) {
     var exchange_name = exchange.name;
     

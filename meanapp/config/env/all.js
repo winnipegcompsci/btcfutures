@@ -29,7 +29,9 @@ module.exports = {
 				'public/lib/angular-ui-utils/ui-utils.js',
 				'public/lib/angular-bootstrap/ui-bootstrap-tpls.js',
                 'public/lib/datatables/jquery-1.10.2.min.js',
-                'public/lib/datatables/jquery.dataTables.js'
+                'public/lib/datatables/jquery.dataTables.js',
+                'public/lib/highcharts/highcharts.js',
+                'public/lib/highcharts/highcharts.src.js'
 			]
 		},
 		css: [

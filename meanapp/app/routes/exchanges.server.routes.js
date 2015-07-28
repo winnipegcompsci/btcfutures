@@ -37,6 +37,9 @@ module.exports = function(app) {
     app.route('/exchanges/:exchangeId/getCurrentHolding')
         .get(exchanges.getCurrentHolding);
 
+    app.route('/exchanges/:exchangeId/getPricesFromDB')
+        .get(exchanges.getPricesFromDB);
+        
 	// Finish by binding the Exchange middleware
 	app.param('exchangeId', exchanges.exchangeByID);
 };
