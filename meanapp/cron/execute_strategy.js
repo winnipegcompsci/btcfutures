@@ -47,15 +47,36 @@ function executeStrategy() {
             }
         }
     });
+    
+    setTimeout(executeStrategy, TTL * 1000)
 }
 
 function doLongBiasedHedge(strategy) {
+    // #### Get All Exchange Prices
+    // #### Calculate Spreads and Average Spreads (3 hours)
+    // #### Get Amount Held at all Exchanges
+
+    /*
+        For each primary Exchange:
+            if(passesRequirements) {
+                placeBuyOrder(strategy.totalCoins * primaryExchange.rate);
+            }
+            
+            if(passesRequirements) {
+                placeSellOrder();
+            }
+            
+        For each insurance Exchange 
+            if(passesRequirements) {
+                placeBuyOrder(strategy.totalCoins * strategy.insuranceRate * insuranceExchange.rate);
+            }
+            
+            if(passesRequirements) {
+                placeSellorder();
+            }
+    */
+    
     console.log("Using Strategy: " + strategy.name);
-    
-    // LOAD Exchanges
-    // LOAD Prices and store in Exchanges.prices as array [ timestamp, price].
-    
-    
     
     var promise = Exchanges.find({}).exec();
     promise.then(function(exchanges) {
@@ -64,20 +85,32 @@ function doLongBiasedHedge(strategy) {
         }
     
         for(var i = 0; i < exchanges.length; i++) {
-            console.log("Searching for: " + exchanges[i].name + " prices");
             var promise_2 = Prices.find({exchange: exchanges[i]._id}).exec();
-            promise_2.then(function (prices) {       
-                for(var j = 0; j < prices.length; j++) {
-                    console.log("Found Price: " + prices[j].price);
-                }
+            promise_2.then(function (prices) {
+                
+                Exchanges.find({}, function(err, exchanges) {
+                    for(var i = 0; i < exchanges.length; i++) {
+                        var sum = 0;
+                        var lastPrice = 0;
+                
+                        for(var j = 0; j < prices.length; j++) {
+                            lastPrice = prices[j].price;
+                    
+                            sum += prices[j].price;
+                    
+                            if(j == prices.length - 1) {
+                                console.log(exchanges[i].name + ":: last price was: " + lastPrice);
+                                console.log(exchanges[i].name + ":: average price was: " + sum / prices.length);
+                            }
+                        }
+                    }
+                });
+
             });
         }
         
         
     });
-    
-    
-    
 }
 
 function doShortBiasedHedge(strategy) {
