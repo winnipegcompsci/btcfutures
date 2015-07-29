@@ -82,13 +82,11 @@ function getVariables() {
         executeStrategy(strategy, exchanges, prices);
     });
     
-    // setTimeout(getVariables, TTL * 1000)     // Repeat every TTL seconds.
+    setTimeout(getVariables, TTL * 1000)     // Repeat every TTL seconds.
 }
 
 function executeStrategy(strategy, exchanges, prices) {
-    if(strategy && exchanges && prices) {
-        console.log("\nExecuting %s", strategy.name);
-        
+    if(strategy && exchanges && prices) {        
         if(strategy.name.toLowerCase() === 'long biased hedge') {
             prepLongBiasedHedge(strategy, exchanges, prices);
         }
@@ -115,8 +113,7 @@ function prepLongBiasedHedge(strategy, exchanges, prices ) {
                 strategy.insuranceExchanges[i].lastPrice = lastPrice;
                 sum += prices[j].price;
                 numPrices++;
-            }
-           
+            }  
         }
                 
         doLongBiasedHedge(strategy);
@@ -209,7 +206,7 @@ function prepLongBiasedHedge(strategy, exchanges, prices ) {
             var privateClient = new BitVC(strategy.primaryExchanges[i].exchange.apikey, strategy.primaryExchanges[i].exchange.secretkey);
             
             privateClient.getCurrentOrders(function(err, pos_resp) {
-                if(pos_resp.orders) {
+                if(typeof pos_resp !== 'undefined') {
                     for(var j = 0; j < pos_resp.orders.length; i++) {
                         amount = pos_resp.orders[j].order_amount;
                         
@@ -229,9 +226,9 @@ function prepLongBiasedHedge(strategy, exchanges, prices ) {
     }
 }
 
-function doLongBiasedHedge(strategy) {
+function doLongBiasedHedge(strategy) {    
     var pass = true;
-    
+        
     for(var i = 0; i < strategy.primaryExchanges.length; i++) {
         // Check Primary Exchange Variables
         if(!strategy.primaryExchanges[i].lastPrice)             { pass = false; }
@@ -251,6 +248,8 @@ function doLongBiasedHedge(strategy) {
     if(!pass) {
         return; 
     } else {
+        console.log("Executing %s", strategy.name);
+        
         console.log("Total Coins: %s BTC | Max Buy Price: $ %s USD | Insurance Coverage: %s %",
             strategy.totalCoins, strategy.maxBuyPrice, strategy.insuranceCoverage*100);
         console.log("--------------------------------------------------------------------------------");
@@ -280,45 +279,58 @@ function doLongBiasedHedge(strategy) {
         
         
         for(var i = 0; i < strategy.primaryExchanges.length; i++) {
-            console.log("\nExchange: " + strategy.primaryExchanges[i].exchange.name +
-                "|| Last Price (Current): %s", Number(strategy.primaryExchanges[i].lastPrice).toFixed(2) );
-            console.log("Current Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].currentSpread).toFixed(2) );
-            console.log("3Hr Avg Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].averageSpread).toFixed(2) ); 
-        
-            // For each Primary Exchange            
-            /*
-                IF currently holding is < (strategy.totalCoins * strategy.primaryExchanges[i].ratio) &&
-                    strategy.primaryExchanges[i].lastPrice < strategy.maxBuyPrice &&
-                    strategy.primaryExchanges[i].currentSpread < strategy.primaryExchanges[i].averageSpread)
-                    
-                    place Buy Order [LONG].
-                    
-                // Implement Sell Logic.
-            */
+            // console.log("\nExchange: " + strategy.primaryExchanges[i].exchange.name +" || Last Price (Current): %s", Number(strategy.primaryExchanges[i].lastPrice).toFixed(2) );
+            // console.log("Current Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].currentSpread).toFixed(2) );
+            // console.log("3Hr Avg Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].averageSpread).toFixed(2) ); 
+            // console.log("Currently Holding [LONG]: %s (average price paid: %s)", Number(strategy.primaryExchanges[i].currentlyHolding).toFixed(2), Number(strategy.primaryExchanges[i].averageBuyPrice).toFixed(2));
+            // console.log("Currently Holding [SHORT]: %s (average price paid: %s)", Number(strategy.insuranceExchanges[i].currentlyHolding).toFixed(2), Number(strategy.insuranceExchanges[i].averageBuyPrice).toFixed(2));
+                        
+            // Strategy LOGIC
+            if((strategy.primaryExchanges[i].currentlyHolding < (strategy.totalCoins * strategy.primaryExchanges[i].ratio)) &&
+                strategy.primaryExchanges[i].lastPrice < strategy.maxBuyPrice && 
+                Math.abs(strategy.primaryExchanges[i].currentSpread) < Math.abs(strategy.primaryExchanges[i].averageSpread)) {
             
+                // Buy out of Total.
+                console.log("Buy %s BTC LONG from %s @ $ %s (holding %s / %s BTC)", 
+                    (strategy.totalCoins / 10) * strategy.primaryExchanges[i].ratio,
+                    strategy.primaryExchanges[i].exchange.name, 
+                    strategy.primaryExchanges[i].lastPrice,
+                    ((strategy.totalCoins / 10) * strategy.primaryExchanges[i].ratio) + strategy.primaryExchanges[i].currentlyHolding,
+                    strategy.totalCoins * strategy.primaryExchanges[i].ratio
+                );
+            }
+            
+                // Implement Primary (LONG) Sell Logic
+            
+            if((strategy.insuranceExchanges[i].currentlyHolding < (strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)) &&
+                strategy.insuranceExchanges[i].lastPrice < strategy.maxBuyPrice &&
+                Math.abs(strategy.insuranceExchanges[i].currentSpread) < Math.abs(strategy.insuranceExchanges[i].averageSpread)) {
+            
+                // Buy out of Total.
+                console.log("Buy %s BTC Short from %s @ $ %s (holding %s / %s BTC)", 
+                    (strategy.totalCoins / 10) * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio,
+                    strategy.insuranceExchanges[i].exchange.name, 
+                    strategy.insuranceExchanges[i].lastPrice,
+                    (strategy.totalCoins / 10) * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio + strategy.insuranceExchanges[i].currentlyHolding,
+                    strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio
+                );
+            }
         
-            // For each Insurance Exchange
-            /*
-                If(currently holding is < (strategy.totalCoins * strategy.insuranceCoverage * strategy.primaryExchanges[i].ratio) &&
-                    strategy.insuranceExchanges[i].lastPrice < strategy.maxBuyPrice && 
-                    strategy.insuranceExchanges[i].currentSpread < strategy.insuranceExchanges[i].averageSpread)
-                    
-                    place Buy Order [SHORT].
-                    
-                // Implement Sell Logic.            
-            */
-        
+                // Implement Insurance (Short) Sell Logic.                    
         }
     }
-        
-        
-        
-    
 }
 
 function prepShortBiasedHedge(strategy, exchanges, prices) {
     console.log("Using Strategy: " + strategy.name);
+    
+    // Copy and Invert prepLongBiasedHedge
 }
+
+function doShortBiasedHedge(strategy) {
+    // Implement Short Biased Hedge.
+}
+
 
 function printData(data) {
     console.log("Data: " + util.inspect(data) );
