@@ -82,7 +82,7 @@ function getVariables() {
         executeStrategy(strategy, exchanges, prices);
     });
     
-    setTimeout(getVariables, TTL * 1000)     // Repeat every TTL seconds.
+    // setTimeout(getVariables, TTL * 1000)     // Repeat every TTL seconds.
 }
 
 function executeStrategy(strategy, exchanges, prices) {
@@ -90,10 +90,10 @@ function executeStrategy(strategy, exchanges, prices) {
         console.log("\nExecuting %s", strategy.name);
         
         if(strategy.name.toLowerCase() === 'long biased hedge') {
-            doLongBiasedHedge(strategy, exchanges, prices);
+            prepLongBiasedHedge(strategy, exchanges, prices);
         }
         if(strategy.name.toLowerCase() === 'short biased hedge') {
-            doShortBiasedHedge(strategy, exchanges, prices);
+            prepLongBiasedHedge(strategy, exchanges, prices);
         }
     
     } else {
@@ -101,33 +101,8 @@ function executeStrategy(strategy, exchanges, prices) {
     }
 }
 
-function doLongBiasedHedge(strategy, exchanges, prices ) {
-    console.log("Total Coins: %s BTC | Max Buy Price: $ %s USD | Insurance Coverage: %s %",
-        strategy.totalCoins, strategy.maxBuyPrice, strategy.insuranceCoverage*100);
-    console.log("--------------------------------------------------------------------------------");
-    // Show Exchanges and Amounts we are going long
-    for(var i = 0; i < strategy.primaryExchanges.length; i++) {
-        if(strategy.primaryExchanges[i].ratio > 0) {
-            console.log("%s @ %s % = %s BTC [LONG]", 
-                strategy.primaryExchanges[i].exchange.name, 
-                strategy.primaryExchanges[i].ratio*100, 
-                strategy.totalCoins * strategy.primaryExchanges[i].ratio
-            );
-        }
-    }
-    // Show exchanges and amounts we are going short
-    console.log("--------------------------------------------------------------------------------");
-    for(var i = 0; i < strategy.insuranceExchanges.length; i++) {
-        if(strategy.insuranceExchanges[i].ratio > 0) {            
-            console.log("%s @ %s % = %s BTC [SHORT]", 
-                strategy.insuranceExchanges[i].exchange.name, 
-                strategy.insuranceExchanges[i].ratio*100, 
-                strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio
-            );
-        }
-    }
-    console.log("--------------------------------------------------------------------------------");
-    // Buy Long on Each Primary Exchange
+function prepLongBiasedHedge(strategy, exchanges, prices ) {    
+    //  Get LTP for each exchange.
     for(var i = 0; i < strategy.primaryExchanges.length; i++) {
         var sum = 0;
         var numPrices = 0;
@@ -137,17 +112,14 @@ function doLongBiasedHedge(strategy, exchanges, prices ) {
             if(prices[j].exchange.toString() == strategy.primaryExchanges[i].exchange._id.toString()) {
                 lastPrice = prices[j].price;
                 strategy.primaryExchanges[i].lastPrice = lastPrice;
+                strategy.insuranceExchanges[i].lastPrice = lastPrice;
                 sum += prices[j].price;
                 numPrices++;
             }
            
         }
-        
-        console.log("The last price on %s was: %s (3hr average: %s)", 
-            strategy.primaryExchanges[i].exchange.name, 
-            Number(lastPrice).toFixed(2), 
-            Number(sum/numPrices).toFixed(2)
-        );
+                
+        doLongBiasedHedge(strategy);
     }
     
     // Calculate Current Spreads.
@@ -163,15 +135,12 @@ function doLongBiasedHedge(strategy, exchanges, prices ) {
         }
         
         strategy.primaryExchanges[i].currentSpread = sum/numPrices;
+        strategy.insuranceExchanges[i].currentSpread = sum/numPrices;
         
-        console.log("The current spread [averaged across all exchanges] for %s is: %s",
-            strategy.primaryExchanges[i].exchange.name,
-            Number(sum/numPrices).toFixed(2)
-        );
+        doLongBiasedHedge(strategy);
     } // end of current spread calculations.
     
     // Calculate Average Spreads.
-    
     for(var i = 0; i < strategy.primaryExchanges.length; i++) {
         var sum = 0;
         var numPrices = 0;
@@ -184,16 +153,170 @@ function doLongBiasedHedge(strategy, exchanges, prices ) {
         }
         
         strategy.primaryExchanges[i].averageSpread = sum / numPrices;
+        strategy.insuranceExchanges[i].averageSpread = sum / numPrices;
         
-        console.log("The average spread [last 3 hours across all exchanges] for %s is: %s",
-            strategy.primaryExchanges[i].exchange.name,
-            strategy.primaryExchanges[i].averageSpread
-        );
+        doLongBiasedHedge(strategy);
         
     } // end average spread calculations
+    
+    
+    // Calculate Currently Holding
+    for(var i = 0; i < strategy.primaryExchanges.length; i++) {
+        strategy.primaryExchanges[i].currentlyHolding = 0;
+        strategy.primaryExchanges[i].averageBuyPrice = 0;
+
+        strategy.insuranceExchanges[i].currentlyHolding = 0;
+        strategy.insuranceExchanges[i].averageBuyPrice = 0;
+        
+        if(strategy.primaryExchanges[i].exchange.name.toLowerCase() == "okcoin") {
+
+            var privateClient = new OKCoin(strategy.primaryExchanges[i].exchange.apikey, strategy.primaryExchanges[i].exchange.secretkey);
+            
+            privateClient.getFixedFuturePositions(function (err, pos_resp) {
+                if(pos_resp.result) {
+                    for(var j = 0; j < pos_resp.holding.length; j++) {
+                        strategy.primaryExchanges[i].currentlyHolding += pos_resp.holding[j].buy_amount;
+                        strategy.insuranceExchanges[i].currentlyHolding += pos_resp.holding[j].sell_amount;
+                        
+                        strategy.primaryExchanges[i].averageBuyPrice = pos_resp.holding[i].buy_price_avg;
+                        strategy.insuranceExchanges[i].averageBuyPrice = pos_resp.holding[i].sell_price_avg;
+                    }
+                }
+            }, 'btc_usd', 'quarter', 1);
+
+        } else if (strategy.primaryExchanges[i].exchange.name.toLowerCase() == "796") {
+            var privateClient = new Futures796(strategy.primaryExchanges[i].exchange.apikey, strategy.primaryExchanges[i].exchange.secretkey);
+            
+            privateClient.getPositions(function(err, pos_resp) {
+                if(pos_resp.msg == "success") {
+                    var $STRING = '10';
+                    
+                    for(var j = 0; j < pos_resp.data.length; j++) {
+                        strategy.primaryExchanges[i].currentlyHolding += 
+                            pos_resp.data[j].A.buy.$STRING.total;
+                        strategy.insuranceExchanges[i].currentlyHolding += 
+                            pos_resp.data[j].B.buy.$STRING.total;
+                        
+                        strategy.primaryExchanges[i].averageBuyPrice = 
+                            pos_resp.data[j].A.buy.$STRING.avg_price;
+                        strategy.insuranceExchanges[i].averageBuyPrice = 
+                            pos_resp.data[j].B.buy.$STRING.avg_price;
+                    }
+                }                
+            });
+
+        } else if (strategy.primaryExchanges[i].exchange.name.toLowerCase() == 'bitvc') {
+            var privateClient = new BitVC(strategy.primaryExchanges[i].exchange.apikey, strategy.primaryExchanges[i].exchange.secretkey);
+            
+            privateClient.getCurrentOrders(function(err, pos_resp) {
+                if(pos_resp.orders) {
+                    for(var j = 0; j < pos_resp.orders.length; i++) {
+                        amount = pos_resp.orders[j].order_amount;
+                        
+                        if(pos_resp.orders[j].type == 1) {
+                            strategy.primaryExchanges[i].currentlyHolding += amount;
+                        }
+                        
+                        if(pos_resp.orders[j].type == 2) {
+                            strategy.insuranceExchanges[i].currentlyHolding += amount;
+                        }
+                    }
+                }
+            });
+        }
+        
+        doLongBiasedHedge(strategy);
+    }
 }
 
-function doShortBiasedHedge(strategy, exchanges, prices) {
+function doLongBiasedHedge(strategy) {
+    var pass = true;
+    
+    for(var i = 0; i < strategy.primaryExchanges.length; i++) {
+        // Check Primary Exchange Variables
+        if(!strategy.primaryExchanges[i].lastPrice)             { pass = false; }
+        if(!strategy.primaryExchanges[i].currentSpread)         { pass = false; }
+        if(!strategy.primaryExchanges[i].averageSpread)         { pass = false; }
+        if(typeof strategy.primaryExchanges[i].currentlyHolding == 'undefined')      { pass = false; }
+        if(typeof strategy.primaryExchanges[i].averageBuyPrice == 'undefined')       { pass = false; }
+        
+        // Check Insurance Exchange Variables
+        if(!strategy.insuranceExchanges[i].lastPrice)           { pass = false; }
+        if(!strategy.insuranceExchanges[i].currentSpread)       { pass = false; }
+        if(!strategy.insuranceExchanges[i].averageSpread)       { pass = false; }
+        if(typeof strategy.insuranceExchanges[i].currentlyHolding == 'undefined')    { pass = false; }
+        if(typeof strategy.insuranceExchanges[i].averageBuyPrice == 'undefined')     { pass = false; }
+    }
+    
+    if(!pass) {
+        return; 
+    } else {
+        console.log("Total Coins: %s BTC | Max Buy Price: $ %s USD | Insurance Coverage: %s %",
+            strategy.totalCoins, strategy.maxBuyPrice, strategy.insuranceCoverage*100);
+        console.log("--------------------------------------------------------------------------------");
+        
+        // Show Exchanges and Amounts we are going long
+        for(var i = 0; i < strategy.primaryExchanges.length; i++) {
+            if(strategy.primaryExchanges[i].ratio > 0) {
+                console.log("%s @ %s % = %s BTC [LONG]", 
+                    strategy.primaryExchanges[i].exchange.name, 
+                    strategy.primaryExchanges[i].ratio*100, 
+                    strategy.totalCoins * strategy.primaryExchanges[i].ratio
+                );
+            }
+        }
+        // Show exchanges and amounts we are going short
+        console.log("--------------------------------------------------------------------------------");
+        for(var i = 0; i < strategy.insuranceExchanges.length; i++) {
+            if(strategy.insuranceExchanges[i].ratio > 0) {            
+                console.log("%s @ %s % = %s BTC [SHORT]", 
+                    strategy.insuranceExchanges[i].exchange.name, 
+                    strategy.insuranceExchanges[i].ratio*100, 
+                    strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio
+                );
+            }
+        }
+        console.log("--------------------------------------------------------------------------------");
+        
+        
+        for(var i = 0; i < strategy.primaryExchanges.length; i++) {
+            console.log("\nExchange: " + strategy.primaryExchanges[i].exchange.name +
+                "|| Last Price (Current): %s", Number(strategy.primaryExchanges[i].lastPrice).toFixed(2) );
+            console.log("Current Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].currentSpread).toFixed(2) );
+            console.log("3Hr Avg Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].averageSpread).toFixed(2) ); 
+        
+            // For each Primary Exchange            
+            /*
+                IF currently holding is < (strategy.totalCoins * strategy.primaryExchanges[i].ratio) &&
+                    strategy.primaryExchanges[i].lastPrice < strategy.maxBuyPrice &&
+                    strategy.primaryExchanges[i].currentSpread < strategy.primaryExchanges[i].averageSpread)
+                    
+                    place Buy Order [LONG].
+                    
+                // Implement Sell Logic.
+            */
+            
+        
+            // For each Insurance Exchange
+            /*
+                If(currently holding is < (strategy.totalCoins * strategy.insuranceCoverage * strategy.primaryExchanges[i].ratio) &&
+                    strategy.insuranceExchanges[i].lastPrice < strategy.maxBuyPrice && 
+                    strategy.insuranceExchanges[i].currentSpread < strategy.insuranceExchanges[i].averageSpread)
+                    
+                    place Buy Order [SHORT].
+                    
+                // Implement Sell Logic.            
+            */
+        
+        }
+    }
+        
+        
+        
+    
+}
+
+function prepShortBiasedHedge(strategy, exchanges, prices) {
     console.log("Using Strategy: " + strategy.name);
 }
 
