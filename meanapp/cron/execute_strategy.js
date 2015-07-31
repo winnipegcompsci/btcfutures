@@ -236,7 +236,7 @@ function prepLongBiasedHedge(strategy, exchanges, prices ) {
                 var sumBuyShort = 0;
                 var numBuyLong = 0;
                 var numBuyShort = 0;
-                
+                console.log("DEBUGGING: ");
                 for(var j = 0; j < process.env.TRADES[strategy.primaryExchanges[i].exchange._id].length; j++) {
                     if(process.env.TRADES[strategy.primaryExchanges[i].exchange._id][j].bias == 'LONG') {
                         if(process.env.TRADES[strategy.primaryExchanges[i].exchange._id][j].type == "BUY") {
