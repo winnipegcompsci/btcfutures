@@ -31,6 +31,10 @@ var TradeSchema = new Schema({
         type: String,
         default: ''
     },
+    bias: {
+        type: String,
+        default: '',
+    },
     lever_rate: {
         type: String,
         default: ''
@@ -46,6 +50,10 @@ var TradeSchema = new Schema({
     status: {
         type: Number, 
         default: 0,
+    },
+    strategy: {
+        type: Schema.ObjectId,
+        ref: 'Strategy',
     },
 	user: {
 		type: Schema.ObjectId,
