@@ -1,7 +1,7 @@
 'use strict';
 
 // Exchanges controller
-angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootScope', '$stateParams', '$location', '$http', 'Authentication', 'Exchanges',
+angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootScope', '$stateParams', '$location', '$http', 'Authentication', 'Exchanges', 
 	function($scope, $rootScope, $stateParams, $location, $http, Authentication, Exchanges) {
 		$scope.authentication = Authentication;
 
@@ -166,6 +166,10 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                 });
         };
         
+        $scope.getClosestPrice = function(exchange_id, dateItem) {
+            console.log("Looking for prices on: " + exchange_id);           
+            console.log("Looking for price closest to: " + dateItem);
+        };
 	}
 ]);
 

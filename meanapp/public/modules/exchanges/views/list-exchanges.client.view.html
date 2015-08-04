@@ -2,6 +2,7 @@
     <div class="page-header">
         <h1>Exchanges</h1>
     </div>
+
     <div class="list-group">
         <a data-ng-repeat="exchange in exchanges" data-ng-href="#!/exchanges/{{exchange._id}}" class="list-group-item">
             <span style="padding-right: 15px" class="pull-left"><img height="45px" width="120px" ng-src="{{exchange.logo_url}}"></span>
@@ -20,4 +21,88 @@
     <div class="alert alert-warning text-center" data-ng-hide="!exchanges.$resolved || exchanges.length">
     	No Exchanges yet, why don't you <a href="/#!/exchanges/create">create one</a>?
     </div>
+</section>
+
+<section data-ng-controller="ExchangesController" data-ng-init="getExchangePricesForGraph()"> 
+    <div id="graph_container">
+    
+    </div>
+</section>
+
+<section data-ng-controller="ExchangesController" data-ng-init="find()">
+    <script type="text/javascript-lazy">
+    $(function () {
+        var endDate = new Date();
+        var startDate = new Date();
+        startDate.setDate(startDate.getDate() - 1);
+               
+        console.log("Starting at %s and going to %s",  startDate, endDate);
+        console.log("typeof(exchange_id): " + typeof '55a972e0fab6e8a40dd50f2e' );
+        console.log("typeof(getDates()): " + typeof getDates(startDate.getTime, endDate.getTime()));
+        
+        $('#graph_container').highcharts({
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: '24 Hour Price Trends'
+            },
+            subtitle: {
+                text: 'Last Traded Price by Exchange'
+            },
+            xAxis: {
+                categories: getDates(startDate.getTime(), endDate.getTime())
+            },
+            yAxis: {
+                title: {
+                    text: 'USD/BTC (per bitcoin)'
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            series: [{
+                name: 'OKCoin',
+                data: getPricesForDates('55a972e0fab6e8a40dd50f2e',     // Exchange ID 
+                    getDates( startDate.getTime(), endDate.getTime() ) 
+                )
+            }, {
+                name: '796',
+                data: getPricesForDates('55a97300fab6e8a40dd50f2f',     // Exchange ID
+                    getDates( startDate.getTime(), endDate.getTime() ) 
+                )
+            }, {
+                name: 'BitVC',
+                data: getPricesForDates('55b677f6cd06c6f815e00826',     // Exchange ID
+                    getDates( startDate.getTime(), endDate.getTime() ) 
+                )
+            }]
+        });
+    });
+
+    function getDates(startDate, endDate) {
+        var dateArray = new Array();
+        var currentDate = new Date(startDate).getTime();
+        while(currentDate <= endDate) {
+            dateArray.push( new Date(currentDate) );       
+            currentDate = currentDate + (2 * 3600 * 1000);
+        }
+        return dateArray;
+    };
+    
+    function getPricesForDates(exchange_id, dateArray) {
+        priceArray = [];
+                
+        for(var i = 0; i < dateArray.length; i++) {
+            priceArray.push(getClosestPrice(exchange_id, dateArray[i]));
+        }
+                       
+        return priceArray;
+    };   
+    </script>
 </section>
