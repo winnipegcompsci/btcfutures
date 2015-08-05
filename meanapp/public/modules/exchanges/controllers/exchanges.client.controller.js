@@ -166,9 +166,43 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                 });
         };
         
-        $scope.getClosestPrice = function(exchange_id, dateItem) {
-            console.log("Looking for prices on: " + exchange_id);           
-            console.log("Looking for price closest to: " + dateItem);
+        $scope.getGraphData = function() {
+            
+            Exchanges.query().$promise.then(function(results) {
+                var endDate = new Date();
+                var startDate = new Date();
+                startDate.setDate(startDate.getDate() - 1);
+                
+                $scope.graphData = [];
+                
+                for(var i = 0; i < results.length; i++) {
+                    var seriesDates = new Array();
+                    var seriesPrices = new Array();
+                    var seriesName = results[i].name;
+                    var currentDate = new Date(startDate).getTime();
+                    
+                    $scope.graphData[seriesName] = new Array();
+                    
+                    while(currentDate < endDate) {
+                        seriesDates.push( new Date (currentDate) );
+                        
+                        currentDate = currentDate + (2 * 3600 * 1000);
+                    }
+                    
+                    var thisPrice;
+                    for(var d = 0; d < seriesDates.length; d++) {
+                        $http.get('prices/graphdata/' + results[i]._id + '/' + seriesDates[d].getTime())
+                            .success(function (data) {
+                                
+                                console.log("RETURNED DATA: " + data);  // DEBUG
+                                
+                                var thisPrice = data;
+                                $scope.graphData[seriesName].push(thisPrice);
+                            });
+                    }
+                    
+                }
+            });
         };
 	}
 ]);

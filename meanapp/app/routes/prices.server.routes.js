@@ -14,6 +14,11 @@ module.exports = function(app) {
 		.put(users.requiresLogin, prices.hasAuthorization, prices.update)
 		.delete(users.requiresLogin, prices.hasAuthorization, prices.delete);
 
+    app.route('/prices/graphData/:exchangeId/:priceDate')
+        .get(prices.getPriceOnExchangeByDate);
+        
 	// Finish by binding the Price middleware
 	app.param('priceId', prices.priceByID);
+    app.param('exchangeId', prices.exchangeByID);
+    app.param('priceDate', prices.dateFromTimestamp);
 };

@@ -6,6 +6,7 @@
 var mongoose = require('mongoose'),
 	errorHandler = require('./errors.server.controller'),
 	Price = mongoose.model('Price'),
+    Exchange = mongoose.model('Exchange'),
 	_ = require('lodash');
 
 /**
@@ -94,6 +95,47 @@ exports.priceByID = function(req, res, next, id) {
 		req.price = price ;
 		next();
 	});
+};
+
+exports.exchangeByID = function(req, res, next, id) {
+    Exchange.findById(id).exec(function(err, exchange) {
+        if(err) return next(err);
+        if( !exchange) return next(new Error('Failed to load Exchange ' + id));
+        
+        req.exchange = exchange;
+        next();
+    });
+};
+
+exports.dateFromTimestamp = function (req, res, next, timestamp) {
+    var queryDate = new Date (timestamp*1000);
+    req.queryDate = queryDate;
+    next();
+};
+
+
+exports.getPriceOnExchangeByDate = function (req, res) {
+    console.log('REQUEST EXCHANGE: ' + req.exchange);
+    console.log('REQUEST DATE: ' + req.queryDate);
+    
+    Price.find(
+        {
+            exchange: req.exchange,
+            timestamp: {
+                '$lte' : req.queryDate
+            }
+        }, 
+        {}, 
+        function(err, price) {
+            if(err) {
+                console.log("ERROR: " + err);
+            }
+            console.log("Returned %s prices", price.length);
+            // console.log("RETURNING: " + price);
+            res.jsonp(price);
+        }
+        
+    ).limit(1);
 };
 
 /**

@@ -29,16 +29,12 @@
     </div>
 </section>
 
-<section data-ng-controller="ExchangesController" data-ng-init="find()">
+<section data-ng-controller="ExchangesController" data-ng-init="getGraphData()">
     <script type="text/javascript-lazy">
-    $(function () {
+    $(graphData.bind("change", function () {
         var endDate = new Date();
         var startDate = new Date();
         startDate.setDate(startDate.getDate() - 1);
-               
-        console.log("Starting at %s and going to %s",  startDate, endDate);
-        console.log("typeof(exchange_id): " + typeof '55a972e0fab6e8a40dd50f2e' );
-        console.log("typeof(getDates()): " + typeof getDates(startDate.getTime, endDate.getTime()));
         
         $('#graph_container').highcharts({
             chart: {
@@ -68,22 +64,16 @@
             },
             series: [{
                 name: 'OKCoin',
-                data: getPricesForDates('55a972e0fab6e8a40dd50f2e',     // Exchange ID 
-                    getDates( startDate.getTime(), endDate.getTime() ) 
-                )
+                data: graphData['OKCoin']
             }, {
                 name: '796',
-                data: getPricesForDates('55a97300fab6e8a40dd50f2f',     // Exchange ID
-                    getDates( startDate.getTime(), endDate.getTime() ) 
-                )
+                data: graphData['796']
             }, {
                 name: 'BitVC',
-                data: getPricesForDates('55b677f6cd06c6f815e00826',     // Exchange ID
-                    getDates( startDate.getTime(), endDate.getTime() ) 
-                )
+                data: graphData['BitVC']
             }]
         });
-    });
+    }));
 
     function getDates(startDate, endDate) {
         var dateArray = new Array();
@@ -95,14 +85,5 @@
         return dateArray;
     };
     
-    function getPricesForDates(exchange_id, dateArray) {
-        priceArray = [];
-                
-        for(var i = 0; i < dateArray.length; i++) {
-            priceArray.push(getClosestPrice(exchange_id, dateArray[i]));
-        }
-                       
-        return priceArray;
-    };   
     </script>
 </section>
