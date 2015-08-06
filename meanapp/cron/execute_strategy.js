@@ -197,7 +197,9 @@ function prepLongBiasedHedge(strategy, exchanges, prices, trades ) {
             var privateClient = new Futures796(strategy.primaryExchanges[i].exchange.apikey, strategy.primaryExchanges[i].exchange.secretkey);
             
             privateClient.getPositions(function(err, pos_resp) {
-                if(pos_resp.msg) {
+                if(err) {
+                    handleError(err);                  
+                } else {
                     if(pos_resp.msg == "success") {
                         var $STRING = '10';
                         
