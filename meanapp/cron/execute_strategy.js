@@ -197,19 +197,21 @@ function prepLongBiasedHedge(strategy, exchanges, prices, trades ) {
             var privateClient = new Futures796(strategy.primaryExchanges[i].exchange.apikey, strategy.primaryExchanges[i].exchange.secretkey);
             
             privateClient.getPositions(function(err, pos_resp) {
-                if(pos_resp.msg == "success") {
-                    var $STRING = '10';
-                    
-                    for(var j = 0; j < pos_resp.data.length; j++) {
-                        strategy.primaryExchanges[i].currentlyHolding += 
-                            pos_resp.data[j].A.buy.$STRING.total;
-                        strategy.insuranceExchanges[i].currentlyHolding += 
-                            pos_resp.data[j].B.buy.$STRING.total;
+                if(pos_resp.msg) {
+                    if(pos_resp.msg == "success") {
+                        var $STRING = '10';
                         
-                        strategy.primaryExchanges[i].averageBuyPrice = 
-                            pos_resp.data[j].A.buy.$STRING.avg_price;
-                        strategy.insuranceExchanges[i].averageBuyPrice = 
-                            pos_resp.data[j].B.buy.$STRING.avg_price;
+                        for(var j = 0; j < pos_resp.data.length; j++) {
+                            strategy.primaryExchanges[i].currentlyHolding += 
+                                pos_resp.data[j].A.buy.$STRING.total;
+                            strategy.insuranceExchanges[i].currentlyHolding += 
+                                pos_resp.data[j].B.buy.$STRING.total;
+                            
+                            strategy.primaryExchanges[i].averageBuyPrice = 
+                                pos_resp.data[j].A.buy.$STRING.avg_price;
+                            strategy.insuranceExchanges[i].averageBuyPrice = 
+                                pos_resp.data[j].B.buy.$STRING.avg_price;
+                        }
                     }
                 }                
             });
