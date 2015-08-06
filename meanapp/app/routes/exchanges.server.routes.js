@@ -11,8 +11,8 @@ module.exports = function(app) {
 
 	app.route('/exchanges/:exchangeId')
 		.get(exchanges.read)
-		.put(users.requiresLogin, exchanges.hasAuthorization, exchanges.update)
-		.delete(users.requiresLogin, exchanges.hasAuthorization, exchanges.delete);
+		.put(users.requiresLogin, /*exchanges.hasAuthorization, */ exchanges.update)
+		.delete(users.requiresLogin, /*exchanges.hasAuthorization, */ exchanges.delete);
 
 	app.route('/exchanges/:exchangeId/getTicker')
 		.get(exchanges.getCurrentPrice);
