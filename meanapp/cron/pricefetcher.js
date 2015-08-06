@@ -52,7 +52,7 @@ function getCurrentPrice(exchange) {
     // console.log("Getting current price for %s", exchange_name);
     
     if(exchange_name.toLowerCase() === 'okcoin') {
-        public_client = new OKCoin();
+        var public_client = new OKCoin();
         public_client.getFutureTicker(function(err, ticker_resp) {
             if(err) {
                 console.log("ERROR: " + err);
@@ -62,7 +62,7 @@ function getCurrentPrice(exchange) {
             
         }, 'btc_usd', 'quarter');
     } else if (exchange_name.toLowerCase() === '796') {
-        public_client = new Futures796();
+        var public_client = new Futures796();
         public_client.getTicker(function(err, ticker_resp) {
             if(err) {
                 console.log("ERROR: " + err);
@@ -71,7 +71,7 @@ function getCurrentPrice(exchange) {
             savePrice(exchange, Number(ticker_resp.ticker.last).toFixed(2));
         });
     } else if (exchange_name.toLowerCase() === 'bitvc') {
-        public_client = new BitVC();
+        var public_client = new BitVC();
         
         public_client.getTicker(function(err, ticker_resp) {
             if(err) {
