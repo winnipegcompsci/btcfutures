@@ -99,6 +99,23 @@ angular.module('strategies').controller('StrategiesController', ['$scope', '$htt
             
             // $scope.holding = "ERROR";
         };
+        
+        $scope.getTradesForStrategy = function() {
+            console.log("The strategy ID is: " + $stateParams.strategyId);  // DEBUG
+            
+            $http.get('trades')
+                .success(function (trades) {
+                    $scope.strategytrades = [];
+                    
+                    for(var i = 0; i < trades.length; i++) {
+                        if(trades[i].strategy == $stateParams.strategyId) {
+                            $scope.strategytrades.push(trades[i]);
+                        }
+                    }
+                });
+            
+            
+        }
 	}
 ]);
 

@@ -6,6 +6,7 @@
 var mongoose = require('mongoose'),
 	errorHandler = require('./errors.server.controller'),
 	Trade = mongoose.model('Trade'),
+    Strategy = mongoose.model('Strategy'),
 	_ = require('lodash');
 
 /**
@@ -75,7 +76,7 @@ exports.delete = function(req, res) {
  * List of Trades
  */
 exports.list = function(req, res) { 
-	Trade.find().sort('-created').populate('user', 'displayName').exec(function(err, trades) {
+	Trade.find().sort('-created').populate('exchange', 'name').populate('user', 'displayName').exec(function(err, trades) {
 		if (err) {
 			return res.status(400).send({
 				message: errorHandler.getErrorMessage(err)

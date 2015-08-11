@@ -13,7 +13,7 @@ module.exports = function(app) {
 		.get(trades.read)
 		.put(users.requiresLogin, trades.hasAuthorization, trades.update)
 		.delete(users.requiresLogin, trades.hasAuthorization, trades.delete);
-
+        
 	// Finish by binding the Trade middleware
 	app.param('tradeId', trades.tradeByID);
 };
