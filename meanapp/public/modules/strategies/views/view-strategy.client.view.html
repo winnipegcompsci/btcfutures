@@ -123,26 +123,27 @@
     <div class="row">
         <h3>Strategy Trade Details:</h3>
         <div class="well" data-ng-init="getTradesForStrategy()">
-            <table width="100%">
-                <tr>
-                    <th>Trade Date</th>
-                    <th>Exchange</th>
-                    <th>Order Type</th>
-                    <th>Bias</th>
-                    <th>Amount</th>
-                    <th>Trade Price</th>
-                </tr>
+            <div class="list-group">
+                <div class="row">
+                    <div class="columns col-lg-3"><strong>Trade Date</strong></div>
+                    <div class="columns col-lg-1"><strong>Exchange</strong></div>
+                    <div class="columns col-lg-2"><strong>Type</strong></div>
+                    <div class="columns col-lg-2"><strong>Bias</strong></div>
+                    <div class="columns col-lg-2"><strong>Amount</strong></div>
+                    <div class="columns col-lg-2"><strong>Price</strong></div>
+                </div>
                 
-                <tr data-ng-repeat="thistrade in strategytrades">
-                    <td> {{thistrade.created | date:'medium'}} </td>
-                    <td> <em> {{thistrade.exchange.name}} </em> </td>
-                    <td> {{thistrade.type}} </td>
-                    <td> {{thistrade.bias}} </td>
-                    <td> {{(thistrade.amount).toFixed(6)}} <span class="glyphicon glyphicon-bitcoin"></span> </td>
-                    <td> <span class="glyphicon glyphicon-usd"></span> {{(thistrade.price).toFixed(2)}} </td>
-                </tr>
-            </table>
-
+                <a data-ng-repeat="thistrade in strategytrades">
+                    <div class="row">
+                        <div class="columns col-lg-3">{{thistrade.created | date:'medium'}}</div>
+                        <div class="columns col-lg-1">{{thistrade.exchange.name}} </div>
+                        <div class="columns col-lg-2">{{thistrade.type}} </div>
+                        <div class="columns col-lg-2">{{thistrade.bias}} </div>
+                        <div class="columns col-lg-2">{{(thistrade.amount).toFixed(6)}} <span class="glyphicon glyphicon-bitcoin"></span> </div>
+                        <div class="columns col-lg-2"> <span class="glyphicon glyphicon-usd"></span> {{(thistrade.price).toFixed(2)}}</div>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
     
