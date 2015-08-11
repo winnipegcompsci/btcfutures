@@ -371,16 +371,17 @@ function doLongBiasedHedge(strategy) {
                     strategy.primaryExchanges[i].exchange.name, 
                     strategy.primaryExchanges[i].lastPrice.toFixed(2)
                 );
-                // DEV LOG
                 if(process.env.NODE_ENV == 'development') {
                     var thisTrade = new Trades({
                         exchange: strategy.primaryExchanges[i].exchange._id,
                         price: strategy.primaryExchanges[i].lastPrice,
                         amount: ((strategy.totalCoins / 10) * strategy.primaryExchanges[i].ratio),
                         type: "BUY",
-                        bias: "LONG"
+                        bias: "LONG",
+                        strategy: strategy._id
                     });
                     
+                    // BUY LONG
                     thisTrade.save(function (err) {
                         if(err) {
                             handleError(err);
@@ -406,9 +407,11 @@ function doLongBiasedHedge(strategy) {
                             price: strategy.insuranceExchanges[i].lastPrice,
                             amount: ((strategy.insuranceExchanges[i].currentlyHolding * strategy.insuranceCoverage)),
                             type: "SELL",
-                            bias: "SHORT"
+                            bias: "SHORT",
+                            strategy: strategy._id
                         });
                         
+                        // SELL SHORT
                         thisTrade.save(function (err) {
                             if(err) {
                                 handleError(err);
@@ -432,9 +435,11 @@ function doLongBiasedHedge(strategy) {
                                 price: strategy.primaryExchanges[i].lastPrice,
                                 amount: ((strategy.primaryExchanges[i].currentlyHolding / 2)).toFixed(4),
                                 type: "SELL",
-                                bias: "LONG"
+                                bias: "LONG",
+                                strategy: strategy._id,
                             });
                             
+                            // SELL LONG
                             thisTrade.save(function (err) {
                                 if(err) {
                                     handleError(err);
@@ -462,9 +467,11 @@ function doLongBiasedHedge(strategy) {
                                     price: strategy.primaryExchanges[i].lastPrice,
                                     amount: ((strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)),
                                     type: "BUY",
-                                    bias: "SHORT"
+                                    bias: "SHORT",
+                                    strategy: strategy._id
                                 });
                                 
+                                // BUY SHORT
                                 thisTrade.save(function (err) {
                                     if(err) {
                                         handleError(err);
@@ -491,8 +498,10 @@ function doLongBiasedHedge(strategy) {
                             amount: ((strategy.primaryExchanges[i].currentlyHolding)),
                             type: "SELL",
                             bias: "LONG",
+                            strategy: strategy._id
                         });
                         
+                        // SELL LONG
                         thisTrade.save(function (err) {
                             if(err) {
                                 handleError(err);
@@ -524,7 +533,8 @@ function doLongBiasedHedge(strategy) {
                         price: strategy.primaryExchanges[i].lastPrice,
                         amount: ((strategy.totalCoins / 10) * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio),
                         type: "BUY",
-                        bias: "SHORT"
+                        bias: "SHORT",
+                        strategy: strategy._id
                     });
                     
                     thisTrade.save(function (err) {
