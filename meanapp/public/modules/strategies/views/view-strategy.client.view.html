@@ -131,17 +131,15 @@
                     <th>Bias</th>
                     <th>Amount</th>
                     <th>Open Price</th>
-                    <th>Close Price</th>
                 </tr>
                 
                 <tr data-ng-repeat="thistrade in strategytrades">
                     <td> {{thistrade.created | date:'medium'}} </td>
-                    <td> {{thistrade.exchange.name}} </td>
+                    <td> <em> {{thistrade.exchange.name}} </em> </td>
                     <td> {{thistrade.type}} </td>
                     <td> {{thistrade.bias}} </td>
                     <td> {{(thistrade.amount).toFixed(6)}} <span class="glyphicon glyphicon-bitcoin"></span> </td>
                     <td> <span class="glyphicon glyphicon-usd"></span> {{(thistrade.price).toFixed(2)}} </td>
-                    <td> {{thistrade.close_price}} </td>
                 </tr>
             </table>
 
