@@ -167,7 +167,7 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
         };
         
         $scope.getGraphData = function() {
-            
+            /*
             Exchanges.query().$promise.then(function(results) {
                 var endDate = new Date();
                 var startDate = new Date();
@@ -203,6 +203,7 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                     
                 }
             });
+            */
         };
 	}
 ]);

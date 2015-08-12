@@ -27,7 +27,7 @@
                 <td> <span data-ng-bind="trade.created | date:'short'"></span> </td>
                 <td> <a data-ng-href="#!/trades/{{trade._id}}"> {{ trade._id }} </a></td>
                 <td> <span data-ng-bind="trade.amount"> </span> BTC </td>
-                <td> <span data-ng-bind="trade.exchange"> </span> </td>
+                <td> <span data-ng-bind="trade.exchange.name"> </span> </td>
                 <td> <span data-ng-bind="trade.type | uppercase"> </span> </td>
                 <td> <span data-ng-bind="trade.price"> </span> USD </td>
                 <td> <span data-ng-bind="getCurrentPriceById({{trade.exchange}})"> </span> USD </td>
