@@ -12,6 +12,40 @@ angular.module('core').controller('HomeController', ['$scope', '$http', 'Authent
                     $scope.exchanges = data;
                 });
         };
+        
+        $scope.countTrades = function(exchange) {
+            $http.get('trades')
+                .success(function(trades) {                   
+                    exchange.numTrades = 0;
+                    exchange.longAmount = 0;
+                    exchange.shortAmount = 0;
+                    
+                    for(var i = 0; i < trades.length; i++) {
+                        
+                        if(trades[i].exchange._id == exchange._id) {
+                            if(trades[i].type == "BUY") {
+                                exchange.numTrades++;
+                                
+                                if(trades[i].bias == "LONG") {
+                                    exchange.longAmount += trades[i].amount;
+                                } else if (trades[i].bias == "SHORT") {
+                                    exchange.shortAmount += trades[i].amount;
+                                }
+                               
+                                
+                            } else if(trades[i].type == "SELL") {
+                                exchange.numTrades--;
+                                
+                                if(trades[i].bias == "LONG") {
+                                    exchange.longAmount -= trades[i].amount;
+                                } else if (trades[i].bias == "SHORT") {
+                                    exchange.shortAmount -= trades[i].amount;
+                                }
+                            }
+                        }
+                    }
+                });
+        };
     }
    
 ]);
