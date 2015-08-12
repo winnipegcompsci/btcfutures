@@ -23,12 +23,12 @@
                 <div class="panel panel-info">
                     <div class="panel-heading">{{exchange.name}} <span class="badge text-success pull-right" data-ng-init="countTrades(exchange)">Holding {{exchange.numTrades}} Positions</span> </div>
                     <div class="panel-body">
-                        <div class="row text-right">Account Equity: <span class="glyphicon glyphicon-usd"></span> 0.00 USD</div>
-                        <div class="row text-right">BTC Balance: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span></div>
-                        <div class="row text-right">Realized Profit/Loss: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span> </div>
-                        <div class="row text-right">Unrealized Profit/Loss: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span> </div>
-                        <div class="row text-left text-success"> Holding {{exchange.longAmount.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> Long </div>
-                        <div class="row text-left text-success"> Holding {{exchange.shortAmount.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> Short </div>
+                        <div class="row text-left text-info">Account Equity: <span class="glyphicon glyphicon-usd"></span> 0.00 USD</div>
+                        <div class="row text-left text-info">BTC Balance: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span></div>
+                        <div class="row text-left text-info">Realized Profit/Loss: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span> </div>
+                        <div class="row text-left text-info">Unrealized Profit/Loss: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span> </div>
+                        <div class="row text-right text-success"> Holding {{exchange.longAmount.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> Long </div>
+                        <div class="row text-right text-success"> Holding {{exchange.shortAmount.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> Short </div>
                     </div>
                 </div>
                 
