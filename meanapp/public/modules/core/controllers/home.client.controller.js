@@ -38,7 +38,7 @@ angular.module('core').controller('HomeController', ['$scope', '$http', 'Authent
                         
                         if(trades[i].exchange._id == exchange._id) {
                             if(trades[i].type == "BUY") {
-                                exchange.numTrades++;
+                                exchange.numTrades = exchange.numTrades + 1;
                                 
                                 if(trades[i].bias == "LONG") {
                                     exchange.longAmount += trades[i].amount;
@@ -48,7 +48,7 @@ angular.module('core').controller('HomeController', ['$scope', '$http', 'Authent
                                
                                 
                             } else if(trades[i].type == "SELL") {
-                                exchange.numTrades--;
+                                exchange.numTrades = exchange.numTrades - 1;
                                 
                                 if(trades[i].bias == "LONG") {
                                     exchange.longAmount -= trades[i].amount;
