@@ -13,6 +13,20 @@ angular.module('core').controller('HomeController', ['$scope', '$http', 'Authent
                 });
         };
         
+        $scope.getLastPrice = function(exchange) {
+            console.log("Getting price for " + exchange.name);  // DEBUG
+            if(!exchange) {
+                exchange = Exchanges.get({
+                    exchangeId: $stateParams.exchangeId
+                });
+            }
+
+            $http.get('exchanges/' + exchange._id + '/getTicker')
+                .success(function(data) {
+                    exchange.currentPrice = Number(data.last).toFixed(2); 
+                });
+        };
+        
         $scope.countTrades = function(exchange) {
             $http.get('trades')
                 .success(function(trades) {                   
