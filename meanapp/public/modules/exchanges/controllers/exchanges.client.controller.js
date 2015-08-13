@@ -59,16 +59,16 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                 $scope.exchanges = result;
                 
                 for(var i = 0; i < result.length; i++) {
-                    var thisName = result[i].name.toLowerCase().replace(" ", "");
+                    var thisName = result[i].name.toLowerCase().replace(' ', '');
                                        
                     if(thisName === 'okcoin') {
-                        $scope.exchanges[i].logo_url = "/img/okcoin.png";
+                        $scope.exchanges[i].logo_url = '/img/okcoin.png';
                     } else if (thisName === '796' || thisName === 'futures796') {
-                        $scope.exchanges[i].logo_url = "/img/796.jpg";
+                        $scope.exchanges[i].logo_url = '/img/796.jpg';
                     } else if (thisName === 'bitvc') {
                         $scope.exchanges[i].logo_url = '/img/bitvc.png';                        
                     } else {
-                        console.log("Exchange: " + thisName + " -- has no logo on record");
+                        console.log('Exchange: ' + thisName + ' -- has no logo on record');
                     }
                 }
                 
@@ -159,7 +159,6 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                 thisID = $stateParams.exchangeId;
             }
             
-            $stateParams.exchangeId;
             $http.get('exchanges/' + thisID + '/getPricesFromDB')
                 .success(function(data) {
                     $scope.chartData = data; 
@@ -216,8 +215,8 @@ angular.module('exchanges').directive('script', function() {
         {
             if (attr.type==='text/javascript-lazy') 
             {
-                var s = document.createElement("script");
-                s.type = "text/javascript";                
+                var s = document.createElement('script');
+                s.type = 'text/javascript';                
                 var src = elem.attr('src');
                 if(src!==undefined) {
                     s.src = src;
@@ -229,5 +228,5 @@ angular.module('exchanges').directive('script', function() {
                 elem.remove();
             }
         }
-    }  
+    };  
 });

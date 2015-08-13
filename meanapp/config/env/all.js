@@ -30,8 +30,9 @@ module.exports = {
 				'public/lib/angular-bootstrap/ui-bootstrap-tpls.js',
                 'public/lib/datatables/jquery-1.10.2.min.js',
                 'public/lib/datatables/jquery.dataTables.js',
-                'public/lib/highcharts/highcharts.js',
-                'public/lib/highcharts/highcharts.src.js'
+                
+                'http://code.highcharts.com/stock/highstock.src.js',
+                'public/lib/highcharts-ng/src/highcharts-ng.js'
 			]
 		},
 		css: [

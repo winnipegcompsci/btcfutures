@@ -13,9 +13,9 @@ module.exports = function(app) {
 		.get(prices.read)
 		.put(users.requiresLogin, prices.hasAuthorization, prices.update)
 		.delete(users.requiresLogin, prices.hasAuthorization, prices.delete);
-
-    app.route('/prices/graphData/:exchangeId/:priceDate')
-        .get(prices.getPriceOnExchangeByDate);
+        
+    app.route('/prices/graph/day')
+        .get(prices.getGraphPrices);
         
 	// Finish by binding the Price middleware
 	app.param('priceId', prices.priceByID);

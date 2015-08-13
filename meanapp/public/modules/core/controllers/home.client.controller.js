@@ -1,7 +1,8 @@
 'use strict';
 
+var myapp = angular.module('core');
 
-angular.module('core').controller('HomeController', ['$scope', '$http', 'Authentication',
+myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
 	function($scope, $http, Authentication) {
 		// This provides Authentication context.
 		$scope.authentication = Authentication;
@@ -14,16 +15,40 @@ angular.module('core').controller('HomeController', ['$scope', '$http', 'Authent
         };
         
         $scope.getLastPrice = function(exchange) {
-            console.log("Getting price for " + exchange.name);  // DEBUG
             if(!exchange) {
-                exchange = Exchanges.get({
-                    exchangeId: $stateParams.exchangeId
-                });
+                exchange.currentPrice = 'N/F';
             }
 
             $http.get('exchanges/' + exchange._id + '/getTicker')
                 .success(function(data) {
                     exchange.currentPrice = Number(data.last).toFixed(2); 
+                });
+        };
+        
+        $scope.getGraphPrices = function() {
+            $http.get('/prices/graph/day')
+                .success(function(graphData) {
+                    $scope.chartConfig = {
+                        options: {
+                            chart: {
+                                zoomType: 'x'
+                            },
+                            rangeSelector: {
+                                enabled: true
+                            },
+                            navigator: {
+                                enabled: true
+                            }
+                        },
+                        series: graphData,
+                        title: {
+                            text: '24 Hour LTP By Exchange'
+                        },
+                        useHighStocks: true
+                    };
+                })
+                .error(function(err) {
+                    console.log('Caught Error: ' + err);
                 });
         };
         
@@ -36,23 +61,23 @@ angular.module('core').controller('HomeController', ['$scope', '$http', 'Authent
                     
                     for(var i = 0; i < trades.length; i++) {
                         
-                        if(trades[i].exchange._id == exchange._id) {
-                            if(trades[i].type == "BUY") {
+                        if(trades[i].exchange._id === exchange._id) {
+                            if(trades[i].type === 'BUY') {
                                 exchange.numTrades = exchange.numTrades + 1;
                                 
-                                if(trades[i].bias == "LONG") {
+                                if(trades[i].bias === 'LONG') {
                                     exchange.longAmount += trades[i].amount;
-                                } else if (trades[i].bias == "SHORT") {
+                                } else if (trades[i].bias === 'SHORT') {
                                     exchange.shortAmount += trades[i].amount;
                                 }
                                
                                 
-                            } else if(trades[i].type == "SELL") {
+                            } else if(trades[i].type === 'SELL') {
                                 exchange.numTrades = exchange.numTrades - 1;
                                 
-                                if(trades[i].bias == "LONG") {
+                                if(trades[i].bias === 'LONG') {
                                     exchange.longAmount -= trades[i].amount;
-                                } else if (trades[i].bias == "SHORT") {
+                                } else if (trades[i].bias === 'SHORT') {
                                     exchange.shortAmount -= trades[i].amount;
                                 }
                             }
@@ -72,8 +97,8 @@ angular.module('core').directive('script', function() {
         {
             if (attr.type==='text/javascript-lazy') 
             {
-                var s = document.createElement("script");
-                s.type = "text/javascript";                
+                var s = document.createElement('script');
+                s.type = 'text/javascript';                
                 var src = elem.attr('src');
                 if(src!==undefined) {
                     s.src = src;
@@ -85,5 +110,5 @@ angular.module('core').directive('script', function() {
                 elem.remove();
             }
         }
-    }  
+    };  
 });

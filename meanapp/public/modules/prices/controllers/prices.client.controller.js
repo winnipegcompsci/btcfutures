@@ -73,8 +73,8 @@ angular.module('prices').directive('script', function() {
         {
             if (attr.type==='text/javascript-lazy') 
             {
-                var s = document.createElement("script");
-                s.type = "text/javascript";                
+                var s = document.createElement('script');
+                s.type = 'text/javascript';                
                 var src = elem.attr('src');
                 if(src!==undefined) {
                     s.src = src;
@@ -86,5 +86,5 @@ angular.module('prices').directive('script', function() {
                 elem.remove();
             }
         }
-    }  
+    };  
 });

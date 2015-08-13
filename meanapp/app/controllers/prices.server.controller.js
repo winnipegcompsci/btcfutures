@@ -113,29 +113,33 @@ exports.dateFromTimestamp = function (req, res, next, timestamp) {
     next();
 };
 
-
-exports.getPriceOnExchangeByDate = function (req, res) {
-    console.log('REQUEST EXCHANGE: ' + req.exchange);
-    console.log('REQUEST DATE: ' + req.queryDate);
+exports.getGraphPrices = function(req, res) {
     
-    Price.find(
-        {
-            exchange: req.exchange,
-            timestamp: {
-                '$lte' : req.queryDate
+    var seriesData = [];
+    
+    Exchange.find().exec(function (err, exchanges) {
+        if(err) {
+            return res.status(400).send({
+               message: errorHandler.getErrorMessage(err) 
+            });
+        } else {
+            var seriesData = [];
+            
+            for(var i = 0; i < exchanges.length; i++) {
+                var newSeries = {
+                    id: exchanges[i].name,
+                    data: [
+                        // push [timestamp, price]
+                    ]
+                };
+                        
+                seriesData.push(newSeries);
+            
             }
-        }, 
-        {}, 
-        function(err, price) {
-            if(err) {
-                console.log("ERROR: " + err);
-            }
-            console.log("Returned %s prices", price.length);
-            // console.log("RETURNING: " + price);
-            res.jsonp(price);
+                
+            res.jsonp(seriesData);
         }
-        
-    ).limit(1);
+	});   
 };
 
 /**
@@ -147,3 +151,4 @@ exports.hasAuthorization = function(req, res, next) {
 	}
 	next();
 };
+

@@ -145,12 +145,17 @@ exports.getCurrentPrice = function(req, res) {
             } 
 
             bitvc_public.getExchangeRate(function(err, exchange_rate) {
-                ticker_resp.last = ticker_resp.last / exchange_rate.rate;
-                ticker_resp.high = ticker_resp.high / exchange_rate.rate;
-                ticker_resp.low = ticker_resp.low / exchange_rate.rate;
-                ticker_resp.buy = ticker_resp.buy / exchange_rate.rate;
-                ticker_resp.sell = ticker_resp.sell / exchange_rate.rate;
+                if(err) {
+                    return res.status(500).send(err);
+                }
                 
+                if(exchange_rate) {
+                    ticker_resp.last = ticker_resp.last / exchange_rate.rate;
+                    ticker_resp.high = ticker_resp.high / exchange_rate.rate;
+                    ticker_resp.low = ticker_resp.low / exchange_rate.rate;
+                    ticker_resp.buy = ticker_resp.buy / exchange_rate.rate;
+                    ticker_resp.sell = ticker_resp.sell / exchange_rate.rate;
+                }
                 return res.send(ticker_resp);
             });
             
@@ -216,9 +221,9 @@ exports.getFutureCandles = function(req, res) {
         }, 'btc_usd', '1hour', 'weekly');
     } else if (thisName === '796' || thisName === 'futures796') {
         res.status(500).send('ERROR: 796s API does not provide Candlestick data');
-    } else {
-        
-    }
+    } else if (thisName === 'bitvc') {
+        res.status(500).send('ERROR: BitVCs API does not provide Candlestick data');
+    }    
 };
 
 exports.getFuturePositions = function(req, res) {
@@ -239,7 +244,7 @@ exports.getUserInfo = function(req, res) {
         });
            
     } else if (thisName === '796' || thisName === 'futures796') {
-        
+        res.status(500).send('ERROR: ' + thisName + ' Function GetUserInfo() -- Not Found');
     } else {
         res.status(500).send('ERROR: ' + thisName + ' Function GetUserInfo() -- Not Found');
     }
@@ -253,13 +258,13 @@ exports.getPricesFromDB = function(req, res) {
         var times_arr = [];
         
         for(var i = 0; i < prices.length; i++) {
-            prices_arr.push(prices[i].price)
+            prices_arr.push(prices[i].price);
             times_arr.push(prices[i].timestamp);
         }
         res.send({'prices': prices_arr, 'timestamps': times_arr});
     });
     
-}
+};
 
 
 exports.getCurrentHolding = function(req, res) {
@@ -275,8 +280,8 @@ exports.getCurrentHolding = function(req, res) {
                 var thisShortAmount = 0;
                 
                 for(var i = 0; i < pos_resp.holding.length; i++) {
-                    thisLongAmount += pos_resp.holding[i]['buy_amount'];
-                    thisShortAmount += pos_resp.holding[i]['sell_amount'];
+                    thisLongAmount += pos_resp.holding[i].buy_amount;
+                    thisShortAmount += pos_resp.holding[i].sell_amount;
                 }
                 
                 res.send({

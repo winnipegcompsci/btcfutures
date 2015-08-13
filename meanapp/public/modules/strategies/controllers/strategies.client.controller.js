@@ -90,32 +90,32 @@ angular.module('strategies').controller('StrategiesController', ['$scope', '$htt
                     } else if (position === 'short') {
                         $scope.strategy.primaryExchanges[$index].holding_short = holding.short;
                     } else {
-                        console.log("Position: " + position + " can not be found");
+                        console.log('Position: ' + position + ' can not be found');
                     }
                 })
                 .error(function (err) {
-                    console.log("ERROR: " + err);
+                    console.log('ERROR: ' + err);
                 });
             
             // $scope.holding = "ERROR";
         };
         
         $scope.getTradesForStrategy = function() {
-            console.log("The strategy ID is: " + $stateParams.strategyId);  // DEBUG
+            console.log('The strategy ID is: ' + $stateParams.strategyId);  // DEBUG
             
             $http.get('trades')
                 .success(function (trades) {
                     $scope.strategytrades = [];
                     
                     for(var i = 0; i < trades.length; i++) {
-                        if(trades[i].strategy == $stateParams.strategyId) {
+                        if(trades[i].strategy === $stateParams.strategyId) {
                             $scope.strategytrades.push(trades[i]);
                         }
                     }
                 });
             
             
-        }
+        };
 	}
 ]);
 
@@ -127,8 +127,8 @@ angular.module('strategies').directive('script', function() {
         {
             if (attr.type==='text/javascript-lazy') 
             {
-                var s = document.createElement("script");
-                s.type = "text/javascript";                
+                var s = document.createElement('script');
+                s.type = 'text/javascript';                
                 var src = elem.attr('src');
                 if(src!==undefined) {
                     s.src = src;
@@ -140,5 +140,5 @@ angular.module('strategies').directive('script', function() {
                 elem.remove();
             }
         }
-    }  
+    };  
 });

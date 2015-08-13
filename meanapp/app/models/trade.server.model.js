@@ -62,7 +62,7 @@ var TradeSchema = new Schema({
 });
 
 function getClosingPrice() {
-    return "GET CLOSING PRICE()";
+    return 'GET CLOSING PRICE()';
 }
 
 mongoose.model('Trade', TradeSchema);
