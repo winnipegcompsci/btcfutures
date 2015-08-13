@@ -21,7 +21,7 @@
         <div class="columns col-lg-4" data-ng-repeat="exchange in exchanges">
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    {{exchange.name}} - <span data-ng-init="getLastPrice(exchange)"> LTP <span class="glyphicon glyphicon-usd"></span> {{exchange.currentPrice}} </span> 
+                    {{exchange.name}} - <span data-ng-init="getLastPrice(exchange)"> LTP  - ${{exchange.currentPrice}} </span> 
                     <span class="badge text-success pull-right" data-ng-init="countTrades(exchange)">{{exchange.numTrades}} Open Positions </span> 
                 </div>
                 <div class="panel-body">
