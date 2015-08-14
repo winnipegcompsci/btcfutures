@@ -7,6 +7,7 @@ var mongoose = require('mongoose'),
 	errorHandler = require('./errors.server.controller'),
 	Price = mongoose.model('Price'),
     Exchange = mongoose.model('Exchange'),
+    util = require('util'),
 	_ = require('lodash');
 
 /**
@@ -114,9 +115,9 @@ exports.dateFromTimestamp = function (req, res, next, timestamp) {
 };
 
 exports.getGraphPrices = function(req, res) {
-    
+    /*
     var seriesData = [];
-    
+
     Exchange.find().exec(function (err, exchanges) {
         if(err) {
             return res.status(400).send({
@@ -126,20 +127,63 @@ exports.getGraphPrices = function(req, res) {
             var seriesData = [];
             
             for(var i = 0; i < exchanges.length; i++) {
+                
                 var newSeries = {
                     id: exchanges[i].name,
-                    data: [
-                        // push [timestamp, price]
-                    ]
+                    data: []
                 };
-                        
+                                
+                var xchgPrices = Price.find({
+                        "$where": "this.price.exchange._id == this.exchanges[i]._id"
+                }, {
+                        "created": 1,
+                        "price": 1
+                }).exec();
+                
+                console.log("xchgPrices: " + util.inspect(xchgPrices));
+                
                 seriesData.push(newSeries);
             
             }
                 
             res.jsonp(seriesData);
         }
-	});   
+	});
+    */
+    
+    Price.find({}).sort('-timestamp').populate('exchange name').limit(40000).exec(function(err, prices) {
+		var exchangePrices = [];
+        
+        if (err) {            
+            return res.status(400).send({
+                error: err,
+				message: errorHandler.getErrorMessage(err)
+			});
+		} else {
+            var priceData = {};
+            
+            for(var p = prices.length - 1; p > 0; p--) {
+                if(typeof prices[p].exchange.name !== 'undefined' && prices[p].price !== null) {
+                    if(typeof priceData[prices[p].exchange.name] === 'undefined') {
+                        priceData[prices[p].exchange.name] = {
+                            name: prices[p].exchange.name,
+                            data: [],
+                        };
+                    }
+                    
+                    priceData[prices[p].exchange.name].data.push([
+                        prices[p].timestamp.getTime(), 
+                        Number(Math.round(prices[p].price + 'e2')+'e-2')
+                    ]);
+                }
+            }
+                        
+            res.jsonp(priceData);
+
+		}
+	});
+    
+
 };
 
 /**

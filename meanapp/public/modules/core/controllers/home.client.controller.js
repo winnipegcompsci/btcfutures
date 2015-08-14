@@ -38,17 +38,28 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                             },
                             navigator: {
                                 enabled: true
+                            },
+                            tooltip: {
+                                valueDecimals: 2,
+                                valuePrefix: '$',
+                                valueSuffix: ' USD'
                             }
                         },
-                        series: graphData,
+                        series: [],
                         title: {
-                            text: '24 Hour LTP By Exchange'
+                            text: 'Last Traded Price By Exchange'
                         },
                         useHighStocks: true
                     };
-                })
+                                        
+                    for(var exchangeData in graphData) {
+                        // console.log("Series: " + JSON.stringify(graphData[exchangeData]));                       
+                        $scope.chartConfig.series.push(graphData[exchangeData]);
+                    }
+                    
+                }) // end success.
                 .error(function(err) {
-                    console.log('Caught Error: ' + err);
+                    console.log('Caught Error: ' + JSON.stringify(err));
                 });
         };
         
@@ -89,7 +100,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
    
 ]);
 
-angular.module('core').directive('script', function() {
+myapp.directive('script', function() {
     return {
         restrict: 'E',
         scope: true,
