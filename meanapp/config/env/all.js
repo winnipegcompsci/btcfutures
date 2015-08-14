@@ -32,7 +32,7 @@ module.exports = {
                 'public/lib/datatables/jquery.dataTables.js',
                 'public/lib/highcharts-release/adapters/standalone-framework.js',
                 'public/lib/highcharts-release/highstock-all.js',
-                'public/lib/highcharts-ng/src/highcharts-ng.js'
+                'public/lib/highcharts-ng/dist/highcharts-ng.js'
 			]
 		},
 		css: [

@@ -97,7 +97,7 @@ function getVariables() {
 
 function executeStrategy(strategy, exchanges, prices, trades) {  
         
-    if(strategy && exchanges && prices) {
+    if(strategy && exchanges && prices && trades) {
         if(strategy.name.toLowerCase() === 'long biased hedge') {
             prepLongBiasedHedge(strategy, exchanges, prices, trades);
         }
