@@ -151,7 +151,7 @@ exports.getGraphPrices = function(req, res) {
 	});
     */
     
-    Price.find({}, 'price timestamp exchange').sort('-timestamp').populate('exchange name').limit(40000).exec(function(err, prices) {
+    Price.find({}, 'price timestamp exchange').sort('-timestamp').populate('exchange name').limit(30000).exec(function(err, prices) {
 		var exchangePrices = [];
         
         if (err) {            
