@@ -43,7 +43,10 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                                 valueDecimals: 2,
                                 valuePrefix: '$',
                                 valueSuffix: ' USD'
-                            }
+                            },
+                            lang: {
+                                noData: "Loading Data... "
+                            },
                         },
                         series: [],
                         title: {
