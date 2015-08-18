@@ -343,6 +343,69 @@ function doLongBiasedHedge(strategy) {
         }
         console.log("--------------------------------------------------------------------------------");
         
+        // Maintenance -- Get Rid of Overages in case of Strategy values change.
+        for(var k = 0; k < strategy.primaryExchanges.length; k++) {
+            // Long Biased Hedge, if Over Sell Overage Long.
+            if(strategy.primaryExchanges[k].currentlyHolding > (strategy.totalCoins * strategy.primaryExchanges[k].ratio)) {
+                var difference = strategy.primaryExchanges[k].currentlyHolding - (strategy.totalCoins * strategy.primaryExchanges[k].ratio);
+                
+                console.log("Sell %s BTC [LONG] from %s @ $ %s",
+                    difference,
+                    strategy.primaryExchanges[k].exchange.name,
+                    strategy.primaryExchanges[k].lastPrice.toFixed(2)
+                );
+                
+                if(process.env.NODE_ENV == 'development') { 
+                    var thisTrade = new Trades({
+                        exchange: strategy.primaryExchanges[k].exchange._id,
+                        price: strategy.primaryExchanges[k].lastPrice,
+                        amount: difference,
+                        type: 'SELL',
+                        bias: 'LONG',
+                        strategy: strategy._id
+                    });
+                    
+                    thisTrade.save(function (err) {
+                        if(err) {
+                            handleError(err);
+                        }                       
+                    });
+                }
+            }
+        }
+        for(var k = 0; k < strategy.insuranceExchanges.length; k++) {
+            // Long Biased Hedge, if Over Sell Overage Short.
+            if(strategy.insuranceExchanges[k].currentlyHolding > (strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[k].ratio)) {
+                difference = strategy.insuranceExchanges[k].currentlyHolding - (strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[k].ratio);
+            
+                console.log("Sell %s BTC [SHORT] from %s @ $ %s",
+                    difference,
+                    strategy.insuranceExchanges[k].exchange.name,
+                    strategy.insuranceExchanges[k].lastPrice.toFixed(2)
+                );
+                
+                if(process.env.NODE_ENV == 'development') {
+                    var thisTrade = new Trades({
+                        exchange: strategy.insuranceExchanges[k].exchange._id,
+                        price: strategy.insuranceExchanges[k].lastPrice,
+                        amount: difference,
+                        type: 'SELL',
+                        bias: 'SHORT',
+                        strategy: strategy._id
+                    });
+                    
+                    thisTrade.save(function (err) {
+                        if(err) {
+                            handleError(err);
+                        }                       
+                    });
+                }
+            
+            }
+        }
+        
+        
+        // Main Strategy
         var randomizer = 1;
         for(var i = 0; i < strategy.primaryExchanges.length; i++) {
             randomizer = (Math.random() * (1.3 - 0.7) + 0.7).toFixed(4) //  =1
