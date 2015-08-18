@@ -343,8 +343,10 @@ function doLongBiasedHedge(strategy) {
         }
         console.log("--------------------------------------------------------------------------------");
         
-        
+        var randomizer = 1;
         for(var i = 0; i < strategy.primaryExchanges.length; i++) {
+            randomizer = (Math.random() * (1.3 - 0.7) + 0.7).toFixed(4) //  =1
+            
             console.log(clc.yellow("\nExchange: %s || Last Traded Price: %s"), strategy.primaryExchanges[i].exchange.name, Number(strategy.primaryExchanges[i].lastPrice).toFixed(2) );
            
             console.log("Current Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].currentSpread).toFixed(2) );
@@ -367,7 +369,7 @@ function doLongBiasedHedge(strategy) {
             
                 // Buy out of Total.
                 console.log("Buy %s BTC [LONG] from %s @ $ %s", 
-                    ((strategy.totalCoins / 10) * strategy.primaryExchanges[i].ratio).toFixed(4),
+                    (((strategy.totalCoins / 10)*randomizer) * strategy.primaryExchanges[i].ratio).toFixed(4),
                     strategy.primaryExchanges[i].exchange.name, 
                     strategy.primaryExchanges[i].lastPrice.toFixed(2)
                 );
@@ -375,7 +377,7 @@ function doLongBiasedHedge(strategy) {
                     var thisTrade = new Trades({
                         exchange: strategy.primaryExchanges[i].exchange._id,
                         price: strategy.primaryExchanges[i].lastPrice,
-                        amount: ((strategy.totalCoins / 10) * strategy.primaryExchanges[i].ratio),
+                        amount: (((strategy.totalCoins / 10)*randomizer) * strategy.primaryExchanges[i].ratio),
                         type: "BUY",
                         bias: "LONG",
                         strategy: strategy._id
@@ -392,11 +394,11 @@ function doLongBiasedHedge(strategy) {
                 // call API buy
             }
                         
-            // LONG SELL LOGIC
+            // Sell Short Logic
             if((strategy.primaryExchanges[i].lastPrice > (strategy.insuranceExchanges[i].averageBuyPrice * 1.0125))) {
                 if(strategy.insuranceExchanges[i].currentlyHolding > strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage) {
                     console.log("Sell %s BTC [SHORT] from %s @ %s",
-                        ((strategy.insuranceExchanges[i].currentlyHolding * strategy.insuranceCoverage)).toFixed(4),
+                        ((strategy.insuranceExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage)).toFixed(4),
                         strategy.primaryExchanges[i].exchange.name,
                         strategy.primaryExchanges[i].lastPrice.toFixed(2)
                     );
@@ -405,7 +407,7 @@ function doLongBiasedHedge(strategy) {
                         var thisTrade = new Trades({
                             exchange: strategy.insuranceExchanges[i].exchange._id,
                             price: strategy.insuranceExchanges[i].lastPrice,
-                            amount: ((strategy.insuranceExchanges[i].currentlyHolding * strategy.insuranceCoverage)),
+                            amount: ((strategy.insuranceExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage)),
                             type: "SELL",
                             bias: "SHORT",
                             strategy: strategy._id
@@ -456,7 +458,7 @@ function doLongBiasedHedge(strategy) {
                     if(strategy.primaryExchanges[i].lastPrice > (strategy.primaryExchanges[i].averageBuyPrice * 1.04) && 
                         (strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio) < strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage ) {
                             console.log("Buy %s BTC [SHORT] from %s @ %s",
-                                ((strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)).toFixed(4),
+                                ((strategy.primaryExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)).toFixed(4),
                                 strategy.primaryExchanges[i].exchange.name,
                                 strategy.primaryExchanges[i].lastPrice.toFixed(2)
                             );
@@ -465,7 +467,7 @@ function doLongBiasedHedge(strategy) {
                                 var thisTrade = new Trades({
                                     exchange:  strategy.primaryExchanges[i].exchange._id,
                                     price: strategy.primaryExchanges[i].lastPrice,
-                                    amount: ((strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)),
+                                    amount: ((strategy.primaryExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)),
                                     type: "BUY",
                                     bias: "SHORT",
                                     strategy: strategy._id
@@ -510,7 +512,7 @@ function doLongBiasedHedge(strategy) {
                     }
                     // call API buy.
                 }
-            }
+            } // if price < average - 1.25%
             
         } // end foreach primary exchange    
         
@@ -522,7 +524,7 @@ function doLongBiasedHedge(strategy) {
             
                 // Buy out of Total.
                 console.log("Buy %s BTC [SHORT] from %s @ $ %s", 
-                    ((strategy.totalCoins / 10) * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio).toFixed(4),
+                    ((strategy.totalCoins / 10) * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio).toFixed(4),
                     strategy.insuranceExchanges[i].exchange.name, 
                     (strategy.insuranceExchanges[i].lastPrice).toFixed(2)
                 );
@@ -531,7 +533,7 @@ function doLongBiasedHedge(strategy) {
                     var thisTrade = new Trades({
                         exchange: strategy.primaryExchanges[i].exchange._id,
                         price: strategy.primaryExchanges[i].lastPrice,
-                        amount: ((strategy.totalCoins / 10) * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio),
+                        amount: ((strategy.totalCoins / 10) * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio),
                         type: "BUY",
                         bias: "SHORT",
                         strategy: strategy._id

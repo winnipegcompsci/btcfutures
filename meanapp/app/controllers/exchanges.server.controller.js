@@ -7,6 +7,7 @@ var mongoose = require('mongoose'),
 	errorHandler = require('./errors.server.controller'),
 	Exchange = mongoose.model('Exchange'),
     Price = mongoose.model('Price'),
+    Trade = mongoose.model('Trade'),
 	OKCoin  = require('okcoin'),
 	Futures796 = require('futures796'),
     BitVC = require('bitvc'),
@@ -270,61 +271,100 @@ exports.getPricesFromDB = function(req, res) {
 exports.getCurrentHolding = function(req, res) {
     var thisName = req.exchange.name.toLowerCase().replace(' ', '');
     
-    if(thisName === 'okcoin') {
-        okcoin_private = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
-        okcoin_private.getFixedFuturePositions(function(err, pos_resp) {
+    
+    if(process.env.NODE_ENV == 'development') {
+        Trade.find({}, function(err, trades) {
             if(err) {
                 res.send(err);
             } else {
                 var thisLongAmount = 0;
                 var thisShortAmount = 0;
+                                
+                for(var i = 0; i < trades.length; i++) {                    
+                    if(trades[i].exchange._id.toString() === req.exchange._id.toString()) {
+                        if(trades[i].type === 'BUY') {
+                            if(trades[i].bias === 'LONG') {
+                                thisLongAmount += trades[i].amount;
+                            } else if (trades[i].bias === 'SHORT') {
+                                thisShortAmount += trades[i].amount;
+                            }                            
+                        } else if (trades[i].type === 'SELL') {
+                            if(trades[i].bias === 'LONG') {
+                                thisLongAmount -= trades[i].amount;
+                            } else if (trades[i].bias === 'SHORT') {
+                                thisShortAmount -= trades[i].amount;
+                            }
+                        }
+                        
+                    }
+                }
                 
-                for(var i = 0; i < pos_resp.holding.length; i++) {
-                    thisLongAmount += pos_resp.holding[i].buy_amount;
-                    thisShortAmount += pos_resp.holding[i].sell_amount;
+                // Development Mode.
+                res.send({
+                    'long': thisLongAmount,
+                    'short': thisShortAmount,
+                });
+                
+            }
+        }).populate('exchange');
+    } else {
+
+        if(thisName === 'okcoin') {
+            okcoin_private = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+            okcoin_private.getFixedFuturePositions(function(err, pos_resp) {
+                if(err) {
+                    res.send(err);
+                } else {
+                    var thisLongAmount = 0;
+                    var thisShortAmount = 0;
+                    
+                    for(var i = 0; i < pos_resp.holding.length; i++) {
+                        thisLongAmount += pos_resp.holding[i].buy_amount;
+                        thisShortAmount += pos_resp.holding[i].sell_amount;
+                    }
+                    
+                    res.send({
+                       'long': thisLongAmount,
+                       'short': thisShortAmount
+                    });
+                }
+            }, 'btc_usd', 'quarter', 1);
+            
+        } else if (thisName === '796' || thisName === 'futures796') {      
+                
+            futures796_private = new Futures796(req.exchange.apikey, req.exchange.secretkey);
+            futures796_private.getPositions(function(err, pos_resp) {
+                
+                var thisLongAmount = 0;
+                var thisShortAmount = 0;
+                
+                var $STRING = '10';
+                
+                if(pos_resp.data.A) {
+                    thisLongAmount = pos_resp.data.A.buy.$STRING.total;
+                }
+                
+                if(pos_resp.data.B) {
+                    thisShortAmount = pos_resp.data.B.buy.$STRING.total;
                 }
                 
                 res.send({
-                   'long': thisLongAmount,
-                   'short': thisShortAmount
+                    'long': thisLongAmount,
+                    'short': thisShortAmount
                 });
-            }
-        }, 'btc_usd', 'quarter', 1);
-        
-    } else if (thisName === '796' || thisName === 'futures796') {      
-            
-        futures796_private = new Futures796(req.exchange.apikey, req.exchange.secretkey);
-        futures796_private.getPositions(function(err, pos_resp) {
-            
-            var thisLongAmount = 0;
-            var thisShortAmount = 0;
-            
-            var $STRING = '10';
-            
-            if(pos_resp.data.A) {
-                thisLongAmount = pos_resp.data.A.buy.$STRING.total;
-            }
-            
-            if(pos_resp.data.B) {
-                thisShortAmount = pos_resp.data.B.buy.$STRING.total;
-            }
-            
-            res.send({
-                'long': thisLongAmount,
-                'short': thisShortAmount
-            });
 
-        });
-        
-    } else if (thisName === 'bitvc') {
-        res.send({
-            'long': 0,
-            'short': 0
-        });
-        
-        
-    } else {
-       res.status(500).send('ERROR: ' + thisName + ' Function getCurrentHolding() -- Not Found');
+            });
+            
+        } else if (thisName === 'bitvc') {
+            res.send({
+                'long': 0,
+                'short': 0
+            });
+            
+            
+        } else {
+           res.status(500).send('ERROR: ' + thisName + ' Function getCurrentHolding() -- Not Found');
+        }
     }
 };
 

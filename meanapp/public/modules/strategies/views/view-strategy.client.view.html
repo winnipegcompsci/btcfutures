@@ -62,10 +62,10 @@
                         </td>
                         <td>
                             <div data-ng-if="strategy.name == 'Long Biased Hedge'">
-                                {{ ((strategy.primaryExchanges[$index].holding_long) / (strategy.totalCoins * strategy.primaryExchanges[$index].ratio)) }} %
+                                {{ ( ((strategy.primaryExchanges[$index].holding_long) / (strategy.totalCoins * strategy.primaryExchanges[$index].ratio))*100).toFixed(2) }} %
                             </div>
                             <div data-ng-if="strategy.name == 'Short Biased Hedge'">
-                                {{ ((strategy.primaryExchanges[$index].holding_short) / (strategy.totalCoins * strategy.primaryExchanges[$index].ratio)) }} %
+                                {{ ( ((strategy.primaryExchanges[$index].holding_short) / (strategy.totalCoins * strategy.primaryExchanges[$index].ratio))*100).toFixed(2) }} %
                             </div>
                         </td>
                     </tr>
@@ -107,10 +107,10 @@
                             
                             <td>
                                 <div data-ng-if="strategy.name == 'Long Biased Hedge'">
-                                    {{ ((strategy.primaryExchanges[$index].holding_short) / (strategy.totalCoins * strategy.insuranceExchanges[$index].ratio))  }} %
+                                    {{ ( ((strategy.primaryExchanges[$index].holding_short) / (strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[$index].ratio))*100).toFixed(2)  }} %
                                 </div>
                                 <div data-ng-if="strategy.name == 'Short Biased Hedge'">
-                                    {{ ((strategy.primaryExchanges[$index].holding_long) / (strategy.totalCoins * strategy.insuranceExchanges[$index].ratio)) }} %
+                                    {{ ( ((strategy.primaryExchanges[$index].holding_long) / (strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[$index].ratio))*100).toFixed(2) }} %
                                 </div>                            
                             </td>
                         </tr>
