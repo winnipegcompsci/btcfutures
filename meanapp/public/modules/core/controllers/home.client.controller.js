@@ -28,7 +28,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
         $scope.getGraphPrices = function() {
             $http.get('/prices/graph/day')
                 .success(function(graphData) {
-                    $scope.chartConfig = {
+                    $scope.ltpChartConfig = {
                         options: {
                             chart: {
                                 zoomType: 'x'
@@ -57,7 +57,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                                         
                     for(var exchangeData in graphData) {
                         // console.log("Series: " + JSON.stringify(graphData[exchangeData]));                       
-                        $scope.chartConfig.series.push(graphData[exchangeData]);
+                        $scope.ltpChartConfig.series.push(graphData[exchangeData]);
                     }
                     
                 }) // end success.
