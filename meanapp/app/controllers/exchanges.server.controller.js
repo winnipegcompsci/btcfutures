@@ -272,7 +272,7 @@ exports.getCurrentHolding = function(req, res) {
     var thisName = req.exchange.name.toLowerCase().replace(' ', '');
     
     
-    if(process.env.NODE_ENV == 'development') {
+    if(process.env.NODE_ENV === 'development') {
         Trade.find({}, function(err, trades) {
             if(err) {
                 res.send(err);

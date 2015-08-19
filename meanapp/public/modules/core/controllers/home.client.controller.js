@@ -26,7 +26,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
         };
         
         $scope.getGraphPrices = function() {
-            $http.get('/prices/graph/day')
+            $http.get('/prices/graph/last')
                 .success(function(graphData) {
                     $scope.ltpChartConfig = {
                         options: {
@@ -45,7 +45,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                                 valueSuffix: ' USD'
                             },
                             lang: {
-                                noData: "Loading Data... "
+                                noData: 'Loading Data... '
                             },
                         },
                         series: [],
@@ -72,6 +72,12 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                     exchange.numTrades = 0;
                     exchange.longAmount = 0;
                     exchange.shortAmount = 0;
+                    exchange.longInvested = 0;
+                    exchange.shortInvested = 0;
+                    exchange.numBuysLong = 0;
+                    exchange.numBuysShort = 0;
+                    exchange.avgLongBuyPrice = 0;
+                    exchange.avgShortBuyPrice = 0;
                     
                     for(var i = 0; i < trades.length; i++) {
                         
@@ -81,21 +87,34 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                                 
                                 if(trades[i].bias === 'LONG') {
                                     exchange.longAmount += trades[i].amount;
+                                    exchange.longInvested += trades[i].price;
+                                    exchange.numBuysLong++;
+                                    
                                 } else if (trades[i].bias === 'SHORT') {
                                     exchange.shortAmount += trades[i].amount;
-                                }
-                               
+                                    exchange.shortInvested += trades[i].price;
+                                    exchange.numBuysShort++;
+                                }                               
                                 
                             } else if(trades[i].type === 'SELL') {
                                 exchange.numTrades = exchange.numTrades - 1;
                                 
                                 if(trades[i].bias === 'LONG') {
                                     exchange.longAmount -= trades[i].amount;
+                                    
                                 } else if (trades[i].bias === 'SHORT') {
                                     exchange.shortAmount -= trades[i].amount;
                                 }
                             }
                         }
+                    }
+                    
+                    if(exchange.numBuysLong !== 0) {
+                        exchange.avgLongBuyPrice = exchange.longInvested / exchange.numBuysLong;
+                    }
+                    
+                    if(exchange.numBuysShort !== 0) {
+                        exchange.avgShortBuyPrice = exchange.shortInvested / exchange.numBuysShort;
                     }
                 });
         };

@@ -4,19 +4,21 @@
         Notifications.load();
 	</div>
     -->
-    <div class="jumbotron text-center">
-        <div class="row">
-			<div class="col-md-12 col-md-offset-0 col-sm-8 col-sm-offset-2 col-xs-12" data-ng-init="getGraphPrices()">              
-                <highchart id="daygraph" config="ltpChartConfig"></highchart>
-			</div>
-		</div>
-		<br>
-		<div class="row">
-			<p class="lead">
-				<em>Currently Implementing Long Biased Hedge</em>
-			</p>
-		</div>
-	</div>
+    <div class="row">       
+        <div class="jumbotron text-center">
+            <div class="row">
+                <div class="col-md-12 col-md-offset-0 col-sm-8 col-sm-offset-2 col-xs-12" data-ng-init="getGraphPrices()">              
+                    <highchart id="daygraph" config="ltpChartConfig"></highchart>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <p class="lead">
+                    <em>Currently Implementing Long Biased Hedge</em>
+                </p>
+            </div>
+        </div>
+    </div>
 
     <div class="row" data-ng-init="getExchanges()">
         <div class="columns col-lg-4" data-ng-repeat="exchange in exchanges">
@@ -31,8 +33,11 @@
                     <div class="row text-left text-info">Realized Profit/Loss: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span> </div>
                     <div class="row text-left text-info">Unrealized Profit/Loss: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span> </div>
                     <br />
-                    <div class="row text-left text-success"> Holding {{exchange.longAmount.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> (Long) </div>
+                    <div class="row text-left text-success"> Holding {{exchange.longAmount.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> (Long) </div> 
+                    <div class="row text-right text-success"> (Avg Long Buy Price <span class="glyphicon glyphicon-usd"></span>{{exchange.avgLongBuyPrice.toFixed(5)}} ) </div>
+
                     <div class="row text-left text-success"> Holding {{exchange.shortAmount.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> (Short) </div>
+                    <div class="row text-right text-success"> (Avg Short Buy Price <span class="glyphicon glyphicon-usd"></span>{{exchange.avgShortBuyPrice.toFixed(5)}} )</div>
                 </div>
             </div>
         </div>
