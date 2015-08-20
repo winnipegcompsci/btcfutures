@@ -62,12 +62,16 @@ angular.module('trades').controller('TradesController', ['$scope', '$http', '$ro
 			$scope.trades = Trades.query();
             
             $scope.totalAmount = 0;
+            $scope.totalLong = 0;
+            $scope.totalShort = 0;
+            
             $scope.totalDiff = 0;
             $scope.totalProfitLoss = 0;
             $scope.sumLTP = 0;
             $scope.sumBuy = 0;
             
-            $scope.exchangeLTPs = {};
+            
+            $scope.numChecked = 0;
 		};
         
         //Find existing Trade
@@ -82,10 +86,7 @@ angular.module('trades').controller('TradesController', ['$scope', '$http', '$ro
             $http.get('exchanges/' + trade.exchange._id + '/getTicker')
                 .success(function (data) {
                     trade.exchange.ltp = Number(data.last).toFixed(2);
-                    
-                    // Set Scope so we don't have to search each time.
-                    $scope.exchangeLTPs[trade.exchange._id] = trade.exchange.ltp;
-                    
+                   
                     if(trade.bias === 'LONG') {
                         trade.curDiff = Number(trade.exchange.ltp - trade.price).toFixed(2);
                         trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
@@ -96,8 +97,23 @@ angular.module('trades').controller('TradesController', ['$scope', '$http', '$ro
 
                     if(trade.type === 'BUY') {
                         $scope.totalAmount += Number(trade.amount);
+                        
+                        if(trade.bias === 'LONG') {
+                            $scope.totalLong += Number(trade.amount);  
+                        } else if (trade.bias === 'SHORT') {
+                            $scope.totalShort += Number(trade.amount);
+                        }
+                        
+                    
                     } else if (trade.type === 'SELL') {
                         $scope.totalAmount -= Number(trade.amount);
+                    
+                        if(trade.bias === 'LONG') {
+                            $scope.totalLong -= Number(trade.amount);
+                        } else if (trade.bias === 'SHORT') {
+                            $scope.totalShort -= Number(trade.amount);
+                        }
+                    
                     }
 
                     $scope.totalDiff += Number(trade.curDiff);
@@ -127,8 +143,10 @@ angular.module('trades').controller('TradesController', ['$scope', '$http', '$ro
         $scope.checkClicked = function(trade) {                        
             if(trade.checked) {
                 trade.type = "CHECKED";
+                $scope.numChecked++;
             } else {
                 trade.type = trade.backup;
+                $scope.numChecked--;
             }
         };
 	}

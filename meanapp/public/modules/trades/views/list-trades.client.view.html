@@ -6,6 +6,7 @@
     <div class="row">        
         <a class="pull-right btn btn-info" href="#!/trades/all">View All Trade History</a>
         <ul class="list-group">
+            <!-- Headings Row -->
             <li class="list-group-item list-group-item-info">
                 <div class="row">
                     <div class="columns col-lg-2"><strong>Date Opened</strong></div>
@@ -25,6 +26,31 @@
                 </div>
             </li>
             
+            <!-- New Method: COLOUR BY PROFIT, SORT ON PROFIT. -->
+            <li data-ng-repeat="trade in trades | orderBy:'-profitloss' " 
+                data-ng-class="{'true':'list-group-item list-group-item-success', 'false':'list-group-item list-group-item-danger'}[trade.profitloss >= 0]" 
+                data-ng-mouseover="hoverOnTrade(trade)" 
+                data-ng-mouseout="removeHoverOnTrade(trade)">
+                <div class="row" data-ng-init="getExchangeValues(trade)">
+                    <div class="columns col-lg-2">{{trade.created | date:'short'}}</div>
+                    <div class="columns col-lg-1">{{trade.exchange.name}}</div>
+                    <div class="columns col-lg-1">{{trade.bias}}</div>
+                    <div class="columns col-lg-1">{{trade.backup || trade.type}}</div>
+                    <div class="columns col-lg-1">{{trade.amount.toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span></div>
+                    <div class="columns col-lg-1">{{trade.price.toFixed(2)}}</div>
+                    <div class="columns col-lg-1">${{trade.exchange.ltp || '--'}}</div>
+                    <div class="columns col-lg-1">${{trade.curDiff || '--'}}</div>
+                    <div class="columns col-lg-1">${{trade.profitloss || '--'}}</div>
+                    <div class="columns col-lg-2 pull-right">
+                        <label class="checkbox-inline">
+                            <input data-ng-model="trade.checked" data-ng-change="checkClicked(trade)"
+                                id="{{trade._id}}" type="checkbox" value="">Close Trade
+                        </label>
+                    </div>
+                </div>
+            </li>
+            
+            <!-- OLD METHOD: COLOUR BY BUY/SELL
             <li data-ng-repeat="trade in trades | orderBy:'-created' " 
                 data-ng-class="{'BUY':'list-group-item list-group-item-success', 'SELL':'list-group-item list-group-item-danger', 'HOVER':'list-group-item list-group-item-info', 'CHECKED':'list-group-item list-group-item-warning'}[trade.type]" 
                 data-ng-mouseover="hoverOnTrade(trade)" 
@@ -47,16 +73,24 @@
                     </div>
                 </div>
             </li>
+            -->
             
+            <!-- Statistics Row -->
             <li class="list-group-item list-group-item-info">
                 <div class="row" data-ng-init="">    
                     <div class="columns col-lg-2"><h4>Summary:</h4></div>
-                    <div class="columns col-lg-1"></div>
-                    <div class="columns col-lg-1"></div>
+                    <div class="columns col-lg-2">
+                        <div class="row pull-right">
+                            Long Held: {{totalLong.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span>
+                        </div>
+                        <div class="row pull-right">
+                            Short Held: {{totalShort.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span>
+                        </div>
+                    </div>
                     <div class="columns col-lg-1"></div>
                     
                     <div class="columns col-lg-1">
-                        Holding: {{totalAmount.toFixed(2)}} <span class="glyphicon glyphicon-bitcoin"></span>
+                        All Held: {{totalAmount.toFixed(2)}} <span class="glyphicon glyphicon-bitcoin"></span>
                     </div>
                     
                     <div class="columns col-lg-1">
@@ -68,7 +102,7 @@
                     </div>
                     
                     <div class="columns col-lg-1">
-                        Difference: ${{totalDiff.toFixed(2)}}
+                        <!-- Difference: ${{totalDiff.toFixed(2)}} -->
                     </div>
                     
                     <div class="columns col-lg-1">
@@ -78,7 +112,12 @@
             </li>
         </ul>
         <br />
-        <a class="pull-right btn btn-warning" href="#!/trades/closeChecked">Close Checked Positions</a>
+        <a ng-if="numChecked > 0" class="pull-right btn btn-success" href="#!/trades/closeChecked">
+            Close {{numChecked}} Checked Positions
+        </a>
+        <a ng-if="numChecked <= 0" class="pull-right btn btn-danger disabled" href="">
+            Choose position(s) to close first.
+        </a>
     </div>
     
     <div class="alert alert-warning text-center" data-ng-hide="!trades.$resolved || trades.length">
