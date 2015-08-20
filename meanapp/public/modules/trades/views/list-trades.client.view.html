@@ -1,59 +1,77 @@
 <section data-ng-controller="TradesController" data-ng-init="find()">
     <div class="page-header">
-        <h1>Trades / Open Positions</h1>
-        <a class="pull-right btn btn-info" href="#!/trades/all">View All Trade History</a>
-        <br />
-        <div> Total Profit / Losses, Total Positions Open, Using Strategy, etc.</div>
+        <h1>Trades / Open Positions</h1>    
     </div>
-    <div class="list-group">
-        <table width="100%" border="1px solid black" cellpadding="10">
-            <thead>
-            <tr>
-                <th>Opened </th>
-                <th>Trade ID</th>
-                <th>Amount </th>
-                <th>Exchange </th>
-                <th>Type </th>
-                <th>Price </th>
-                <th>Closing / Current Price </th>
-                <th>Difference </th>
-                <th>Profit / Loss </th>
-                <th>Status / Close </th>
-            </tr>
-            </thead>
+    
+    <div class="row">        
+        <a class="pull-right btn btn-info" href="#!/trades/all">View All Trade History</a>
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-info">
+                <div class="row">
+                    <div class="columns col-lg-2"><strong>Date Opened</strong></div>
+                    <div class="columns col-lg-1"><strong>Exchange</strong></div>
+                    <div class="columns col-lg-1"><strong>Bias</strong></div>
+                    <div class="columns col-lg-1"><strong>Type</strong></div>
+                    <div class="columns col-lg-1"><strong>Amount</strong></div>
+                    <div class="columns col-lg-1"><strong>Buy Price</strong></div>
+                    <div class="columns col-lg-1"><strong>Exchange LTP</strong></div>
+                    <div class="columns col-lg-1"><strong>Difference</strong></div>
+                    <div class="columns col-lg-1"><strong>Profit/Loss</strong></div>
+                    <div class="columns col-lg-1 pull-right">
+                        <label class="checkbox-inline">
+                            <input type="checkbox" value="">Close All
+                        </label>
+                    </div>
+                </div>
+            </li>
             
-            <tbody>
-            <tr data-ng-repeat="trade in trades | orderBy:'-created' ">
-                <td> <span data-ng-bind="trade.created | date:'short'"></span> </td>
-                <td> <a data-ng-href="#!/trades/{{trade._id}}"> {{ trade._id }} </a></td>
-                <td> <span data-ng-bind="trade.amount"> </span> BTC </td>
-                <td> <span data-ng-bind="trade.exchange.name"> </span> </td>
-                <td> <span data-ng-bind="trade.type | uppercase"> </span> </td>
-                <td> <span data-ng-bind="trade.price"> </span> USD </td>
-                <td> <span data-ng-bind="getCurrentPriceById({{trade.exchange}})"> </span> USD </td>
-                <td> {{trade.exchange.getCurrentPrice() - trade.price}} </td>
-                <td> {{trade.amount * ( trade.price - trade.exchange.getCurrentPrice() ) }} </td>
-                <td data-ng-if="trade.status == 0">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox"> Close Position
-                            
+            <li data-ng-repeat="trade in trades | orderBy:'-created' " 
+                data-ng-class="{'BUY':'list-group-item list-group-item-success', 'SELL':'list-group-item list-group-item-danger', 'HOVER':'list-group-item list-group-item-info', 'CHECKED':'list-group-item list-group-item-warning'}[trade.type]" 
+                data-ng-mouseover="hoverOnTrade(trade)" 
+                data-ng-mouseout="removeHoverOnTrade(trade)">
+                <div class="row" data-ng-init="getExchangeValues(trade)">
+                    <div class="columns col-lg-2">{{trade.created | date:'short'}}</div>
+                    <div class="columns col-lg-1">{{trade.exchange.name}}</div>
+                    <div class="columns col-lg-1">{{trade.bias}}</div>
+                    <div class="columns col-lg-1">{{trade.backup || trade.type}}</div>
+                    <div class="columns col-lg-1">{{trade.amount.toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span></div>
+                    <div class="columns col-lg-1">{{trade.price.toFixed(2)}}</div>
+                    <div class="columns col-lg-1">${{trade.exchange.ltp || '--'}}</div>
+                    <div class="columns col-lg-1">${{trade.curDiff || '--'}}</div>
+                    <div class="columns col-lg-1">${{trade.profitloss || '--'}}</div>
+                    <div class="columns col-lg-2 pull-right">
+                        <label class="checkbox-inline">
+                            <input data-ng-model="trade.checked" data-ng-change="checkClicked(trade)"
+                                id="{{trade._id}}" type="checkbox" value="">Close Trade
                         </label>
                     </div>
-                </td>
-                <td data-ng-if="trade.status == 1">
-                    <div ng-model="warning">
-                        <label>
-                        CLOSED
-                        </label>
+                </div>
+            </li>
+            
+            <li class="list-group-item list-group-item-info">
+                <div class="row" data-ng-init="">    
+                    <div class="columns col-lg-2"><h4>Summary:</h4></div>
+                    <div class="columns col-lg-1"></div>
+                    <div class="columns col-lg-1"></div>
+                    <div class="columns col-lg-1"></div>
+                    <div class="columns col-lg-1">
+                        Holding: {{totalAmount.toFixed(2)}} <span class="glyphicon glyphicon-bitcoin"></span>
                     </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                    <div class="columns col-lg-1">
+                        Buy Avg: $ {{ ((sumBuy) / (trades.length)).toFixed(2) }}
+                    </div>
+                    <div class="columns col-lg-1">
+                        LTP Avg: $ {{ ((sumLTP) / (trades.length)).toFixed(2) }}
+                    </div>
+                    <div class="columns col-lg-1">Difference: ${{totalDiff.toFixed(2)}}</div>
+                    <div class="columns col-lg-1">Profit/Loss: ${{totalProfitLoss.toFixed(2)}}</div>
+                </div>
+            </li>
+        </ul>
         <br />
         <a class="pull-right btn btn-warning" href="#!/trades/closeChecked">Close Checked Positions</a>
     </div>
+    
     <div class="alert alert-warning text-center" data-ng-hide="!trades.$resolved || trades.length">
     	No Trades yet, why don't you <a href="/#!/trades/create">create one</a>?
     </div>

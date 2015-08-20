@@ -57,7 +57,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                     };
                                         
                     for(var exchangeData in graphData) {
-                        console.log("Returned Data: " + JSON.stringify(exchangeData));
+                        // console.log("Returned Data: " + JSON.stringify(exchangeData));
                         $scope.ltpChartConfig.series.push(graphData[exchangeData]);
                     }
                     

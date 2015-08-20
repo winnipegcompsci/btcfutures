@@ -60,20 +60,99 @@ angular.module('trades').controller('TradesController', ['$scope', '$http', '$ro
 		// Find a list of Trades
 		$scope.find = function() {
 			$scope.trades = Trades.query();
+            
+            $scope.totalAmount = 0;
+            $scope.totalDiff = 0;
+            $scope.totalProfitLoss = 0;
+            $scope.sumLTP = 0;
+            $scope.sumBuy = 0;
+            
+            $scope.exchangeLTPs = {};
 		};
-
-		// Find existing Trade
+        
+        //Find existing Trade
 		$scope.findOne = function() {
 			$scope.trade = Trades.get({ 
 				tradeId: $stateParams.tradeId
 			});
 		};
+               
         
-        $scope.getCurrentPriceById = function(exchange_id) {
-            $http.get('exchanges/' + exchange_id + '/getTicker')
-                .success(function (data) {
-                    return Number(data.last).toFixed(2);
-                });
+        $scope.getExchangeValues = function(trade) {
+            if(typeof $scope.exchangeLTPs[trade.exchange._id] !== 'undefined') {
+                console.log("PULLING PRICE FROM MEMORY");
+                if(trade.bias === 'LONG') {
+                    trade.curDiff = Number(trade.exchange.ltp - trade.price).toFixed(2);
+                    trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
+                } else if (trade.bias === 'SHORT') {
+                    trade.curDiff = Number(trade.price - trade.exchange.ltp).toFixed(2);
+                    trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
+                }
+
+                if(trade.type === 'BUY') {
+                    $scope.totalAmount += Number(trade.amount);
+                } else if (trade.type === 'SELL') {
+                    $scope.totalAmount -= Number(trade.amount);
+                }
+
+                $scope.totalDiff += Number(trade.curDiff);
+                $scope.totalProfitLoss += Number(trade.profitloss);
+                
+                $scope.sumLTP += Number(trade.exchange.ltp);
+                $scope.sumBuy += Number(trade.price);
+            } else {  // Else not found in list.
+                console.log("PULLING PRICE FROM API");
+                $http.get('exchanges/' + trade.exchange._id + '/getTicker')
+                    .success(function (data) {
+                        trade.exchange.ltp = Number(data.last).toFixed(2);
+                        
+                        // Set Scope so we don't have to search each time.
+                        $scope.exchangeLTPs[trade.exchange._id] = trade.exchange.ltp;
+                        
+                        if(trade.bias === 'LONG') {
+                            trade.curDiff = Number(trade.exchange.ltp - trade.price).toFixed(2);
+                            trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
+                        } else if (trade.bias === 'SHORT') {
+                            trade.curDiff = Number(trade.price - trade.exchange.ltp).toFixed(2);
+                            trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
+                        }
+
+                        if(trade.type === 'BUY') {
+                            $scope.totalAmount += Number(trade.amount);
+                        } else if (trade.type === 'SELL') {
+                            $scope.totalAmount -= Number(trade.amount);
+                        }
+
+                        $scope.totalDiff += Number(trade.curDiff);
+                        $scope.totalProfitLoss += Number(trade.profitloss);
+                        
+                        $scope.sumLTP += Number(trade.exchange.ltp);
+                        $scope.sumBuy += Number(trade.price);
+
+                    });
+            }
+        };
+        
+        
+        $scope.hoverOnTrade = function(trade) {
+            if(trade.type != 'CHECKED') {
+                trade.backup = trade.type;
+                trade.type = 'HOVER';
+            }
+        };
+        
+        $scope.removeHoverOnTrade = function(trade) {
+            if(trade.type != 'CHECKED') {
+                trade.type = trade.backup;
+            }
+        };
+        
+        $scope.checkClicked = function(trade) {                        
+            if(trade.checked) {
+                trade.type = "CHECKED";
+            } else {
+                trade.type = trade.backup;
+            }
         };
 	}
 ]);
