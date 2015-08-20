@@ -79,58 +79,35 @@ angular.module('trades').controller('TradesController', ['$scope', '$http', '$ro
                
         
         $scope.getExchangeValues = function(trade) {
-            if(typeof $scope.exchangeLTPs[trade.exchange._id] !== 'undefined') {
-                console.log("PULLING PRICE FROM MEMORY");
-                if(trade.bias === 'LONG') {
-                    trade.curDiff = Number(trade.exchange.ltp - trade.price).toFixed(2);
-                    trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
-                } else if (trade.bias === 'SHORT') {
-                    trade.curDiff = Number(trade.price - trade.exchange.ltp).toFixed(2);
-                    trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
-                }
+            $http.get('exchanges/' + trade.exchange._id + '/getTicker')
+                .success(function (data) {
+                    trade.exchange.ltp = Number(data.last).toFixed(2);
+                    
+                    // Set Scope so we don't have to search each time.
+                    $scope.exchangeLTPs[trade.exchange._id] = trade.exchange.ltp;
+                    
+                    if(trade.bias === 'LONG') {
+                        trade.curDiff = Number(trade.exchange.ltp - trade.price).toFixed(2);
+                        trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
+                    } else if (trade.bias === 'SHORT') {
+                        trade.curDiff = Number(trade.price - trade.exchange.ltp).toFixed(2);
+                        trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
+                    }
 
-                if(trade.type === 'BUY') {
-                    $scope.totalAmount += Number(trade.amount);
-                } else if (trade.type === 'SELL') {
-                    $scope.totalAmount -= Number(trade.amount);
-                }
+                    if(trade.type === 'BUY') {
+                        $scope.totalAmount += Number(trade.amount);
+                    } else if (trade.type === 'SELL') {
+                        $scope.totalAmount -= Number(trade.amount);
+                    }
 
-                $scope.totalDiff += Number(trade.curDiff);
-                $scope.totalProfitLoss += Number(trade.profitloss);
-                
-                $scope.sumLTP += Number(trade.exchange.ltp);
-                $scope.sumBuy += Number(trade.price);
-            } else {  // Else not found in list.
-                console.log("PULLING PRICE FROM API");
-                $http.get('exchanges/' + trade.exchange._id + '/getTicker')
-                    .success(function (data) {
-                        trade.exchange.ltp = Number(data.last).toFixed(2);
-                        
-                        // Set Scope so we don't have to search each time.
-                        $scope.exchangeLTPs[trade.exchange._id] = trade.exchange.ltp;
-                        
-                        if(trade.bias === 'LONG') {
-                            trade.curDiff = Number(trade.exchange.ltp - trade.price).toFixed(2);
-                            trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
-                        } else if (trade.bias === 'SHORT') {
-                            trade.curDiff = Number(trade.price - trade.exchange.ltp).toFixed(2);
-                            trade.profitloss = Number(trade.curDiff * trade.amount).toFixed(2);
-                        }
+                    $scope.totalDiff += Number(trade.curDiff);
+                    $scope.totalProfitLoss += Number(trade.profitloss);
+                    
+                    $scope.sumLTP += Number(trade.exchange.ltp);
+                    $scope.sumBuy += Number(trade.price);
 
-                        if(trade.type === 'BUY') {
-                            $scope.totalAmount += Number(trade.amount);
-                        } else if (trade.type === 'SELL') {
-                            $scope.totalAmount -= Number(trade.amount);
-                        }
-
-                        $scope.totalDiff += Number(trade.curDiff);
-                        $scope.totalProfitLoss += Number(trade.profitloss);
-                        
-                        $scope.sumLTP += Number(trade.exchange.ltp);
-                        $scope.sumBuy += Number(trade.price);
-
-                    });
-            }
+                });
+            // End of HTTP GET Req.
         };
         
         

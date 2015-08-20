@@ -54,17 +54,26 @@
                     <div class="columns col-lg-1"></div>
                     <div class="columns col-lg-1"></div>
                     <div class="columns col-lg-1"></div>
+                    
                     <div class="columns col-lg-1">
                         Holding: {{totalAmount.toFixed(2)}} <span class="glyphicon glyphicon-bitcoin"></span>
                     </div>
+                    
                     <div class="columns col-lg-1">
                         Buy Avg: $ {{ ((sumBuy) / (trades.length)).toFixed(2) }}
                     </div>
+                    
                     <div class="columns col-lg-1">
                         LTP Avg: $ {{ ((sumLTP) / (trades.length)).toFixed(2) }}
                     </div>
-                    <div class="columns col-lg-1">Difference: ${{totalDiff.toFixed(2)}}</div>
-                    <div class="columns col-lg-1">Profit/Loss: ${{totalProfitLoss.toFixed(2)}}</div>
+                    
+                    <div class="columns col-lg-1">
+                        Difference: ${{totalDiff.toFixed(2)}}
+                    </div>
+                    
+                    <div class="columns col-lg-1">
+                        Profit/Loss: ${{totalProfitLoss.toFixed(2)}}
+                    </div>
                 </div>
             </li>
         </ul>
