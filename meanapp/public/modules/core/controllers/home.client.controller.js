@@ -26,8 +26,9 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
         };
         
         $scope.getGraphPrices = function() {
-            $http.get('/prices/graph/last')
+            $http.get('/prices/graph/minute')
                 .success(function(graphData) {
+                    
                     $scope.ltpChartConfig = {
                         options: {
                             chart: {
@@ -46,7 +47,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                             },
                             lang: {
                                 noData: 'Loading Data... '
-                            },
+                            }
                         },
                         series: [],
                         title: {
@@ -56,7 +57,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                     };
                                         
                     for(var exchangeData in graphData) {
-                        // console.log("Series: " + JSON.stringify(graphData[exchangeData]));                       
+                        console.log("Returned Data: " + JSON.stringify(exchangeData));
                         $scope.ltpChartConfig.series.push(graphData[exchangeData]);
                     }
                     

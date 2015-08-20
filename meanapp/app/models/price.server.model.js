@@ -17,6 +17,7 @@ var PriceSchema = new Schema({
     },
 	timestamp: {
 		type: Date,
+        index: true,
 		default: Date.now
 	},
 	exchange: {

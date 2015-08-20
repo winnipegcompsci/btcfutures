@@ -154,88 +154,61 @@ exports.getGraphPrices = function(req, res) {
 exports.getMinuteGraphPrices = function(req, res) {
     var startDate;
     var endDate;
-    
-    Price.findOne({}, 'price timestamp exchange')
-    .sort('timestamp')
-    .exec(function(err, price) {
-        startDate = price.timestamp;
         
-        getResultsInRange(startDate, endDate);
-    });
-    
     Price.findOne({}, 'price timestamp exchange')
     .sort('-timestamp')
     .exec(function(err, price) {
         endDate = price.timestamp;
         
+        var startDate = new Date(endDate);
+        startDate.setDate(endDate.getDate() - 7);
+        
         getResultsInRange(startDate, endDate);
     });
     
-    
+    // METHOD 2:
     function getResultsInRange(startDate, endDate) {
         if(typeof startDate !== 'undefined' && typeof endDate !== 'undefined') {
+            console.log('Querying prices from %s until %s', startDate, endDate);
+            
             Price.find({timestamp: {$gte: startDate, $lte: endDate}}, 'price timestamp exchange')
-            // .sort('-timestamp')
-            // .populate('exchange')
+            .sort('timestamp')
+            .populate('exchange')
             .exec(function(err, prices) {
                 if(err) {
                     res.jsonp({'error': err});
                 } else {
-                    console.log("Found: " + prices.length + " prices");
-                    res.jsonp(prices);
+                    console.log('Returned %s prices... ', prices.length);
+                    
+                    var priceData = {};
+                    
+                    for(var i = 0; i < prices.length; i += 10) {
+                        
+                        if(typeof priceData[prices[i].exchange.name] === 'undefined') {
+                            console.log('Creating Object for: %s', prices[i].exchange.name);
+                            priceData[prices[i].exchange.name] = {
+                                name: prices[i].exchange.name,
+                                data: []
+                            };
+                            
+                            priceData[prices[i].exchange.name].data.push([
+                                prices[i].timestamp.getTime(),
+                                prices[i].price
+                            ]);
+                        } else {                                
+                            priceData[prices[i].exchange.name].data.push([
+                                prices[i].timestamp.getTime(),
+                                prices[i].price
+                            ]);
+                        }
+                    }
+                    
+                    res.jsonp(priceData);
                 }
             });
             
         }
-    }
-    
-    
-    /*
-    function getResultsInRange(startDate, endDate) {
-        if(typeof startDate !== 'undefined' && typeof endDate !== 'undefined') {
-            console.log('Getting Results from %s until %s', startDate, endDate);
-            
-            var currentDate = startDate;
-            currentDate.setSeconds(0);
-            
-            var priceData = {};
-            
-            while(currentDate < endDate) {                
-                Price.findOne({'timestamp': {$lte: currentDate}}, 'price timestamp exchange')
-                // .populate('exchange')
-                .sort('-timestamp')
-                .exec(function(err, price) { 
-                    if(err) {
-                        console.log('ERROR: ' + err);
-                    } else if (price !== null) {               
-                        if(typeof priceData[price.exchange.name] === 'undefined') {
-                            priceData[price.exchange.name] = {
-                                name: price.exchange.name,
-                                data: []
-                            };
-                            
-                            priceData[price.exchange.name].data.push([
-                                price.timestamp.getTime(),
-                                price.price
-                            ]);
-                        } else {
-                            priceData[price.exchange.name].data.push([
-                                price.timestamp.getTime(),
-                                price.price
-                            ]);
-                        }                        
-                    }
-                });
-                
-                
-                // Increment Current Date.
-                currentDate.setMinutes(currentDate.getMinutes() + 2);
-            }
-            
-            res.jsonp(priceData);
-        }//end if startDate and endDate are defined (giving us a valid date range).
-    }// end getResultsInRange()
-    */
+    }   
 }; // end getMinuteGraphPrices()
 
 
