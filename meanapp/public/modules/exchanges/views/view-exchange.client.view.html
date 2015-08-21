@@ -1,118 +1,73 @@
 <section data-ng-controller="ExchangesController" data-ng-init="findOne()">
 	<div class="page-header">
 		<h1 data-ng-bind="exchange.name"></h1>
-        <span class="pull-right" data-ng-init="getUserInfo(exchange)">
-            <span>Balance</span>
-            {{userinfo.info.btc.balance.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> 
-            <span>Account Equity:</span>
-            {{userinfo.info.btc.rights.toFixed(2)}}  <span class="glyphicon glyphicon-usd"></span> 
-        </span>
-        <br />
-	</div>
-        
-    <div class="row">
-        <div class="panel panel-info">
-            <div class="panel-heading">Current Contracts</div>
-            <div class="panel-body">
-            <ul>
-                <p data-ng-if="userinfo.info.btc.contracts.length == 0">
-                    <strong class="text-center">Not Holding Any Contracts</strong>
-                </p>
-                
-                <li data-ng-repeat="contract in userinfo.info.btc.contracts">
-                    Available: {{contract.available}}
-                    Balance: {{contract.balance}}
-                    Bond: {{contract.bond}}
-                    Contract ID: {{contract.contract_id}}
-                    Contract Type: {{contract.contract_type}}
-                    Frozen: {{contract.freeze}}
-                    Profit: {{contract.profit}}
-                    Unrealized Profit: {{contract.unprofit}}
-                </li>
-            </ul>
+        <small class="pull-right">
+            <div class="row text-right">
+                Current Futures Index Price: ${{future_index.future_index}} USD
+            </div>
+            <div class="row text-right">
+                Future Hold Amount: {{future_hold_amount[0].amount}} <span class="glyphicon glyphicon-bitcoin"></span> (Contract: {{future_hold_amount[0].contract_name}} )
+            </div>
+            <div class="row text-right">
+                Current Exchange Rate: {{exchange_rate.rate}} <span class="glyphicon glyphicon-yen"></span> = 1 USD 
             </div>
             
-        </div>           
-        <br />
-        
+        </small>
        
-        <div class="well" data-ng-init="getPricesFromDB()">
-            <div id="chart" style="width:100%; height:300px;"></div>
-            {{chartData}}
+        <br />
+	</div>
+        
+    <div class="row" data-ng-init="getExchangeData(exchange)">        
+        <div class="row">
+            <div class="panel panel-success">
+                <div class="panel-heading">Current Price Information</div>
+                <div class="panel-body">
+                    <div class="columns col-lg-3 text-left">Contract ID: {{future_ticker.contract_id}}</div>
+                    <div class="columns col-lg-1">Buy: {{future_ticker.buy || "--"}}</div>
+                    <div class="columns col-lg-1">High: {{future_ticker.high || "--"}}</div>
+                    <div class="columns col-lg-2"><h3>Last: ${{future_ticker.last || "--"}}</h3></div>
+                    <div class="columns col-lg-1">Low: {{future_ticker.low || "--"}} </div>
+                    <div class="columns col-lg-1">Sell: {{future_ticker.sell || "--"}} </div>
+                    <div class="columns col-lg-3 text-right">Volume: {{future_ticker.vol || "--"}} <span class="glyphicon glyphicon-bitcoin"></span> </div>
+                </div>
+            </div>
         </div>
         
         
-        <div data-ng-init="getTrades()">
-            <h3> Recent Trades on {{exchange.name}} </h3>
-            <table id="trades_table" class="table" border="1px solid" width="100%">
-                <thead>
-                    <tr class="info">
-                        <th>Date</th>
-                        <th>Amount</th>
-                        <th>Price</th>
-                        <th>TID</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr data-ng-class="{'table success': trade.type === 'buy', 'table danger': trade.type === 'sell'}" data-ng-repeat="trade in trades track by trade.tid | orderBy:'-trade.date_ms'" post-repeat-directive>
-                        <td> {{trade.date_ms | date:'medium'}} </td> 
-                        <td> {{trade.amount.toFixed(5)}} <span class="pull-left glyphicon glyphicon-bitcoin"></span></td>
-                        <td> {{trade.price.toFixed(2)}} <span class="pull-left glyphicon glyphicon-usd"></span></td>
-                        <td> {{trade.tid}} </td>
-                        <td> {{trade.type | uppercase}} </td>
-                    </tr>
-                </tbody>
-            </table>      
+        <div class="row">
+            <div class="columns col-lg-5">
+                <div class="panel panel-info">
+                    <div class="panel-heading">{{exchange.name}} Market Depth</div>
+                    <div class="panel-body">
+                        <ul class="list-group pull-left">
+                            <li class="list-group-item list-group-item-info">
+                                Amount @ Ask Price
+                            </li>
+                            
+                            <li class="list-group-item list-group-item-danger text-right" data-ng-repeat='ask in future_depth.asks'>
+                                {{ask[1].toFixed(3)}} <span class="glyphicon glyphicon-bitcoin"></span> @ ${{ask[0].toFixed(2)}}
+                            </li>
+                        </ul>
+                        <ul class="list-group pull-right">
+                            <li class="list-group-item list-group-item-info">
+                                Amount @ Bid Price
+                            </li>
+                            
+                            <li class="list-group-item list-group-item-success text-right" data-ng-repeat='bid in future_depth.bids'>
+                                {{bid[1].toFixed(3)}} <span class="glyphicon glyphicon-bitcoin"></span> @ ${{bid[0].toFixed(2)}}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns col-lg-7">
+                <highchart id="tradechart" config="tradeChartConfig"></highchart>
+            </div>
+        </div> <!-- End of row -->
+                        
+        <div class="row">
+            <highchart id="klinechart" config="klineChartConfig"></highchart>
         </div>
     </div>
-	<small data-ng-init="">
-		<em class="text-muted">
-            <h4 class="pull-right list-group-item-heading">Last Price: </h4>
-            <div class="row">
-                Last, High, Low, Buy, Sell
-			</div>            
-		</em>
-	</small>
-    <div class="pull-right" data-ng-show="((authentication.user) && (authentication.user._id == exchange.user._id))">
-		<a class="btn btn-primary" href="/#!/exchanges/{{exchange._id}}/edit">
-			<i class="glyphicon glyphicon-edit"> Edit</i>
-		</a>
-		<a class="btn btn-primary" data-ng-click="remove();">
-			<i class="glyphicon glyphicon-trash"> Delete</i>
-		</a>
-	</div>
 </section>
-
-<script type="text/javascript-lazy">
-$(document).ready(function(){
-    $(function drawChart() {
-        if(typeof chartData !== 'undefined') {
-            $('#chart').highcharts({
-                chart: {
-                    type: 'line'
-                },
-                title: {
-                    text: 'Exchange Price over Time'
-                },
-                xAxis: {
-                    categories: chartData.timestamps         
-                },
-                yAxis: {
-                    title: {
-                        text: 'Price'
-                    }
-                },
-                series: [{
-                    name: 'Price',
-                    data: chartData.prices
-                }]
-            });
-        } else {
-            console.log("Trying to draw chart again in 10 seconds");
-            setTimeout(drawChart, 3 * 1000);
-        }
-    });
-});
-</script>

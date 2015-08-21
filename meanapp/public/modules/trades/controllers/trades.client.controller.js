@@ -128,26 +128,31 @@ angular.module('trades').controller('TradesController', ['$scope', '$http', '$ro
         
         
         $scope.hoverOnTrade = function(trade) {
-            if(trade.type != 'CHECKED') {
+            if(trade.type !== 'CHECKED') {
                 trade.backup = trade.type;
                 trade.type = 'HOVER';
             }
         };
         
         $scope.removeHoverOnTrade = function(trade) {
-            if(trade.type != 'CHECKED') {
+            if(trade.type !== 'CHECKED') {
                 trade.type = trade.backup;
             }
         };
         
         $scope.checkClicked = function(trade) {                        
             if(trade.checked) {
-                trade.type = "CHECKED";
+                trade.type = 'CHECKED';
                 $scope.numChecked++;
             } else {
                 trade.type = trade.backup;
                 $scope.numChecked--;
             }
         };
+        
+        $scope.orderByProfitLossFunction = function(trade) {
+            trade.profitloss = parseFloat(trade.profitloss);
+            return parseFloat(trade.profitloss);
+        }
 	}
 ]);

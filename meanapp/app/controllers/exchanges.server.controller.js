@@ -227,10 +227,6 @@ exports.getFutureCandles = function(req, res) {
     }    
 };
 
-exports.getFuturePositions = function(req, res) {
-    
-};
-
 exports.getUserInfo = function(req, res) {
     var thisName = req.exchange.name.toLowerCase().replace(' ', '');
     
@@ -368,5 +364,316 @@ exports.getCurrentHolding = function(req, res) {
     }
 };
 
+/* 
+API Functions
+*/
 
+// Future Price Functions (Public Client -- GET Requests)
+exports.future_ticker = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        var publicClient = new OKCoin();
+        
+        publicClient.getFutureTicker(function(err, ticker_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+            
+            return res.send(ticker_resp.ticker);
+        }, 'btc_usd', 'quarter');
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+    
+};
 
+exports.future_depth = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+
+    if(thisName === 'okcoin') {
+        var publicClient = new OKCoin();
+        
+        publicClient.getFutureDepth(function(err, depth_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+            
+            return res.send(depth_resp);
+        }, 'btc_usd', 'quarter', 5);
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }    
+    
+};
+
+exports.future_trades = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        var publicClient = new OKCoin();
+        
+        publicClient.getFutureTrades(function(err, trades_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+            
+            return res.send(trades_resp);          
+        }, 'btc_usd', 'quarter');
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_index = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        var publicClient = new OKCoin();
+        
+        publicClient.getFutureIndex(function(err, index_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+            
+            return res.send(index_resp);
+        }, 'btc_usd');
+       
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.exchange_rate = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+
+    if(thisName === 'okcoin') {
+        var publicClient = new OKCoin();
+        
+        publicClient.getExchangeRate(function(err, exchange_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+            
+            return res.send(exchange_resp);
+        });
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_estimated_price = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');  
+
+    if(thisName === 'okcoin') {
+        var publicClient = new OKCoin();
+        
+        publicClient.getFutureEstimatedPrice(function(err, estimated_price_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+            
+            return res.send(estimated_price_resp);
+        }, 'btc_usd');
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+    
+};
+
+exports.future_kline = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var publicClient = new OKCoin();
+        
+        publicClient.getFutureKline(function(err, kline_resp) {
+            if(err) {
+                res.status(500).send(err);
+            }
+            
+            return res.send(kline_resp);
+            
+        }, 'btc_usd', '1min', 'quarter'); 
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_hold_amount = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var publicClient = new OKCoin();
+        
+        publicClient.getFutureHoldAmount(function(err, holding_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+            
+            return res.send(holding_resp);
+        }, 'btc_usd', 'quarter');
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+// Futures Trade Functions (Private Client --> POST Requests)
+exports.future_userinfo = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_position = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+       
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+    
+};
+
+exports.future_trade = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_trades_history = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_batch_trade = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_cancel = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_order_info = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+    
+};
+
+exports.future_orders_info = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_userinfo_fixed = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_position_fixed = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};
+
+exports.future_explosive = function(req, res) {
+	var thisName = req.exchange.name.toLowerCase().replace(' ', '');    
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        
+    } else {
+        res.send({error: 'This function has not been implemented yet for ' + req.exchange.name});
+    }
+
+};

@@ -27,7 +27,7 @@
             </li>
             
             <!-- New Method: COLOUR BY PROFIT, SORT ON PROFIT. -->
-            <li data-ng-repeat="trade in trades | orderBy:'-profitloss' " 
+            <li data-ng-repeat="trade in trades | orderBy:orderByProfitLossFunction:true" 
                 data-ng-class="{'true':'list-group-item list-group-item-success', 'false':'list-group-item list-group-item-danger'}[trade.profitloss >= 0]" 
                 data-ng-mouseover="hoverOnTrade(trade)" 
                 data-ng-mouseout="removeHoverOnTrade(trade)">
@@ -40,7 +40,7 @@
                     <div class="columns col-lg-1">{{trade.price.toFixed(2)}}</div>
                     <div class="columns col-lg-1">${{trade.exchange.ltp || '--'}}</div>
                     <div class="columns col-lg-1">${{trade.curDiff || '--'}}</div>
-                    <div class="columns col-lg-1">${{trade.profitloss || '--'}}</div>
+                    <div class="columns col-lg-1">${{trade.profitloss.toFixed(2) || '--'}}</div>
                     <div class="columns col-lg-2 pull-right">
                         <label class="checkbox-inline">
                             <input data-ng-model="trade.checked" data-ng-change="checkClicked(trade)"
@@ -112,8 +112,11 @@
             </li>
         </ul>
         <br />
+        <label class="checkbox-inline text-right">
+            <input class="pull-right" id="closeProfitable" type="checkbox" value="">Close ALL Profitable Trades
+        </label>
         <a ng-if="numChecked > 0" class="pull-right btn btn-success" href="#!/trades/closeChecked">
-            Close {{numChecked}} Checked Positions
+            Close {{numChecked}} Positions
         </a>
         <a ng-if="numChecked <= 0" class="pull-right btn btn-danger disabled" href="">
             Choose position(s) to close first.

@@ -165,44 +165,181 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                 });
         };
         
-        $scope.getGraphData = function() {
-            /*
-            Exchanges.query().$promise.then(function(results) {
-                var endDate = new Date();
-                var startDate = new Date();
-                startDate.setDate(startDate.getDate() - 1);
+        // New Function to Load API Data        
+        $scope.getExchangeData = function() {            
+            var exchange_id = $stateParams.exchangeId;
+            
+            $http.get('exchanges/' + exchange_id + '/future_ticker')
+                .success(function(data) {
+                    $scope.future_ticker = data;
+                });
+            
+            $http.get('exchanges/' + exchange_id + '/future_depth')
+                .success(function(data) {
+                    $scope.future_depth = data;
+                });
                 
-                $scope.graphData = [];
-                
-                for(var i = 0; i < results.length; i++) {
-                    var seriesDates = new Array();
-                    var seriesPrices = new Array();
-                    var seriesName = results[i].name;
-                    var currentDate = new Date(startDate).getTime();
+            $http.get('exchanges/' + exchange_id + '/future_trades')
+                .success(function(data) {
+                    $scope.future_trades = data;
                     
-                    $scope.graphData[seriesName] = new Array();
+                    $scope.tradeChartConfig = {
+                        options: {
+                            chart: {
+                                zoomType: 'x'
+                            },
+                            rangeSelector: {
+                                enabled: false
+                            },
+                            navigator: {
+                                enabled: false
+                            },
+                            tooltip: {
+                                shared: false,
+                                formatter: function() {
+                                    var text = 'Amount: ' + this.y + ' BTC';
+                                    return text;
+                                }
+                            },
+                            lang: {
+                                noData: 'Loading Data... '
+                            }
+                        },
+                        series: [],
+                        title: {
+                            text: 'Recent Trade Volumes'
+                        },
+                        useHighStocks: true
+                    };
+                                        
+                    // Generate Series Data.                    
+                    var prices = {
+                        name: 'Price',
+                        data: []
+                    };
                     
-                    while(currentDate < endDate) {
-                        seriesDates.push( new Date (currentDate) );
+                    var amounts = {
+                        name: 'Amounts',
+                        data: []
+                    };
+                    
+                    for(var i = 0; i < data.length; i++) {                       
+                        prices.data.push([
+                            data[i].date,
+                            data[i].price
+                        ]);
                         
-                        currentDate = currentDate + (2 * 3600 * 1000);
+                        amounts.data.push([
+                            data[i].date,
+                            data[i].amount
+                        ]);
+                        
                     }
                     
-                    var thisPrice;
-                    for(var d = 0; d < seriesDates.length; d++) {
-                        $http.get('prices/graphdata/' + results[i]._id + '/' + seriesDates[d].getTime())
-                            .success(function (data) {
-                                
-                                console.log("RETURNED DATA: " + data);  // DEBUG
-                                
-                                var thisPrice = data;
-                                $scope.graphData[seriesName].push(thisPrice);
-                            });
+                    // $scope.tradeChartConfig.series.push(prices);
+                    $scope.tradeChartConfig.series.push(amounts);
+                    
+                });
+                
+            $http.get('exchanges/' + exchange_id + '/future_index')
+                .success(function(data) {
+                    $scope.future_index = data;
+                });
+                
+            $http.get('exchanges/' + exchange_id + '/exchange_rate')
+                .success(function(data) {
+                    $scope.exchange_rate = data;
+                });
+                
+            $http.get('exchanges/' + exchange_id + '/future_estimated_price')
+                .success(function(data) {
+                    $scope.future_estimated_price = data;
+                });
+                
+            $http.get('exchanges/' + exchange_id + '/future_kline')
+                .success(function(data) {
+                    $scope.future_kline = data;
+                    
+                    $scope.klineChartConfig = {
+                        options: {
+                            chart: {
+                                zoomType: 'x'
+                            },
+                            rangeSelector: {
+                                enabled: false
+                            },
+                            navigator: {
+                                enabled: false
+                            },
+                            tooltip: {
+                                valueDecimals: 2,
+                                valuePrefix: '$',
+                                valueSuffix: ' USD'
+                            },
+                            lang: {
+                                noData: 'Loading Data... '
+                            }
+                        },
+                        series: [],
+                        title: {
+                            text: 'Candlestick Data'
+                        },
+                        useHighStocks: true
+                    };
+                    
+                    var openPrices = {
+                        name: 'Open',
+                        data: []
+                    };
+                    
+                    var highPrices = {
+                        name: 'High',
+                        data: []
+                    };
+                    
+                    var lowPrices = {
+                        name: 'Low',
+                        data: []
+                    };
+                    
+                    var closePrices = {
+                        name: 'Close',
+                        data: []
                     }
                     
-                }
-            });
-            */
+                    for(var i = 0; i < data.length; i++) {
+                        openPrices.data.push([
+                            data[i][0],
+                            data[i][1]
+                        ]);
+                        
+                        highPrices.data.push([
+                            data[i][0],
+                            data[i][2]
+                        ]);
+                        
+                        lowPrices.data.push([
+                            data[i][0],
+                            data[i][3]
+                        ]);
+                        
+                        closePrices.data.push([
+                            data[i][0],
+                            data[i][4]
+                        ]);
+                    }
+                    
+                    $scope.klineChartConfig.series.push(openPrices);
+                    $scope.klineChartConfig.series.push(highPrices);
+                    $scope.klineChartConfig.series.push(lowPrices);
+                    $scope.klineChartConfig.series.push(closePrices);
+                    
+                });
+                
+            $http.get('exchanges/' + exchange_id + '/future_hold_amount')
+                .success(function(data) {
+                    $scope.future_hold_amount = data;
+                });
         };
 	}
 ]);
