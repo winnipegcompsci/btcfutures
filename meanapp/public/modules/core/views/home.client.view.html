@@ -7,9 +7,9 @@
     <div class="row">
         <h2 class="text-center">Dashboard</h2>
     </div>
-    
-    <div class="row" data-ng-init="getGraphPrices()">
-        <highchart id="daygraph" config="ltpChartConfig"></highchart>
+
+    <div class="row" data-ng-init="getBalanceChart()">
+        <highchart id="balancegraph" config="balanceChartConfig"></highchart>
     </div>
     
     <div class="row">
@@ -37,6 +37,10 @@
                 </div>
             </div>
         </div>
+    </div>
+    
+    <div class="row" data-ng-init="getGraphPrices()">
+        <highchart id="daygraph" config="ltpChartConfig"></highchart>
     </div>
     
 	<br />

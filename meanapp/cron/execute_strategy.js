@@ -21,6 +21,7 @@ var Futures796 = require('futures796');
 var BitVC = require('bitvc');
 var TTL = 10;
 
+var BalancesModel = require('../app/models/balance.server.model.js');
 var TradeModel = require('../app/models/trade.server.model.js');
 var UserModel = require('../app/models/user.server.model.js');
 var ExchangeModel = require('../app/models/exchange.server.model.js');
@@ -29,6 +30,7 @@ var PriceModel = require('../app/models/price.server.model.js');
 var passport = require('../config/passport');
 var exchange = require('../config/express');
 
+var Balances = mongoose.model('Balance');
 var Trades = mongoose.model('Trade');
 var Exchanges = mongoose.model('Exchange');
 var Strategies = mongoose.model('Strategy');
@@ -120,7 +122,10 @@ function prepLongBiasedHedge(strategy, exchanges, prices, trades ) {
         for(var j = 0; j < prices.length; j++) {          
             if(prices[j].exchange.toString() == strategy.primaryExchanges[i].exchange._id.toString()) {
                 lastPrice = prices[j].price;
-                
+
+                // Randomize to Test.
+                // lastPrice = lastPrice * (Math.random() * (1.02 - 0.98) + 0.98); //  =1
+                                
                 strategy.primaryExchanges[i].lastPrice = lastPrice;
                 strategy.insuranceExchanges[i].lastPrice = lastPrice;
                 
@@ -177,70 +182,9 @@ function prepLongBiasedHedge(strategy, exchanges, prices, trades ) {
         strategy.insuranceExchanges[i].currentlyHolding = 0;
         strategy.insuranceExchanges[i].averageBuyPrice = 0;
         
-        if(strategy.primaryExchanges[i].exchange.name.toLowerCase() == "okcoin") {
-
-            var privateClient = new OKCoin(strategy.primaryExchanges[i].exchange.apikey, strategy.primaryExchanges[i].exchange.secretkey);
-            
-            privateClient.getFixedFuturePositions(function (err, pos_resp) {
-                if(pos_resp.result) {
-                    for(var j = 0; j < pos_resp.holding.length; j++) {
-                        strategy.primaryExchanges[i].currentlyHolding += pos_resp.holding[j].buy_amount;
-                        strategy.insuranceExchanges[i].currentlyHolding += pos_resp.holding[j].sell_amount;
                         
-                        strategy.primaryExchanges[i].averageBuyPrice = pos_resp.holding[i].buy_price_avg;
-                        strategy.insuranceExchanges[i].averageBuyPrice = pos_resp.holding[i].sell_price_avg;
-                    }
-                }
-            }, 'btc_usd', 'quarter', 1);
-            
-        } else if (strategy.primaryExchanges[i].exchange.name.toLowerCase() == "796") {
-            var privateClient = new Futures796(strategy.primaryExchanges[i].exchange.apikey, strategy.primaryExchanges[i].exchange.secretkey);
-            
-            privateClient.getPositions(function(err, pos_resp) {
-                if(err) {
-                    handleError(err);                  
-                } else {
-                    if(pos_resp.msg == "success") {
-                        var $STRING = '10';
-                        
-                        for(var j = 0; j < pos_resp.data.length; j++) {
-                            strategy.primaryExchanges[i].currentlyHolding += 
-                                pos_resp.data[j].A.buy.$STRING.total;
-                            strategy.insuranceExchanges[i].currentlyHolding += 
-                                pos_resp.data[j].B.buy.$STRING.total;
-                            
-                            strategy.primaryExchanges[i].averageBuyPrice = 
-                                pos_resp.data[j].A.buy.$STRING.avg_price;
-                            strategy.insuranceExchanges[i].averageBuyPrice = 
-                                pos_resp.data[j].B.buy.$STRING.avg_price;
-                        }
-                    }
-                }                
-            });
-
-        } else if (strategy.primaryExchanges[i].exchange.name.toLowerCase() == 'bitvc') {
-            var privateClient = new BitVC(strategy.primaryExchanges[i].exchange.apikey, strategy.primaryExchanges[i].exchange.secretkey);
-            
-            privateClient.getCurrentOrders(function(err, pos_resp) {
-                if(typeof pos_resp !== 'undefined') {
-                    for(var j = 0; j < pos_resp.orders.length; i++) {
-                        amount = pos_resp.orders[j].order_amount;
-                        
-                        if(pos_resp.orders[j].type == 1) {
-                            strategy.primaryExchanges[i].currentlyHolding += amount;
-                        }
-                        
-                        if(pos_resp.orders[j].type == 2) {
-                            strategy.insuranceExchanges[i].currentlyHolding += amount;
-                        }
-                    }
-                }
-            });
-            
-        }
-                        
-            // IF DEBUG PARSE TRADES?
-        if(process.env.NODE_ENV == 'development') {
+        // IF DEBUG PARSE TRADES?
+        if(process.env.NODE_ENV === 'development') {
             var numLong = 0;
             var sumLong = 0;
             var numShort = 0;
@@ -248,30 +192,30 @@ function prepLongBiasedHedge(strategy, exchanges, prices, trades ) {
                          
             for(var j = 0; j < trades.length; j++) {
                 if(trades[j].exchange.toString() == strategy.primaryExchanges[i].exchange._id.toString()) {                   
-                    if(trades[j].bias == "LONG") {
+                    if(trades[j].bias === 'LONG') {
                         
-                        if(trades[j].type == "BUY") {
+                        if(trades[j].type === 'BUY') {
                             strategy.primaryExchanges[i].currentlyHolding += trades[j].amount;
                             numLong++;
                             sumLong += trades[j].price;
                         }
                         
-                        if(trades[j].type == "SELL") {
+                        if(trades[j].type === 'SELL') {
                             strategy.primaryExchanges[i].currentlyHolding -= trades[j].amount;
                         }
                     }
                 } // end if trade was on primary exchange 
                 
                 if(trades[j].exchange.toString() == strategy.primaryExchanges[i].exchange._id.toString()) {                    
-                    if(trades[j].bias == "SHORT") {
+                    if(trades[j].bias === 'SHORT') {
                         
-                        if(trades[j].type == "BUY") {
+                        if(trades[j].type === 'BUY') {
                             strategy.insuranceExchanges[i].currentlyHolding += trades[j].amount;
                             numShort++;
                             sumShort += trades[j].price;
                         }
                         
-                        if(trades[j].type == "SELL") {
+                        if(trades[j].type === 'SELL') {
                             strategy.insuranceExchanges[i].currentlyHolding -= trades[j].amount;
                         }
                     }
@@ -294,7 +238,10 @@ function prepLongBiasedHedge(strategy, exchanges, prices, trades ) {
 
 function doLongBiasedHedge(strategy) {    
     var pass = true;
-        
+    
+
+    
+    
     for(var i = 0; i < strategy.primaryExchanges.length; i++) {
         // Check Primary Exchange Variables
         if(!strategy.primaryExchanges[i].lastPrice)             { pass = false; }
@@ -320,6 +267,7 @@ function doLongBiasedHedge(strategy) {
             strategy.totalCoins, strategy.maxBuyPrice, strategy.insuranceCoverage*100);
         console.log("--------------------------------------------------------------------------------");
         
+                
         // Show Exchanges and Amounts we are going long
         for(var i = 0; i < strategy.primaryExchanges.length; i++) {
             if(strategy.primaryExchanges[i].ratio > 0) {
@@ -329,8 +277,22 @@ function doLongBiasedHedge(strategy) {
                     strategy.totalCoins * strategy.primaryExchanges[i].ratio
                 );
             }
+            
+            // Write Current Holding and Current Price to Chart.
+            var newBalance = new Balances({
+                balance: strategy.primaryExchanges[i].currentlyHolding,
+                price: strategy.primaryExchanges[i].lastPrice,
+                exchange: strategy.primaryExchanges[i].exchange._id
+            });    
+            
+            newBalance.save(function (err) {
+                if(err) {
+                    handleError(err);
+                }       
+            });  
+            
         }
-        // Show exchanges and amounts we are going short
+        // Show Exchanges and amounts we are going short
         console.log("--------------------------------------------------------------------------------");
         for(var i = 0; i < strategy.insuranceExchanges.length; i++) {
             if(strategy.insuranceExchanges[i].ratio > 0) {            
@@ -348,29 +310,16 @@ function doLongBiasedHedge(strategy) {
             // Long Biased Hedge, if Over Sell Overage Long.
             if(strategy.primaryExchanges[k].currentlyHolding > (strategy.totalCoins * strategy.primaryExchanges[k].ratio)) {
                 var difference = strategy.primaryExchanges[k].currentlyHolding - (strategy.totalCoins * strategy.primaryExchanges[k].ratio);
-                
-                console.log("Sell %s BTC [LONG] from %s @ $ %s",
+                  
+                placeOrder(
+                    strategy.primaryExchanges[k].exchange,
+                    strategy.primaryExchanges[k].lastPrice,
                     difference,
-                    strategy.primaryExchanges[k].exchange.name,
-                    strategy.primaryExchanges[k].lastPrice.toFixed(2)
+                    'SELL',
+                    'LONG',
+                    strategy
                 );
                 
-                if(process.env.NODE_ENV == 'development') { 
-                    var thisTrade = new Trades({
-                        exchange: strategy.primaryExchanges[k].exchange._id,
-                        price: strategy.primaryExchanges[k].lastPrice,
-                        amount: difference,
-                        type: 'SELL',
-                        bias: 'LONG',
-                        strategy: strategy._id
-                    });
-                    
-                    thisTrade.save(function (err) {
-                        if(err) {
-                            handleError(err);
-                        }                       
-                    });
-                }
             }
         }
         for(var k = 0; k < strategy.insuranceExchanges.length; k++) {
@@ -378,35 +327,22 @@ function doLongBiasedHedge(strategy) {
             if(strategy.insuranceExchanges[k].currentlyHolding > (strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[k].ratio)) {
                 difference = strategy.insuranceExchanges[k].currentlyHolding - (strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[k].ratio);
             
-                console.log("Sell %s BTC [SHORT] from %s @ $ %s",
+                placeOrder(
+                    strategy.insuranceExchanges[k].exchange,
+                    strategy.insuranceExchanges[k].lastPrice,
                     difference,
-                    strategy.insuranceExchanges[k].exchange.name,
-                    strategy.insuranceExchanges[k].lastPrice.toFixed(2)
-                );
-                
-                if(process.env.NODE_ENV == 'development') {
-                    var thisTrade = new Trades({
-                        exchange: strategy.insuranceExchanges[k].exchange._id,
-                        price: strategy.insuranceExchanges[k].lastPrice,
-                        amount: difference,
-                        type: 'SELL',
-                        bias: 'SHORT',
-                        strategy: strategy._id
-                    });
-                    
-                    thisTrade.save(function (err) {
-                        if(err) {
-                            handleError(err);
-                        }                       
-                    });
-                }
-            
+                    'SELL',
+                    'SHORT',
+                    strategy
+                );   
             }
         }
         
         
         // Main Strategy
         var randomizer = 1;
+        console.log('\n');          // Formatting.
+        
         for(var i = 0; i < strategy.primaryExchanges.length; i++) {
             randomizer = (Math.random() * (1.3 - 0.7) + 0.7).toFixed(4) //  =1
             
@@ -429,185 +365,100 @@ function doLongBiasedHedge(strategy) {
             if((strategy.primaryExchanges[i].currentlyHolding < (strategy.totalCoins * strategy.primaryExchanges[i].ratio)) &&
                 strategy.primaryExchanges[i].lastPrice < strategy.maxBuyPrice && 
                 Math.abs(strategy.primaryExchanges[i].currentSpread) < Math.abs(strategy.primaryExchanges[i].averageSpread)) {
-            
-                // Buy out of Total.
-                console.log("Buy %s BTC [LONG] from %s @ $ %s", 
-                    (((strategy.totalCoins / 10)*randomizer) * strategy.primaryExchanges[i].ratio).toFixed(4),
-                    strategy.primaryExchanges[i].exchange.name, 
-                    strategy.primaryExchanges[i].lastPrice.toFixed(2)
+                            
+                placeOrder(
+                    strategy.primaryExchanges[i].exchange,
+                    strategy.primaryExchanges[i].lastPrice,
+                    (((strategy.totalCoins / 10)*randomizer) * strategy.primaryExchanges[i].ratio),
+                    'BUY',
+                    'LONG',
+                    strategy
                 );
-                if(process.env.NODE_ENV == 'development') {
-                    var thisTrade = new Trades({
-                        exchange: strategy.primaryExchanges[i].exchange._id,
-                        price: strategy.primaryExchanges[i].lastPrice,
-                        amount: (((strategy.totalCoins / 10)*randomizer) * strategy.primaryExchanges[i].ratio),
-                        type: "BUY",
-                        bias: "LONG",
-                        strategy: strategy._id
-                    });
-                    
-                    // BUY LONG
-                    thisTrade.save(function (err) {
-                        if(err) {
-                            handleError(err);
-                        }                       
-                    });
-                }
                 
-                // call API buy
             }
                         
             // Sell Short Logic
             if((strategy.primaryExchanges[i].lastPrice > (strategy.insuranceExchanges[i].averageBuyPrice * 1.0125))) {
+                
                 if(strategy.insuranceExchanges[i].currentlyHolding > strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage) {
-                    console.log("Sell %s BTC [SHORT] from %s @ %s",
-                        ((strategy.insuranceExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage)).toFixed(4),
-                        strategy.primaryExchanges[i].exchange.name,
-                        strategy.primaryExchanges[i].lastPrice.toFixed(2)
+                    
+                    placeOrder(
+                        strategy.insuranceExchanges[i].exchange,
+                        strategy.insuranceExchanges[i].lastPrice,
+                        ((strategy.insuranceExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage)),
+                        'SELL',
+                        'SHORT',
+                        strategy
                     );
-                    // DEV LOG
-                    if(process.env.NODE_ENV == 'development') {
-                        var thisTrade = new Trades({
-                            exchange: strategy.insuranceExchanges[i].exchange._id,
-                            price: strategy.insuranceExchanges[i].lastPrice,
-                            amount: ((strategy.insuranceExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage)),
-                            type: "SELL",
-                            bias: "SHORT",
-                            strategy: strategy._id
-                        });
                         
-                        // SELL SHORT
-                        thisTrade.save(function (err) {
-                            if(err) {
-                                handleError(err);
-                            }
-                        });
-                    };
-                    // call API sell.
+                    
                 }
                 
                 if(strategy.primaryExchanges[i].currentlyHolding > 0) {
                     if(strategy.primaryExchanges[i].lastPrice > (strategy.primaryExchanges[i].averageBuyPrice * 1.025)) {
-                        console.log("Sell %s BTC [LONG] from %s @ %s",
+                        
+                        placeOrder(
+                            strategy.primaryExchanges[i].exchange,
+                            strategy.primaryExchanges[i].lastPrice,
                             ((strategy.primaryExchanges[i].currentlyHolding / 2)).toFixed(4),
-                            strategy.primaryExchanges[i].exchange.name,
-                            strategy.primaryExchanges[i].lastPrice.toFixed(2)                           
+                            'SELL',
+                            'LONG',
+                            strategy
                         );
-                        // DEV LOG
-                        if(process.env.NODE_ENV == 'development') {
-                            var thisTrade = new Trades({
-                                exchange: strategy.primaryExchanges[i].exchange._id,
-                                price: strategy.primaryExchanges[i].lastPrice,
-                                amount: ((strategy.primaryExchanges[i].currentlyHolding / 2)).toFixed(4),
-                                type: "SELL",
-                                bias: "LONG",
-                                strategy: strategy._id,
-                            });
-                            
-                            // SELL LONG
-                            thisTrade.save(function (err) {
-                                if(err) {
-                                    handleError(err);
-                                }                               
-                            });
-                            
-                        }
                     }
-                    
-                    // call API sell
                 }
                 
                 if((strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio) > 0) {
                     if(strategy.primaryExchanges[i].lastPrice > (strategy.primaryExchanges[i].averageBuyPrice * 1.04) && 
-                        (strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio) < strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage ) {
-                            console.log("Buy %s BTC [SHORT] from %s @ %s",
-                                ((strategy.primaryExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)).toFixed(4),
-                                strategy.primaryExchanges[i].exchange.name,
-                                strategy.primaryExchanges[i].lastPrice.toFixed(2)
-                            );
+                        (strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio) < strategy.primaryExchanges[i].currentlyHolding * strategy.insuranceCoverage ) {                    
                             
-                            if(process.env.NODE_ENV == 'development') {
-                                var thisTrade = new Trades({
-                                    exchange:  strategy.primaryExchanges[i].exchange._id,
-                                    price: strategy.primaryExchanges[i].lastPrice,
-                                    amount: ((strategy.primaryExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)),
-                                    type: "BUY",
-                                    bias: "SHORT",
-                                    strategy: strategy._id
-                                });
-                                
-                                // BUY SHORT
-                                thisTrade.save(function (err) {
-                                    if(err) {
-                                        handleError(err);
-                                    }
-                                });
-                            }
+                        placeOrder(
+                            strategy.primaryExchanges[i].exchange,
+                            strategy.primaryExchanges[i].lastPrice,
+                            ((strategy.primaryExchanges[i].currentlyHolding * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)),
+                            'BUY',
+                            'SHORT',
+                            strategy
+                        );
+                    
                     }
                     // call API buy
                 }
             } // if price > avereage + 1.25%
             
-            if(strategy.primaryExchanges[i].lastPrice < (strategy.primaryExchanges[i].currentPrice / 1.0125)) {
-                if(strategy.primaryExchanges[i].currentlyHolding > 0) {
-                    console.log("Sell %s BTC [LONG] from %s @ %s",
-                        ((strategy.primaryExchanges[i].currentlyHolding)).toFixed(4),
-                        strategy.primaryExchanges[i].exchange.name,
-                        strategy.primaryExchanges[i].lastPrice.toFixed(2)
+            if(strategy.primaryExchanges[i].lastPrice < (strategy.primaryExchanges[i].averageBuyPrice / 1.0125)) {
+                if(strategy.primaryExchanges[i].currentlyHolding > 0) {                    
+                    placeOrder(
+                        strategy.primaryExchanges[i].exchange,
+                        strategy.primaryExchanges[i].lastPrice,
+                        ((strategy.primaryExchanges[i].currentlyHolding)),
+                        'SELL',
+                        'LONG',
+                        strategy
                     );
-                    
-                    if(process.env.NODE_ENV == 'development') {
-                        var thisTrade = new Trades({
-                            exchange: strategy.primaryExchanges[i].exchange._id,
-                            price: strategy.primaryExchanges[i].lastPrice,
-                            amount: ((strategy.primaryExchanges[i].currentlyHolding)),
-                            type: "SELL",
-                            bias: "LONG",
-                            strategy: strategy._id
-                        });
-                        
-                        // SELL LONG
-                        thisTrade.save(function (err) {
-                            if(err) {
-                                handleError(err);
-                            }
-                        });
-                    }
-                    // call API buy.
                 }
             } // if price < average - 1.25%
             
         } // end foreach primary exchange    
         
-        for(var i = 0; i < strategy.insuranceExchanges.length; i++) {            
+        
+        // Build Up Insurance if below threshold.
+        for(var i = 0; i < strategy.insuranceExchanges.length; i++) {
+            randomizer = (Math.random() * (1.3 - 0.7) + 0.7).toFixed(4) //  =1
+        
             // SHORT BUY LOGIC
             if((strategy.insuranceExchanges[i].currentlyHolding < (strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio)) &&
                 strategy.insuranceExchanges[i].lastPrice < strategy.maxBuyPrice &&
                 Math.abs(strategy.insuranceExchanges[i].currentSpread) < Math.abs(strategy.insuranceExchanges[i].averageSpread)) {
-            
-                // Buy out of Total.
-                console.log("Buy %s BTC [SHORT] from %s @ $ %s", 
-                    ((strategy.totalCoins / 10) * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio).toFixed(4),
-                    strategy.insuranceExchanges[i].exchange.name, 
-                    (strategy.insuranceExchanges[i].lastPrice).toFixed(2)
+                            
+                placeOrder(
+                    strategy.primaryExchanges[i].exchange,
+                    strategy.primaryExchanges[i].lastPrice,
+                    ((strategy.totalCoins / 10) * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio),
+                    'BUY',
+                    'SHORT',
+                    strategy
                 );
-                
-                if(process.env.NODE_ENV == 'development') {
-                    var thisTrade = new Trades({
-                        exchange: strategy.primaryExchanges[i].exchange._id,
-                        price: strategy.primaryExchanges[i].lastPrice,
-                        amount: ((strategy.totalCoins / 10) * randomizer * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio),
-                        type: "BUY",
-                        bias: "SHORT",
-                        strategy: strategy._id
-                    });
-                    
-                    thisTrade.save(function (err) {
-                        if(err) {
-                            handleError(err);
-                        }                       
-                    });
-                }
             }
         } // end foreach insurance exchange.
     }   
@@ -623,11 +474,41 @@ function doShortBiasedHedge(strategy) {
     // Implement Short Biased Hedge.
 }
 
-
 function printData(data) {
     console.log("Data: " + util.inspect(data) );
 }
 
 function handleError(err) {
-    console.log("Error: " + err);
+    console.log(clc.red("Error: %s"), err);
+}
+
+function placeOrder(exchange, price, amount, type, bias, strategy) {
+    
+    console.log(clc.green.bgWhite.underline('Executing %s trade: %s %s BTC %s @ %s on %s)'),
+        strategy.name,
+        type,
+        Number(amount).toFixed(4),
+        bias,
+        Number(price).toFixed(2),
+        exchange.name
+    );
+        
+    if(process.env.NODE_ENV === 'development') {
+        var thisTrade = new Trades({
+            exchange: exchange._id, 
+            price: price, 
+            amount: amount,
+            type: type,
+            bias: bias,
+            strategy: strategy._id,            
+        });
+        
+        thisTrade.save(function (err) {
+            if(err) {
+                handleError(err);
+            }                       
+        });
+    } else {
+        // PRODUCTION API CALLS
+    }
 }

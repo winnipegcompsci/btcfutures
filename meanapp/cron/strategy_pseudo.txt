@@ -1,0 +1,44 @@
+For each Primary Exchange: {
+
+    // Buy Long If Possible.
+    If ( exchange.lastPrice < maxBuyPrice && currentSpread < averageSpread ) {
+        if( exchange.currentlyHolding < strategy.totalCoins * exchange.ratio) {
+            randomAmount = Random number between 7-13. (float).
+            
+            if(exchange.currentlyHolding + randomAmount > strategy.totalCoins * exchange.ratio) {
+                randomAmount = strategy.totalCoins * exchange.ratio - exchange.currentlyHolding.
+            }
+            
+            place order from randomAmount from Exchange at exchange.lastPrice.
+        }
+    }
+
+    // Sell Long
+    If (exchange.lastPrice < exchange.averageBuyPrice / 1.025) {
+        place order to sell half of exchange.currentlyHolding
+    }
+}
+
+
+For each insurance Exchange: {
+    
+    // Buy Short
+    if( ) {
+    
+    }
+    
+    // Sell Short
+    if( ) {
+    
+    }
+    
+}
+
+--------------------------
+
+If exchange's current price goes up 1.25% above exchange's average buy price. Sell short on the exchange at insurance coverage rate * current amount insured on exchange. Once this insurance is sold it waits for the exchange's last price to get to a 2.5 gain over the exchange's average buy price, it then sells half the amount we are currently holding long on the exchange. If the exchange's last price is 4% greater than the average buy price on the exchange we buy short at (long amount  held * insurance coverage rate) / 2.
+
+If the exchange's last price goes down after selling insurance it stops out at the exchange's average buy price + 1.25%.
+
+If the exchange's last price goes down before we have sold short, once it is 1.25% below the average buy price on the exchange, we buy short at (exchange.currentlyHolding * insurance coverage rate). 
+

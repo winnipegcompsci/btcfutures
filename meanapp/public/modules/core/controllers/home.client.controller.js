@@ -25,6 +25,45 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                 });
         };
         
+        $scope.getBalanceChart = function() {            
+            $http.get('/balances/graph/exchange')
+                .success(function(balanceData) {
+                    $scope.balanceChartConfig = {
+                        options: {
+                            chart: {
+                                zoomType: 'x'
+                            },
+                            rangeSelector: {
+                                enabled: true
+                            },
+                            navigator: {
+                                enabled: true
+                            },
+                            tooltip: {
+                                valueDecimals: 2,
+                                valuePrefix: '$',
+                                valueSuffix: ' USD'
+                            },
+                            lang: {
+                                noData: 'Loading Data... '
+                            }
+                        },
+                        series: [],
+                        title: {
+                            text: '(Amount Held) x (Price) over Time'
+                        },
+                        useHighStocks: true
+                    };
+                    
+                    for(var series in balanceData) {
+                        console.log("SERIES::: " + series);
+                        $scope.balanceChartConfig.series.push(balanceData[series]);
+                    }
+                });
+        };
+        
+        
+        
         $scope.getGraphPrices = function() {
             $http.get('/prices/graph/minute')
                 .success(function(graphData) {
