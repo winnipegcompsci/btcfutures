@@ -17,11 +17,11 @@
     </div>
     
     <div class="row" data-ng-init="getExchanges()">
-        <div class="columns col-lg-4" data-ng-repeat="exchange in exchanges">
+        <div class="columns col-lg-4" data-ng-repeat="exchange in exchanges | orderBy:exchange.name:false">
             <div class="panel panel-info">
                 <div class="panel-heading">
                     {{exchange.name}} - <span data-ng-init="getLastPrice(exchange)"> ${{(exchange.currentPrice) || "..."}}</span>  </span> 
-                    <span class="badge text-success pull-right" data-ng-init="countTrades(exchange)">{{exchange.numTrades}} Open Positions </span> 
+                    <span class="badge text-success pull-right" data-ng-init="countTrades(exchange)">{{exchange.numTrades || "0"}} Open Positions </span> 
                 </div>
                 <div class="panel-body">
                     <div class="row text-left text-info">Account Equity: <span class="glyphicon glyphicon-usd"></span> 0.00 USD</div>

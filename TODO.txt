@@ -1,13 +1,24 @@
-TODO LIST.
+BTC Futures: TODO List
+------------------------------------------------------
+ 
+High -------------------------------------------------
 
-1. Cron Scripts 
-        -> Price Fetcher.
-        -> Update Formula for Calculating Spreads
+- Test Cases
+    
+- Customize Strategy Execution Through UI.
 
-2. BitVC Module
-        -> Finish Function mapping
+- Production Mode 
+    - Check Balances before making a trade.
+    - Get Confirmation before Storing Trade in Database
+    - Low Balance Errs Send Email
         
-3. 796 Module
-        -> POST encryption
-        
-        
+    
+Normal -----------------------------------------------
+- Display Balance over all Exchanges (Show total amount held).
+
+- Fix Testing Mode with BackData
+    - Explain Buy / Sell Details & Reasons.
+
+
+Low --------------------------------------------------
+- MetaTrader (4) Plugins for BTC-e

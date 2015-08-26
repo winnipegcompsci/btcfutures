@@ -66,7 +66,11 @@ angular.module('exchanges').controller('ExchangesController', ['$scope', '$rootS
                     } else if (thisName === '796' || thisName === 'futures796') {
                         $scope.exchanges[i].logo_url = '/img/796.jpg';
                     } else if (thisName === 'bitvc') {
-                        $scope.exchanges[i].logo_url = '/img/bitvc.png';                        
+                        $scope.exchanges[i].logo_url = '/img/bitvc.png'; 
+                    } else if (thisName === 'bitmex') {
+                        $scope.exchanges[i].logo_url = '/img/bitmex.png';
+                    } else if (thisName === 'btc-e') {
+                        $scope.exchanges[i].logo_url = '/img/btce.png';
                     } else {
                         console.log('Exchange: ' + thisName + ' -- has no logo on record');
                     }

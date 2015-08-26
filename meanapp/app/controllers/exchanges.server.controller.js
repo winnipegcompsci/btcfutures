@@ -11,6 +11,9 @@ var mongoose = require('mongoose'),
 	OKCoin  = require('okcoin'),
 	Futures796 = require('futures796'),
     BitVC = require('bitvc'),
+    BTCe = require('btce'),
+    BitMEX = require('bitmex'),
+    util = require('util'),
 	_ = require('lodash');
 
 	
@@ -21,6 +24,11 @@ var futures796_public = new Futures796();
 var futures796_private = new Futures796();
 
 var bitvc_public = new BitVC();
+
+var btce_public = new BTCe();
+
+var bitmex_public = new BitMEX();
+
 /**
  * Create a Exchange
  */
@@ -163,6 +171,38 @@ exports.getCurrentPrice = function(req, res) {
             
             
         });
+    } else if (thisName === 'btc-e') {
+        btce_public.getTicker(function(err, ticker_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }
+
+            return res.send(ticker_resp.btc_usd);
+            
+        });
+    
+    } else if (thisName === 'bitmex') { 
+        bitmex_public.getActiveIndices(function(err, ticker_resp) {
+            if(err) {
+                return res.status(500).send(err);
+            }           
+            
+            for(var i = 0; i < ticker_resp.length; i++) {
+            
+                if(ticker_resp[i].symbol === 'XBTZ15') {
+                    return res.send({
+                        last: ticker_resp[i].lastPrice,
+                        high: ticker_resp[i].highPrice,
+                        low: ticker_resp[i].lowPrice,
+                        buy: ticker_resp[i].bidPrice,
+                        sell: ticker_resp[i].askPrice                        
+                    });
+                }
+            }
+            
+            return res.send(ticker_resp);
+        });
+    
     } else {
         res.status(500).send('ERROR: ' + thisName + ' Function GetCurrentPrice() -- Not Found');
     }

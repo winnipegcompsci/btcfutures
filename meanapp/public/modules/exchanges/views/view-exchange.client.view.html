@@ -70,4 +70,12 @@
             <highchart id="klinechart" config="klineChartConfig"></highchart>
         </div>
     </div>
+    
+    <div class="row">
+        <div class="pull-right" data-ng-show="((authentication.user) && (authentication.user._id == exchange.user._id))">
+            <a class="btn btn-primary" href="/#!/exchanges/{{exchange._id}}/edit">
+                <i class="glyphicon glyphicon-edit"></i>
+            </a>
+        </div>
+    </div>
 </section>
