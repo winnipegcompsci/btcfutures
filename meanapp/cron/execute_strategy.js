@@ -263,47 +263,47 @@ function doLongBiasedHedge(strategy) {
     } else {
         console.log("\nExecuting %s", strategy.name);
         
-        console.log("Total Coins: %s BTC | Max Buy Price: $ %s USD | Insurance Coverage: %s %",
-            strategy.totalCoins, strategy.maxBuyPrice, strategy.insuranceCoverage*100);
-        console.log("--------------------------------------------------------------------------------");
+        // console.log("Total Coins: %s BTC | Max Buy Price: $ %s USD | Insurance Coverage: %s %",
+            // strategy.totalCoins, strategy.maxBuyPrice, strategy.insuranceCoverage*100);
+        // console.log("--------------------------------------------------------------------------------");
         
                 
-        // Show Exchanges and Amounts we are going long
-        for(var i = 0; i < strategy.primaryExchanges.length; i++) {
-            if(strategy.primaryExchanges[i].ratio > 0) {
-                console.log("%s @ %s % = %s BTC [LONG]", 
-                    strategy.primaryExchanges[i].exchange.name, 
-                    strategy.primaryExchanges[i].ratio*100, 
-                    strategy.totalCoins * strategy.primaryExchanges[i].ratio
-                );
-            }
+        // // Show Exchanges and Amounts we are going long
+        // for(var i = 0; i < strategy.primaryExchanges.length; i++) {
+            // if(strategy.primaryExchanges[i].ratio > 0) {
+                // console.log("%s @ %s % = %s BTC [LONG]", 
+                    // strategy.primaryExchanges[i].exchange.name, 
+                    // strategy.primaryExchanges[i].ratio*100, 
+                    // strategy.totalCoins * strategy.primaryExchanges[i].ratio
+                // );
+            // }
             
-            // Write Current Holding and Current Price to Chart.
-            var newBalance = new Balances({
-                balance: strategy.primaryExchanges[i].currentlyHolding,
-                price: strategy.primaryExchanges[i].lastPrice,
-                exchange: strategy.primaryExchanges[i].exchange._id
-            });    
+            // // Write Current Holding and Current Price to Chart.
+            // var newBalance = new Balances({
+                // balance: strategy.primaryExchanges[i].currentlyHolding,
+                // price: strategy.primaryExchanges[i].lastPrice,
+                // exchange: strategy.primaryExchanges[i].exchange._id
+            // });    
             
-            newBalance.save(function (err) {
-                if(err) {
-                    handleError(err);
-                }       
-            });  
+            // newBalance.save(function (err) {
+                // if(err) {
+                    // handleError(err);
+                // }       
+            // });  
             
-        }
+        // }
         // Show Exchanges and amounts we are going short
-        console.log("--------------------------------------------------------------------------------");
-        for(var i = 0; i < strategy.insuranceExchanges.length; i++) {
-            if(strategy.insuranceExchanges[i].ratio > 0) {            
-                console.log("%s @ %s % = %s BTC [SHORT]", 
-                    strategy.insuranceExchanges[i].exchange.name, 
-                    strategy.insuranceExchanges[i].ratio*100, 
-                    strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio
-                );
-            }
-        }
-        console.log("--------------------------------------------------------------------------------");
+        // console.log("--------------------------------------------------------------------------------");
+        // for(var i = 0; i < strategy.insuranceExchanges.length; i++) {
+            // if(strategy.insuranceExchanges[i].ratio > 0) {            
+                // console.log("%s @ %s % = %s BTC [SHORT]", 
+                    // strategy.insuranceExchanges[i].exchange.name, 
+                    // strategy.insuranceExchanges[i].ratio*100, 
+                    // strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio
+                // );
+            // }
+        // }
+        // console.log("--------------------------------------------------------------------------------");
         
         // Maintenance -- Get Rid of Overages in case of Strategy values change.
         for(var k = 0; k < strategy.primaryExchanges.length; k++) {
@@ -321,6 +321,19 @@ function doLongBiasedHedge(strategy) {
                 );
                 
             }
+            
+             // Write Current Holding and Current Price to Chart.
+            var newBalance = new Balances({
+                balance: strategy.primaryExchanges[k].currentlyHolding,
+                price: strategy.primaryExchanges[k].lastPrice,
+                exchange: strategy.primaryExchanges[k].exchange._id
+            });    
+            
+            newBalance.save(function (err) {
+                if(err) {
+                    handleError(err);
+                }       
+            });  
         }
         for(var k = 0; k < strategy.insuranceExchanges.length; k++) {
             // Long Biased Hedge, if Over Sell Overage Short.
@@ -346,7 +359,10 @@ function doLongBiasedHedge(strategy) {
         for(var i = 0; i < strategy.primaryExchanges.length; i++) {
             randomizer = (Math.random() * (1.3 - 0.7) + 0.7).toFixed(4) //  =1
             
-            console.log(clc.yellow("\nExchange: %s || Last Traded Price: %s"), strategy.primaryExchanges[i].exchange.name, Number(strategy.primaryExchanges[i].lastPrice).toFixed(2) );
+            console.log(clc.yellow("\nExchange: %s || Last Traded Price: %s (Difference: %s)"), 
+                strategy.primaryExchanges[i].exchange.name, Number(strategy.primaryExchanges[i].lastPrice).toFixed(2),
+                (((strategy.primaryExchanges[i].lastPrice - strategy.primaryExchanges[i].averageBuyPrice) / strategy.primaryExchanges[i].averageBuyPrice)*100).toFixed(2)
+            );
            
             console.log("Current Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].currentSpread).toFixed(2) );
             console.log("3Hr Avg Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].averageSpread).toFixed(2) ); 

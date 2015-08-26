@@ -50,7 +50,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                         },
                         series: [],
                         title: {
-                            text: '(Amount Held) x (Price) over Time'
+                            text: '(Amount Held on Exchange) x (BTC Price)'
                         },
                         useHighStocks: true
                     };
