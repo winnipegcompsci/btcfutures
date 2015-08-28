@@ -458,8 +458,10 @@ exports.getObligatedVsHolding = function(req, res) {
             if(resp) {
                 var data = {};
                 
+                // Populate Data Object.
                 
-                
+                   
+                res.jsonp(data);
             }
             
         });
