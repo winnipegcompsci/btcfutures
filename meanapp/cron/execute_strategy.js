@@ -19,6 +19,9 @@ mongoose.connect('mongodb://localhost/backtothefutures-dev');
 var OKCoin = require('okcoin');
 var Futures796 = require('futures796');
 var BitVC = require('bitvc');
+var BTCe = require('btce');
+var BitMEX = require('bitmex');
+
 var TTL = 10;
 
 var BalancesModel = require('../app/models/balance.server.model.js');
@@ -354,14 +357,14 @@ function doLongBiasedHedge(strategy) {
         
         // Main Strategy
         var randomizer = 1;
-        console.log('\n');          // Formatting.
+        console.log('\n');          // Pretty Formatting.
         
         for(var i = 0; i < strategy.primaryExchanges.length; i++) {
             randomizer = (Math.random() * (1.3 - 0.7) + 0.7).toFixed(4) //  =1
             
-            console.log(clc.yellow("\nExchange: %s || Last Traded Price: %s (Difference: %s)"), 
+            console.log(clc.yellow("\nExchange: %s || Last Traded Price: %s (Difference: %s %)"), 
                 strategy.primaryExchanges[i].exchange.name, Number(strategy.primaryExchanges[i].lastPrice).toFixed(2),
-                (((strategy.primaryExchanges[i].lastPrice - strategy.primaryExchanges[i].averageBuyPrice) / strategy.primaryExchanges[i].averageBuyPrice)*100).toFixed(2)
+                (((strategy.primaryExchanges[i].lastPrice - strategy.primaryExchanges[i].averageBuyPrice) / strategy.primaryExchanges[i].averageBuyPrice)*100).toFixed(3)
             );
            
             console.log("Current Spread [Averaged Across All Exchanges]: %s", Number(strategy.primaryExchanges[i].currentSpread).toFixed(2) );
@@ -508,23 +511,58 @@ function placeOrder(exchange, price, amount, type, bias, strategy) {
         Number(price).toFixed(2),
         exchange.name
     );
+             
+    
+    if(exchange.name.toLowerCase().trim() === 'bitmex') {
+        var timestamp = new Date().getTime();
+        var clOrdID = 'BITMEX' + timestamp;
+        var quantity = Math.floor(amount);
+        if(type === 'SELL') {
+            quantity = quantity * -1;
+        }
         
-    if(process.env.NODE_ENV === 'development') {
-        var thisTrade = new Trades({
-            exchange: exchange._id, 
-            price: price, 
-            amount: amount,
-            type: type,
-            bias: bias,
-            strategy: strategy._id,            
-        });
+        var bitmex_client = new BitMEX(exchange.apikey, exchange.secretkey);
         
-        thisTrade.save(function (err) {
+        bitmex_client.placeOrder(function(err, response) {
             if(err) {
                 handleError(err);
-            }                       
-        });
+            } else {
+                var thisTrade = new Trades({
+                    exchange: exchange._id, 
+                    price: price, 
+                    amount: quantity,
+                    type: type,
+                    bias: bias,
+                    strategy: strategy._id,            
+                });
+        
+                thisTrade.save(function (err) {
+                    if(err) {
+                        handleError(err);
+                    }                       
+                });
+            }
+            
+            if(response) {
+                console.log("Response from BitMEX: \n" + util.inspect(response));
+            }
+        }, 'XBUZ15', quantity, price, false, 'limit', null, clOrdID);
     } else {
-        // PRODUCTION API CALLS
-    }
+        if(process.env.NODE_ENV === 'development') {
+            var thisTrade = new Trades({
+                exchange: exchange._id, 
+                price: price, 
+                amount: amount,
+                type: type,
+                bias: bias,
+                strategy: strategy._id,            
+            });
+            
+            thisTrade.save(function (err) {
+                if(err) {
+                    handleError(err);
+                }                       
+            });
+        } // end if development
+    } 
 }

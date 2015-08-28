@@ -404,6 +404,79 @@ exports.getCurrentHolding = function(req, res) {
     }
 };
 
+exports.getObligatedVsHolding = function(req, res) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        var privateClient = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        privateClient.future_userinfo_fixed(function(err, resp) {
+            if(err) {
+                res.status(500).send(err);
+            }
+            
+            var data = {};
+            
+            for(var i = 0; i < resp.btc.contracts.length; i++) {
+                var name = resp.btc.contracts[i].contract_id;
+                
+                data.push({
+                    'contract': resp.btc.contracts[i].contract_id,
+                    'available': resp.btc.contracts[i].available,
+                    'obligated': resp.btc.contracts[i].freeze,
+                    'profit': resp.btc.contracts[i].profit,
+                    'unprofit': resp.btc.contracts[i].unprofit
+                });
+            }
+            
+            return data;
+        });
+    }
+    
+    if(thisName === '796') {
+        var privateClient = new Futures796(req.exchange.apikey, req.exchange.secretkey);
+        
+        privateClient.getAssets(function(err, resp) {
+            if(err) {
+                res.status(500).send(err);
+            }
+            
+            var data = {};
+            
+            
+        });
+    }
+    
+    if(thisName === 'bitvc') {
+        var privateClient = new BitVC(req.exchange.apikey, req.exchange.secretkey);
+        
+        privateClient.getUserPositions(function(err, resp) {
+            if(err) {
+                res.status(500).send(err);
+            }
+            
+            if(resp) {
+                var data = {};
+                
+                
+                
+            }
+            
+        });
+        
+    }
+    
+    if(thisName === 'btc-e') {
+        var privateClient = new BTCe(req.exchange.apikey, req.exchange.secretkey);
+    }
+    
+    if(thisName === 'bitmex') {
+        var privateClient = new BitMEX(req.exchange.apikey, req.exchange.secretkey);
+    }
+}
+
+
+
 /* 
 API Functions
 */

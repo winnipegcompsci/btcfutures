@@ -1,0 +1,11 @@
+Login: 120036070
+Passsword: 4olfadq
+Investor: pno6urw (read only password)
+
+
+BTC-e:
+MetaTrader login details:
+Account type:		Demo
+Login:			30039243
+Password:		bBN3crNy
+Invest password:	5FMiCruY

@@ -5,9 +5,21 @@ Today's Work
 - Refactored Strategy: Fixed currentlyHolding Amount.
 - Tested with Price Randomizer to make sure all cases 
 get met. 
+
 - Built Balance CRUD Model 
     (for tracking exchange balances over time).
+- Execute Strategy now stores balance information.
+
 - Balances: Amount Holding X Current Price Chart.  
+
+- Added 'Testnet Bitcoin' from the following faucets:
+    https://testnet.coinfaucet.eu/en/
+    http://tpfaucet.appspot.com/
+    http://faucet.xeno-genesis.com/
+    
+Testnet Block Explorer: http://tbtc.blockr.io/address/info/2NBMEXg1dtMhhgwHJvUarerj8V8d5rW4XsN
+  
+- Started configuring app to run on BitMEX testnet instead of live BitMEX site.      
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::

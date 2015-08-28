@@ -37,6 +37,8 @@ module.exports = function(app) {
     app.route('/exchanges/:exchangeId/getPricesFromDB')
         .get(exchanges.getPricesFromDB);
     
+    app.route('/exchanges/:exchangeId/getObligatedVsHolding')
+        .get(exchanges.getObligatedVsHolding);
 
     // New (Public) Functions
     app.route('/exchanges/:exchangeId/future_ticker')

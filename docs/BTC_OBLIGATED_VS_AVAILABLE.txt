@@ -1,0 +1,196 @@
+RISK: (Obligated Vs. Available):
+
+Leverage:   50x = 2% of Open Position is what's at risk.
+
+
+
+OKCoin:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+future_userinfo_4fix.do: {
+    "btc": {
+        balance: account balance
+        "contracts": [
+            available:  available funds
+            balance: account (contract) balance
+            bond: fixed margin
+            contract_id: contract ID
+            contract_type: Contract Type (weekly, quarterly, etc)
+            freeze: frozen amount
+            profit: realized profit
+            unprofit: unrealzed profit
+            rights: account equity
+        ]
+    }
+
+}
+
+OBLIGATED VS AVAILABLE: btc.contracts[x].freeze / btc.contracts[x].available
+
+796::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+get_balance: {
+    "errno":"0",
+    "msg":"success",
+    "data": {
+        "btc":"1939.4027306",
+        "mri":"1800",
+        "asicminer":"800"
+    }
+}
+
+get_assets: {
+    btc: {
+        mainwallet: main wallet balance,
+        marginaccount: margin account balance,
+        unmatched: unoffsetted amount,
+        totalassets: total assets,
+        netassets: net assets,
+    }
+}
+BitVC::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+futures/balance: {
+ profitLoss : 0,                             // Week's Close P/L
+    masterHoldProfitLoss : -0.00091527,      // Main account hold P/L
+    masterUsedMargin : 0.0242,                // Main account used margin
+    status : 0,                                 // Status (0 Normal 1 Liquidation)
+    usedMargin : 0.0484,                       // Used margin
+    holdProfitLoss : -0.00091527,             // Total hold profit loss
+    masterDynamicRights : 10.0747,            // Main account Dynamic rights
+    slaveUsedMargin : 0.0241,                  // Total split account used margin
+    fee : 0.0001936,                            // Week's fee
+    totalProfitLoss : 0,                        // Total Close P/L
+    totalFee : 0.0001936,                       // Total fee
+    riskRate : "0%",                             // Risk rate
+    dynamicRights : 10.0988,                    // Dynamic rights
+    slaveHoldProfitLoss : 0,                    // Total split account hold P/L
+    staticRights : 10.1,                        // Static rights
+    margin : 10.0514,                           // Margin
+    availableMargin : 10.0424,                 // Available margin
+    frozenMargin : 0.008,                       // Frozen margin
+    availableMarginQuarter2 : 10.0424,        // Quarter2 Available margin
+    availableMarginWeek : 10.0424,              // Week Available margin
+    masterHoldProfitLossWeek : 0,               // Main week hold profit loss
+    masterHoldProfitLossWeek2 : 0,              // Main # week hold profit loss
+    masterHoldProfitLossQuarter2 : 0,           // Main quarter hold profit loss
+    closeProfitLossWeek : 0,                    // Week hold profit loss
+    closeProfitLossWeek2 : 0,                   // # Week hold profit loss
+    closeProfitLossQuarter2 : 0,                // Quarter hold profit loss
+    feeWeek : 0.0000666666,                     // Week fee
+    feeWeek2 : 0,                               // # Week fee
+    feeQuarter2 : 0,                            // Quarter fee
+    holdProfitLossWeek : 0,                     // Account week hold profit loss
+    holdProfitLossWeek2 : 0,                    // Account # week hold profit loss
+    holdProfitLossQuarter2 : 0,                 // Account quarter hold profit loss
+}
+
+BTC-e::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+getInfo: {
+	"success":1,
+	"return":{
+		"funds":{
+			"usd":325,
+			"btc":23.998,
+			"ltc":0,
+			...
+		},
+		"rights":{
+			"info":1,
+			"trade":0,
+			"withdraw":0
+		},
+		"transaction_count":0,
+		"open_orders":1,
+		"server_time":1342123547
+	}
+}
+
+# funds: Your account balance available for trading.
+# rights: The privileges of the current API key. 
+# open_orders: The number of open orders
+
+BitMEX:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/position: {
+    [
+      {
+        "account": 0,
+        "symbol": "",
+        "underlying": "",
+        "quoteCurrency": "",
+        "currency": "",
+        "commission": 0,
+        "crossMargin": false,
+        "prevRealisedPnl": 0,
+        "prevUnrealisedPnl": 0,
+        "prevClosePrice": 0,
+        "openingTimestamp": "",
+        "openingQty": 0,
+        "openingCost": 0,
+        "openingComm": 0,
+        "openOrderBuyQty": 0,
+        "openOrderBuyCost": 0,
+        "openOrderBuyPremium": 0,
+        "openOrderSellQty": 0,
+        "openOrderSellCost": 0,
+        "openOrderSellPremium": 0,
+        "execBuyQty": 0,
+        "execBuyCost": 0,
+        "execSellQty": 0,
+        "execSellCost": 0,
+        "execQty": 0,
+        "execCost": 0,
+        "execComm": 0,
+        "currentTimestamp": "",
+        "currentQty": 0,
+        "currentCost": 0,
+        "currentComm": 0,
+        "realisedCost": 0,
+        "unrealisedCost": 0,
+        "grossOpenCost": 0,
+        "grossOpenPremium": 0,
+        "grossExecCost": 0,
+        "isOpen": false,
+        "markPrice": 0,
+        "markValue": 0,
+        "homeNotional": 0,
+        "foreignNotional": 0,
+        "posState": "",
+        "posCost": 0,
+        "posCross": 0,
+        "posInit": 0,
+        "posComm": 0,
+        "posLoss": 0,
+        "posMargin": 0,
+        "posMaint": 0,
+        "posAllowance": 0,
+        "taxableMargin": 0,
+        "initMargin": 0,
+        "maintMargin": 0,
+        "sessionMargin": 0,
+        "targetExcessMargin": 0,
+        "varMargin": 0,
+        "realisedGrossPnl": 0,
+        "realisedTax": 0,
+        "realisedPnl": 0,
+        "unrealisedGrossPnl": 0,
+        "longBankrupt": 0,
+        "shortBankrupt": 0,
+        "taxBase": 0,
+        "indicativeTaxRate": 0,
+        "indicativeTax": 0,
+        "unrealisedTax": 0,
+        "unrealisedPnl": 0,
+        "unrealisedPnlPcnt": 0,
+        "simpleQty": 0,
+        "simpleCost": 0,
+        "simpleValue": 0,
+        "simplePnl": 0,
+        "simplePnlPcnt": 0,
+        "avgEntryPrice": 0,
+        "breakEvenPrice": 0,
+        "marginCallPrice": 0,
+        "liquidationPrice": 0,
+        "bankruptPrice": 0,
+        "timestamp": "",
+        "lastPrice": 0,
+        "lastValue": 0
+      }
+    ]
+}
