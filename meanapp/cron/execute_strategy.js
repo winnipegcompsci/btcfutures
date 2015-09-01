@@ -265,49 +265,7 @@ function doLongBiasedHedge(strategy) {
         return; 
     } else {
         console.log("\nExecuting %s", strategy.name);
-        
-        // console.log("Total Coins: %s BTC | Max Buy Price: $ %s USD | Insurance Coverage: %s %",
-            // strategy.totalCoins, strategy.maxBuyPrice, strategy.insuranceCoverage*100);
-        // console.log("--------------------------------------------------------------------------------");
-        
-                
-        // // Show Exchanges and Amounts we are going long
-        // for(var i = 0; i < strategy.primaryExchanges.length; i++) {
-            // if(strategy.primaryExchanges[i].ratio > 0) {
-                // console.log("%s @ %s % = %s BTC [LONG]", 
-                    // strategy.primaryExchanges[i].exchange.name, 
-                    // strategy.primaryExchanges[i].ratio*100, 
-                    // strategy.totalCoins * strategy.primaryExchanges[i].ratio
-                // );
-            // }
-            
-            // // Write Current Holding and Current Price to Chart.
-            // var newBalance = new Balances({
-                // balance: strategy.primaryExchanges[i].currentlyHolding,
-                // price: strategy.primaryExchanges[i].lastPrice,
-                // exchange: strategy.primaryExchanges[i].exchange._id
-            // });    
-            
-            // newBalance.save(function (err) {
-                // if(err) {
-                    // handleError(err);
-                // }       
-            // });  
-            
-        // }
-        // Show Exchanges and amounts we are going short
-        // console.log("--------------------------------------------------------------------------------");
-        // for(var i = 0; i < strategy.insuranceExchanges.length; i++) {
-            // if(strategy.insuranceExchanges[i].ratio > 0) {            
-                // console.log("%s @ %s % = %s BTC [SHORT]", 
-                    // strategy.insuranceExchanges[i].exchange.name, 
-                    // strategy.insuranceExchanges[i].ratio*100, 
-                    // strategy.totalCoins * strategy.insuranceCoverage * strategy.insuranceExchanges[i].ratio
-                // );
-            // }
-        // }
-        // console.log("--------------------------------------------------------------------------------");
-        
+
         // Maintenance -- Get Rid of Overages in case of Strategy values change.
         for(var k = 0; k < strategy.primaryExchanges.length; k++) {
             // Long Biased Hedge, if Over Sell Overage Long.

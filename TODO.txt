@@ -1,82 +1,30 @@
 BTC Futures: TODO List
 ------------------------------------------------------
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
-Obligation Vs Available Calculations:
-    OKCoin: Done. Using the userinfo_4fix.do method.
-    796: This will need to be done using multiple API calls. I am trying to nest these calls together:
-        eg: get assets, then get all active orders, use balance from asset / orders info for each active position.
-    BitVC: Uses getAssets() and futures/holdOrder
-    BTCe: Uses OrderInfo and getInfo (user info).
-    BitMEX: Uses /orders method (GET request)
+Today:
 
-BitMEX API:
-    I am working on trying to get the POST API authorization to work with BitMEX.
+Plan:
+- Calculate Obligated Amounts vs. Available Amounts.
+- Calculate Quantity instead of Amount.
     
-    I created a test class using the test-cases BitMEX offers to try and create my HMAC(Sha256) hash that gets used to sign the request. 
-    This test class passes, the hmac hash generated matches the expected result based on the input, however when trying to place an order I get the following error:
     
-    Response from BitMEX:
-        "error":{
-            "message":"Signature not valid.",
-            "name":"HTTPError"
-        }
-    
-        Error: 401: BitMEX.executeRequest() 
-        HTTP status code 401 returned from POST request to url https://testnet.bitmex.com:443/api/v1/order 
-        with method order and params 
-        {
-            "symbol":"XBUZ15",
-            "quantity":-1,
-            "price":263.81,
-            "type":"limit",
-            "clOrdID":"BITMEX1440800207912"
-        }
-        
-    I am in the midst of discussing this with the BitMEX CTO 'BitMEX_SAM',
-    to try and debug this. He is in the process of creating an official NodeJS API Wrapper, 
-    so as that is in the works I will be combining the official API with out custom wrapper.    
-    
-BTC-e: MetaTrader:
-
-I have setup a BTC-e demo account for use with MetaTrader4.
-
-The following credentials are used:
-    MetaTrader4 Default Account Details:
-    Login:          120036070
-    Passsword:      4olfadq
-    Investor:       pno6urw (read only password)    
-       
-    BTC-e Demo Server login details: 
-    Login:	        30039243
-    Password:	    bBN3crNy
-    Investor:	    5FMiCruY (read only password)
-
-
-    
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 High Priority-----------------------------------------
-
-- Push Each Exchange NPM Module to Seperate Git Repo.
-- Tests for Each Exchange NPM Module.
-    - Test Public Methods
-        (Returns in Expected Format)
-    - Test Private Methods 
-        (Authorizes Correctly)
-        (Returns in Expected Format)       
         
 - Customize Strategy Execution Through UI.
 - Production Mode 
     - Check Balances before making a trade.
     - Get Confirmation before Storing Trade in Database
     - Low Balance Errs Send Email        
+
+Interface:
+    Show Obligated Vs. Available Amounts.
     
 Normal Priority---------------------------------------
-- Display Balance over all Exchanges (Show total amount held).
-
-- Fix Testing Mode with BackData
-    - Explain Buy / Sell Details & Reasons.
+Strategy:
+    Testing with BackData?
+    
 
 
 Low Priority-------------------------------------------
