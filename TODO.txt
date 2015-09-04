@@ -1,30 +1,37 @@
 BTC Futures: TODO List
 ------------------------------------------------------
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
 Today:
-
-Plan:
-- Calculate Obligated Amounts vs. Available Amounts.
-- Calculate Quantity instead of Amount.
+::::::::::::::::::::::::::::::::::::::::::::::::::::::
     
     
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 High Priority-----------------------------------------
-        
-- Customize Strategy Execution Through UI.
-- Production Mode 
-    - Check Balances before making a trade.
-    - Get Confirmation before Storing Trade in Database
-    - Low Balance Errs Send Email        
 
 Interface:
-    Show Obligated Vs. Available Amounts.
+Dashboard:    
+    - For each Exchange
+        - Get Balance (Total, Available)
+        - Get List of Contracts.
+            - For each Contract/Symbol Show
+                - Position 
+                    (Name, Closing Date, Position Size, Entry Price, Market Price, Unrealized PL, Realized PL)
+        
+                
+
+            
+For Each Exchange:   
+    - Show Positions on Each Contract on The Exchange. 
+    - Show Active Orders
+    - Show Orderbook
+    - Show Recent Trades 
+    - Show Price Chart (Each Symbol)?
     
 Normal Priority---------------------------------------
+
 Strategy:
     Testing with BackData?
-    
+
 
 
 Low Priority-------------------------------------------

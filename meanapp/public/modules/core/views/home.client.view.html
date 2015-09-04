@@ -7,42 +7,132 @@
     <div class="row">
         <h2 class="text-center">Dashboard</h2>
     </div>
-
-    <div class="row" data-ng-init="getBalanceChart()">
-        <highchart id="balancegraph" config="balanceChartConfig"></highchart>
-    </div>
-    
-    <div class="row">
-        <h3 class="text-left">Exchanges</h3>
-    </div>
-    
-    <div class="row" data-ng-init="getExchanges()">
-        <div class="columns col-lg-4" data-ng-repeat="exchange in exchanges | orderBy:exchange.name:false">
-            <div class="panel panel-info">
+       
+    <div class="exchanges-container" data-ng-init="getExchanges()">    
+        <div class="row" data-ng-repeat="exchange in exchanges | orderBy:exchange.name:false">
+            <div class="panel panel-primary" >
                 <div class="panel-heading">
-                    {{exchange.name}} - <span data-ng-init="getLastPrice(exchange)"> ${{(exchange.currentPrice) || "..."}}</span>  </span> 
-                    <span class="badge text-success pull-right" data-ng-init="countTrades(exchange)">{{exchange.numTrades || "0"}} Open Positions </span> 
+                    {{exchange.name}}
+                    <span class="pull-right" data-ng-init="getBalances(exchange)"> 
+                        <!-- Show Total Balance -->
+                        <span class="badge">
+                            <span class="text-warning">Balance: {{exchange.balance.total.toFixed(4)}} </span>
+                            <span class="glyphicon glyphicon-bitcoin"></span>
+                        </span>
+                        
+                        <!-- Show Available Balance -->
+                        <span class="badge">
+                            <span class="text-success">Available: {{exchange.balance.available.toFixed(4)}} </span> 
+                            <span class="glyphicon glyphicon-bitcoin"></span>
+                        </span>
+                    </span>
                 </div>
-                <div class="panel-body">
-                    <div class="row text-left text-info">Account Equity: <span class="glyphicon glyphicon-usd"></span> 0.00 USD</div>
-                    <div class="row text-left text-info">BTC Balance: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span></div>
-                    <div class="row text-left text-info">Realized Profit/Loss: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span> </div>
-                    <div class="row text-left text-info">Unrealized Profit/Loss: 0.00000 <span class="glyphicon glyphicon-bitcoin"></span> </div>
-                    <br />
-                    <div class="row text-left text-success"> Holding {{exchange.longAmount.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> (Long) </div> 
-                    <div class="row text-right text-info"> (Avg Long Buy Price <span class="glyphicon glyphicon-usd"></span>{{exchange.avgLongBuyPrice.toFixed(5) }} ) </div>
-
-                    <div class="row text-left text-success"> Holding {{exchange.shortAmount.toFixed(5)}} <span class="glyphicon glyphicon-bitcoin"></span> (Short) </div>
-                    <div class="row text-right text-info"> (Avg Short Buy Price <span class="glyphicon glyphicon-usd"></span>{{exchange.avgShortBuyPrice.toFixed(5) }} )</div>
+                
+                <div class="panel-body" data-ng-init="exchange.tab = '{{exchange.name}}-positions'">                
+                    <ul class="nav nav-tabs">
+                        <li ng-class="{active:exchange.tab == '{{exchange.name}}-positions'}">
+                            <a href data-ng-click="exchange.tab = '{{exchange.name}}-positions'">Positions</a>
+                        </li>
+                        <li ng-class="{active:exchange.tab == '{{exchange.name}}-active-orders'}">
+                            <a href data-ng-click="exchange.tab = '{{exchange.name}}-active-orders'">Active Orders</a>
+                        </li>
+                        <li ng-class="{active:exchange.tab == '{{exchange.name}}-trade-history'}">
+                            <a href data-ng-click="exchange.tab = '{{exchange.name}}-trade-history'">Trade History</a>
+                        </li>
+                        <li ng-class="{active:exchange.tab == '{{exchange.name}}-price-chart'}">
+                            <a href data-ng-click="exchange.tab = '{{exchange.name}}-price-chart'">Price Chart</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div ng-show="exchange.tab == '{{exchange.name}}-positions'" class="tab-pane active">
+                            <h3> Current Positions </h3>
+                            <table width="100%" data-ng-init="getPositions(exchange)">
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Expires</th>
+                                    <th>Size</th>
+                                    <th>Current Value</th>
+                                    <th>Entry Price</th>
+                                    <th>Current Price</th>
+                                    <th>Unrealized P/L</th>
+                                    <th>Realized P/L</th>
+                                </tr>
+                                
+                                <tr ng-class="{'text-success': position.realizedPL > 0, 'text-danger': position.realizedPL < 0, 'text-primary': position.realizedPL == 0}" data-ng-repeat="position in exchange.positions">
+                                    <td>{{position.symbol}}</td>
+                                    <td>{{position.expires | date:medium}}</td>
+                                    <td>{{position.size}}</td>
+                                    <td>{{position.currentValue}}</td>
+                                    <td>{{position.entryPrice.toFixed(2)}}</td>
+                                    <td>{{position.currentPrice.toFixed(2)}}</td>
+                                    <td>{{position.unrealizedPL.toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span> </td>
+                                    <td>{{position.realizedPL.toFixed(4)}} <span class="glyphicon glyphicon-bitcoin"></span> </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div ng-show="exchange.tab == '{{exchange.name}}-active-orders'" class="tab-pane active">
+                            <h3> Active Trades </h3>
+                            <table width="100%" data-ng-init="getActiveOrders(exchange)">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Symbol</th>
+                                    <th>Status</th>
+                                    <th>Side</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Filled</th>
+                                    <th>Cancel</th>
+                                </tr>
+                                
+                                <tr ng-class="{'text-success': order.side == 'Buy', 'text-danger': order.side == 'Sell'}" data-ng-repeat="order in exchange.activeOrders">
+                                    <td> {{order.id}} </td>
+                                    <td> {{order.symbol}} </td>
+                                    <td> {{order.status}} </td>
+                                    <td> {{order.side}} </td>
+                                    <td> {{order.quantity}} </td>
+                                    <td> {{order.price.toFixed(2)}} </td>
+                                    <td> {{order.filled}} </td>                                    
+                                    <td> <span ng-click="cancelOrder(exchange,order.id)" class="text-danger glyphicon glyphicon-trash"> </span> </td>
+                                </tr>
+                                
+                            </table>
+                        </div>
+                        <div ng-show="exchange.tab == '{{exchange.name}}-trade-history'" class="tab-pane active">
+                            <h3>Trade History</h3>
+                            
+                             <table width="100%" data-ng-init="getTradeHistory(exchange)">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Symbol</th>
+                                    <th>Status</th>
+                                    <th>Side</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                </tr>
+                                
+                                <tr ng-class="{'text-success': order.side == 'Buy', 'text-danger': order.side == 'Sell'}" data-ng-repeat="trade in exchange.trade_history">
+                                    <td> {{trade.id}} </td>
+                                    <td> {{trade.symbol}} </td>
+                                    <td> {{trade.status}} </td>
+                                    <td> {{trade.side}} </td>
+                                    <td> {{trade.quantity}} </td>
+                                    <td> {{trade.price.toFixed(2)}} </td> 
+                                </tr>
+                                
+                            </table>
+                            
+                            
+                        </div>
+                        <div ng-show="exchange.tab == '{{exchange.name}}-price-chart'" class="tab-pane active">
+                            <h3>Price Chart</h3>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="row" data-ng-init="getGraphPrices()">
-        <highchart id="daygraph" config="ltpChartConfig"></highchart>
-    </div>
-    
+            
 	<br />
     <h6 class="text-center">BTCFutures (Back to The Futures) &copy; Enigma Networks   </h6>
 </section>

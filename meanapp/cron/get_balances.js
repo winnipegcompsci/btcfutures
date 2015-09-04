@@ -152,11 +152,21 @@ function getBalances(strategy, exchanges, prices, trades) {
                     }
                     
                     console.log("BTC-e RESPONSE: " + util.inspect(resp));
-                }, 'btc_usd');
+                });
             }
             
             if(exchange_name === 'bitmex') {
                 var client = new BitMEX(api_key, secret);
+                
+                client.getPositions(function(err, resp) {
+                    if(err) {
+                        console.log(clc.red("ERROR: " + err));
+                    }
+                    
+                    console.log("BitMEX RESPONSE: " + util.inspect(resp));
+                });
+                
+                
                 
             }
         }

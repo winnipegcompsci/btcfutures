@@ -127,6 +127,278 @@ exports.hasAuthorization = function(req, res, next) {
 	next();
 };
 
+exports.getBalance = function(req, res, next) {
+    
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        var client = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        client.getFixedUserInfo(function(err, resp) {
+            if(err) {
+                console.log("ERROR: " + err);
+            }           
+            
+            var currentTotal = resp.info.btc.balance;
+            var currentAvailable = resp.info.btc.balance;
+                        
+            resp.info.btc.contracts.forEach(function(contract) {
+                currentAvailable -= contract.freeze;
+            });
+                        
+            return res.send({
+                total: currentTotal,
+                available: currentAvailable
+            });
+        });
+        
+    } else if (thisName === '796' || thisName === 'futures796') {
+        return res.send({
+            total: 0,
+            available: 0
+        });
+    } else if (thisName === 'bitvc') {
+        return res.send({
+            total: 0,
+            available: 0
+        });
+    } else if (thisName === 'btc-e') {
+        return res.send({
+            total: 0,
+            available: 0
+        });
+    } else if (thisName === 'bitmex') {
+        var client = new BitMEX(req.exchange.apikey, req.exchange.secretkey);
+        
+        client.getUserMargin(function(err, resp) {
+            if(err) {
+                console.log("ERROR: " + err);
+            }
+            
+            return res.send({
+                total: resp.marginBalance * 1e-8,
+                available: resp.availableMargin * 1e-8
+            });
+        });        
+    }
+    
+};
+
+exports.getActiveOrders = function(req, res, next) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        
+    } else if (thisName === '796' || thisName === 'futures796') {
+        
+    } else if (thisName === 'bitvc') {
+        
+    } else if (thisName === 'btc-e') {
+        
+    } else if (thisName === 'bitmex') {
+        var client = new BitMEX(req.exchange.apikey, req.exchange.secretkey);
+        
+        client.getOrders(function(err, resp) {
+            if(err) {
+                console.log("ERROR: " + err);
+            }
+                        
+            var orders = [];
+            
+            resp.forEach(function(order) {
+                if(order.ordStatus === 'New') {
+                    orders.push({
+                        id: order.orderID,
+                        symbol: order.symbol,
+                        status: order.ordStatus,
+                        side: order.side,
+                        quantity: order.orderQty,
+                        price: order.price,
+                        filled: order.cumQty                    
+                    });
+                }
+            });
+            
+            res.send(orders);
+            
+            
+        });
+    }
+};
+
+exports.cancelOrder = function(req, res, next) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        
+    } else if (thisName === '796' || thisName === 'futures796') {
+        
+    } else if (thisName === 'bitvc') {
+        
+    } else if (thisName === 'btc-e') {
+        
+    } else if (thisName === 'bitmex') {
+        var client = new BitMEX(req.exchange.apikey, req.exchange.secretkey);
+        
+        client.cancelOrder(function(err, resp) {
+            if(err) {
+                res.send("ERROR: " + err);
+            }
+            
+            res.send(resp);
+        });
+            
+            
+        
+    }
+};
+
+exports.getTradeHistory = function(req, res, next) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        
+    } else if (thisName === '796' || thisName === 'futures796') {
+        
+    } else if (thisName === 'bitvc') {
+        
+    } else if (thisName === 'btc-e') {
+        
+    } else if (thisName === 'bitmex') {
+        var client = new BitMEX(req.exchange.apikey, req.exchange.secretkey);
+        
+        client.getExecutionTradeHistory(function(err, resp) {
+            if(err) {
+                res.send("ERROR: " + err);
+            }
+                        
+            var trades = [];
+            
+            console.log("TRADE HISTORY: " + util.inspect(resp));
+            
+            res.send(trades);
+        });
+    }
+};
+
+
+exports.getPositions = function(req, res, next) {
+    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
+    
+    if(thisName === 'okcoin') {
+        var client = new OKCoin(req.exchange.apikey, req.exchange.secretkey);
+        
+        var contract_types = ['this_week', 'next_week', 'quarter'];
+        
+        var positions = [];
+        
+        contract_types.forEach(function(contract_type) {
+            positions.push({
+                symbol: 'BTC (' + contract_type.replace('_', ' ') + ')',
+                expires: null,
+                size: null,
+                currentValue: null,
+                entryPrice: null,
+                currentPrice: null,
+                unrealizedPL: null,
+                realizedPL: null
+            });  
+        });
+        
+        res.send(positions);
+        
+        
+    } else if (thisName === '796' || thisName === 'futures796') {
+        var client = new Futures796(req.exchange.apikey, req.exchange.secretkey);
+        
+        var positions = [];
+        
+        positions.push({
+            symbol: 'BTC (weekly)',
+            expires: null,
+            size: null,
+            currentValue: null,
+            entryPrice: null,
+            currentPrice: null,
+            unrealizedPL: null,
+            realizedPL: null,
+        });
+        
+        
+        res.send(positions);
+        
+        
+    } else if (thisName === 'bitvc') {
+        var client = new BitVC(req.exchange.apikey, req.exchange.secretkey);
+        
+        var contract_types = ['this_week', 'next_week', 'quarter'];
+        
+        var positions = [];
+        
+        contract_types.forEach(function(contract_type) {
+            positions.push({
+                symbol: 'BTC (' + contract_type.replace('_', ' ') + ')',
+                expires: null,
+                size: null,
+                currentValue: null,
+                entryPrice: null,
+                currentPrice: null,
+                unrealizedPL: null,
+                realizedPL: null
+            });  
+        });
+        
+        res.send(positions);
+        
+        
+    } else if (thisName === 'btc-e') {
+        
+        var positions = [];
+        
+        positions.push({
+            symbol: 'BTC',
+            expires: null,
+            size: null,
+            currentValue: null,
+            entryPrice: null,
+            currentPrice: null,
+            unrealizedPL: null,
+            realizedPL: null,
+        });
+                
+        res.send(positions);
+        
+    } else if (thisName === 'bitmex') {
+        var client = new BitMEX(req.exchange.apikey, req.exchange.secretkey);
+        
+        client.getPositions(function(err, resp) {
+            if(err) {
+                console.log("Error: " + err);
+            } else {            
+                var positions = [];
+                
+                resp.forEach(function(position) {
+                    // GET POSITION EXPIRY DATE FROM INSTRUMENT.
+                    
+                    positions.push({
+                        symbol: position.symbol,
+                        expires: position.currentTimestamp,
+                        size: position.currentQty,
+                        currentValue: Math.abs(position.markValue*1e-8).toFixed(4) + " BTC ($" + position.simpleValue + ")",
+                        entryPrice: position.avgEntryPrice,
+                        currentPrice: position.markPrice,
+                        unrealizedPL: position.unrealisedPnl * 1e-8,
+                        realizedPL: position.realisedPnl * 1e-8
+                    });
+                });
+                
+                res.send(positions);
+            }
+        });
+    }
+}
+
+
 exports.getCurrentPrice = function(req, res) {
 	var thisName = req.exchange.name.toLowerCase().replace(' ', '');
 	
@@ -209,63 +481,6 @@ exports.getCurrentPrice = function(req, res) {
 };
 
 
-exports.addTrade = function(req, res) {
-    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
-
-    var amount = req.amount;
-    var price = req.price;
-    var type = req.type;
-    var match_price = req.match_price;
-    var lever_rate = req.lever_rate;
-    
-    if(thisName === 'okcoin') {
-        okcoin_private.addFutureTrade(function (err, newTrade_resp) {
-            
-            res.send(newTrade_resp);
-        }, 'btc_usd', 'quarter', amount, price, type, match_price, lever_rate);
-        
-    } else if (thisName === '796' || thisName === 'futures796') {        
-        futures796_private.openBuy(function (err, newTrade_resp) {
-            res.send(newTrade_resp);
-        }, '0.10', '10', price, 'A');
-    } else {
-        res.status(500).send('ERROR: ' + thisName + ' Function AddTrade() -- Not Found');
-    }
-    
-    var trade = req.trade;
-};
-
-exports.getCurrentTrades = function(req, res) {
-    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
-    
-    if(thisName === 'okcoin') {
-        okcoin_public.getFutureTrades(function(err, trades_resp) {
-            res.send(trades_resp);
-        }, 'btc_usd', 'quarter');
-    } else if(thisName === '796' || thisName === 'futures796') {
-        futures796_public.getTrades(function(err, trades_resp) {
-            res.send(trades_resp);
-        });
-    } else {
-        res.status(500).send('ERROR: ' + thisName + ' Function GetCurrentTrades() -- Not Found');
-    }
-};
-
-
-
-exports.getFutureCandles = function(req, res) {
-    var thisName = req.exchange.name.toLowerCase().replace(' ', '');
-    
-    if(thisName === 'okcoin') {
-        okcoin_public.getFutureKline(function(err, candles_resp) {
-           res.send(candles_resp); 
-        }, 'btc_usd', '1hour', 'weekly');
-    } else if (thisName === '796' || thisName === 'futures796') {
-        res.status(500).send('ERROR: 796s API does not provide Candlestick data');
-    } else if (thisName === 'bitvc') {
-        res.status(500).send('ERROR: BitVCs API does not provide Candlestick data');
-    }    
-};
 
 exports.getUserInfo = function(req, res) {
     var thisName = req.exchange.name.toLowerCase().replace(' ', '');
@@ -285,22 +500,6 @@ exports.getUserInfo = function(req, res) {
     } else {
         res.status(500).send('ERROR: ' + thisName + ' Function GetUserInfo() -- Not Found');
     }
-};
-
-exports.getPricesFromDB = function(req, res) {
-    var exchange = req.exchange;
-    
-    Price.find({'exchange':exchange._id}, function(err, prices) {
-        var prices_arr = [];
-        var times_arr = [];
-        
-        for(var i = 0; i < prices.length; i++) {
-            prices_arr.push(prices[i].price);
-            times_arr.push(prices[i].timestamp);
-        }
-        res.send({'prices': prices_arr, 'timestamps': times_arr});
-    });
-    
 };
 
 

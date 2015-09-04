@@ -6,7 +6,7 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
 	function($scope, $http, Authentication) {
 		// This provides Authentication context.
 		$scope.authentication = Authentication;
-
+        
         $scope.getExchanges = function() {
             $http.get('exchanges')
                 .success(function(data) {
@@ -14,150 +14,47 @@ myapp.controller('HomeController', ['$scope', '$http', 'Authentication',
                 });
         };
         
-        $scope.getLastPrice = function(exchange) {
-            if(!exchange) {
-                exchange.currentPrice = 'N/F';
-            }
-
-            $http.get('exchanges/' + exchange._id + '/getTicker')
+        $scope.getBalances = function(exchange) {
+            $http.get('exchanges/' + exchange._id + '/balance')
                 .success(function(data) {
-                    exchange.currentPrice = Number(data.last).toFixed(2); 
+                    exchange.balance = data;
                 });
         };
         
-        $scope.getBalanceChart = function() {            
-            $http.get('/balances/graph/exchange')
-                .success(function(balanceData) {
-                    $scope.balanceChartConfig = {
-                        options: {
-                            chart: {
-                                zoomType: 'x'
-                            },
-                            rangeSelector: {
-                                enabled: true
-                            },
-                            navigator: {
-                                enabled: true
-                            },
-                            tooltip: {
-                                valueDecimals: 2,
-                                valuePrefix: '$',
-                                valueSuffix: ' USD'
-                            },
-                            lang: {
-                                noData: 'Loading Data... '
-                            }
-                        },
-                        series: [],
-                        title: {
-                            text: '(Amount Held on Exchange) x (BTC Price)'
-                        },
-                        useHighStocks: true
-                    };
-                    
-                    for(var series in balanceData) {
-                        console.log("SERIES::: " + series);
-                        $scope.balanceChartConfig.series.push(balanceData[series]);
-                    }
+        $scope.getPositions = function(exchange) {
+            
+            $http.get('exchanges/' + exchange._id + '/positions')
+                .success(function(data) {
+                    exchange.positions = data;
+                });
+            
+
+        };
+        
+        $scope.getActiveOrders = function(exchange) {
+           
+            $http.get('exchanges/' + exchange._id + '/active_orders')
+                .success(function(data) {
+                    exchange.activeOrders = data;
+                });
+        };
+        
+        $scope.cancelOrder = function(exchange, order_id) {
+            $http.get('exchanges/' + exchange._id + '/cancel_order/' + order_id)
+                .success(function(data) {
+                    console.log("DEBUG: ORDER CANCELLED");
+                    alert(data);
+                });
+        };
+        
+        $scope.getTradeHistory = function(exchange) {
+            $http.get('exchanges/' + exchange._id + '/trade_history')
+                .success(function(data) {
+                    exchange.trade_history = data;
                 });
         };
         
         
-        
-        $scope.getGraphPrices = function() {
-            $http.get('/prices/graph/minute')
-                .success(function(graphData) {
-                    
-                    $scope.ltpChartConfig = {
-                        options: {
-                            chart: {
-                                zoomType: 'x'
-                            },
-                            rangeSelector: {
-                                enabled: true
-                            },
-                            navigator: {
-                                enabled: true
-                            },
-                            tooltip: {
-                                valueDecimals: 2,
-                                valuePrefix: '$',
-                                valueSuffix: ' USD'
-                            },
-                            lang: {
-                                noData: 'Loading Data... '
-                            }
-                        },
-                        series: [],
-                        title: {
-                            text: 'Last Traded Price By Exchange'
-                        },
-                        useHighStocks: true
-                    };
-                                        
-                    for(var exchangeData in graphData) {
-                        // console.log("Returned Data: " + JSON.stringify(exchangeData));
-                        $scope.ltpChartConfig.series.push(graphData[exchangeData]);
-                    }
-                    
-                }) // end success.
-                .error(function(err) {
-                    console.log('Caught Error: ' + JSON.stringify(err));
-                });
-        };
-        
-        $scope.countTrades = function(exchange) {
-            $http.get('trades')
-                .success(function(trades) {                   
-                    exchange.numTrades = 0;
-                    exchange.longAmount = 0;
-                    exchange.shortAmount = 0;
-                    exchange.longInvested = 0;
-                    exchange.shortInvested = 0;
-                    exchange.numBuysLong = 0;
-                    exchange.numBuysShort = 0;
-                    exchange.avgLongBuyPrice = 0;
-                    exchange.avgShortBuyPrice = 0;
-                    
-                    for(var i = 0; i < trades.length; i++) {
-                        
-                        if(trades[i].exchange._id === exchange._id) {
-                            if(trades[i].type === 'BUY') {
-                                exchange.numTrades = exchange.numTrades + 1;
-                                
-                                if(trades[i].bias === 'LONG') {
-                                    exchange.longAmount += trades[i].amount;
-                                    exchange.longInvested += trades[i].price;
-                                    exchange.numBuysLong++;
-                                    
-                                } else if (trades[i].bias === 'SHORT') {
-                                    exchange.shortAmount += trades[i].amount;
-                                    exchange.shortInvested += trades[i].price;
-                                    exchange.numBuysShort++;
-                                }                               
-                                
-                            } else if(trades[i].type === 'SELL') {
-                                exchange.numTrades = exchange.numTrades - 1;
-                                
-                                if(trades[i].bias === 'LONG') {
-                                    exchange.longAmount -= trades[i].amount;
-                                    
-                                } else if (trades[i].bias === 'SHORT') {
-                                    exchange.shortAmount -= trades[i].amount;
-                                }
-                            }
-                        }
-                    }
-                    
-                    if(exchange.numBuysLong !== 0) {
-                        exchange.avgLongBuyPrice = exchange.longInvested / exchange.numBuysLong;
-                    }
-                    
-                    if(exchange.numBuysShort !== 0) {
-                        exchange.avgShortBuyPrice = exchange.shortInvested / exchange.numBuysShort;
-                    }
-                });
-        };
     }
    
 ]);
@@ -185,3 +82,5 @@ myapp.directive('script', function() {
         }
     };  
 });
+
+
